@@ -5,7 +5,7 @@ import SpriteKit
 enum GameState {
     case title, playing, clear, gameOver, demo
     case registration, campaignComplete, interstitial
-    case difficultySelect, characterSelect
+    case difficultySelect, characterSelect, continueSelect, continuePrompt
 }
 
 class GameScene: SKScene {
@@ -29,6 +29,9 @@ class GameScene: SKScene {
     private var currentStage = 1
     private var stageSequence = 1
     private var bombStock = 2
+    private var continuesRemaining = 0
+    private var continuedThisCredit = false
+    private var continuePromptT: Float = 0
     private var selectedDifficulty = 3
     private var selectedFighter = 0
     private var interstitialTimer: Float = 3.0
@@ -120,6 +123,7 @@ class GameScene: SKScene {
         selectedFighter = prefs.integer(forKey: "ww2_fighter")
         player.applyFighterConfiguration(selectedFighter)
         stageData.difficultyIndex = selectedDifficulty
+        stageData.loadPersistentSettings()
         enterTitle()
     }
 
@@ -174,7 +178,7 @@ class GameScene: SKScene {
                 }
             }
 
-        case .difficultySelect, .characterSelect:
+        case .difficultySelect, .characterSelect, .continueSelect:
             break
 
         case .interstitial:
@@ -202,6 +206,12 @@ class GameScene: SKScene {
             particles.update(dt: dt)
             gameOverT += dt
             if gameOverT >= 9 { routeAfterGameOver() }
+
+        case .continuePrompt:
+            tickParallax(scrollSpeedY: 0, dt: dt)
+            particles.update(dt: dt)
+            continuePromptT += dt
+            if continuePromptT >= 9 { enterGameOver() }
 
         case .registration:
             flashT += dt
@@ -283,7 +293,7 @@ class GameScene: SKScene {
         particles.update(dt: dt)
 
         if player.getHealth() <= 0 {
-            if !demo { enterGameOver() }
+            if !demo { offerContinueOrGameOver() }
         } else {
             resolveBulletCollisions(awardScore: !demo)
             resolvePlayerBulletVsBoss()
@@ -291,7 +301,7 @@ class GameScene: SKScene {
             let exploded = bulletManager.resolveEnemyBulletsVsPlayer(
                 player: player, enemyBullets: enemyWeapons.pool,
                 enemyBulletCount: enemyWeapons.getPoolSize(), particles: particles, awardScore: !demo)
-            if exploded && !demo && player.isGameOver() { enterGameOver() }
+            if exploded && !demo && player.isGameOver() { offerContinueOrGameOver() }
 
             if player.isOnField() {
                 resolvePlayerVsEnemies()
@@ -330,7 +340,7 @@ class GameScene: SKScene {
             enterStageClear()
         }
 
-        if gameState == .playing, player.isGameOver() { enterGameOver() }
+        if gameState == .playing, player.isGameOver() { offerContinueOrGameOver() }
     }
 
     /// Attract CPU: sit near the bottom, slide under the lowest threat, dodge incoming shots.
@@ -500,7 +510,10 @@ class GameScene: SKScene {
             let ny = (e.y - py) / sy
             if nx * nx + ny * ny <= 1 {
                 destroyEnemy(e, awardScore: gameState == .playing, revenge: false)
-                if player.takeDamage() { particles.triggerExplosion(x: px, y: py) }
+                if player.takeDamage() {
+                    particles.triggerExplosion(x: px, y: py)
+                    if player.isGameOver() && gameState == .playing { offerContinueOrGameOver() }
+                }
                 return
             }
         }
@@ -522,7 +535,10 @@ class GameScene: SKScene {
                 let nx = (px - part.x) / rx
                 let ny = (py - part.y) / ry
                 if nx * nx + ny * ny <= 1 {
-                    if player.takeDamage() { particles.triggerExplosion(x: px, y: py) }
+                    if player.takeDamage() {
+                        particles.triggerExplosion(x: px, y: py)
+                        if player.isGameOver() && gameState == .playing { offerContinueOrGameOver() }
+                    }
                     break
                 }
             }
@@ -783,6 +799,13 @@ class GameScene: SKScene {
         SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
     }
 
+    private func enterContinueSelect() {
+        attractTimer = 0
+        attract = .title
+        gameState = .continueSelect
+        SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
+    }
+
     private func beginCampaignFromMenu() {
         ScoreManager.instance.reset()
         ScoreManager.instance.armExtends()
@@ -796,6 +819,8 @@ class GameScene: SKScene {
         player.restoreLives(); player.resetWeaponPower()
         player.applyFighterConfiguration(selectedFighter)
         bombStock = 2
+        continuesRemaining = stageData.getContinueDip()
+        continuedThisCredit = false
         attract = .title; attractTimer = 0
         enterInterstitial()
     }
@@ -849,15 +874,46 @@ class GameScene: SKScene {
         enterInterstitial()
     }
 
+    private func offerContinueOrGameOver() {
+        if gameState != .playing { return }
+        if continuesRemaining > 0 {
+            SoundManager.instance.stopAlarm()
+            continuePromptT = 0
+            gameState = .continuePrompt
+            return
+        }
+        enterGameOver()
+    }
+
+    private func acceptContinueCredit() {
+        if continuesRemaining <= 0 {
+            enterGameOver()
+            return
+        }
+        continuesRemaining -= 1
+        continuedThisCredit = true
+        bombStock = 2
+        player.resetWeaponPower()
+        player.acceptContinueBody()
+        SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
+        gameState = .playing
+        player.setMenuHidden(false)
+    }
+
     private func enterGameOver() {
         SoundManager.instance.stopAlarm()
         gameOverT = 0
         gameState = .gameOver
     }
 
+    private func qualifiesForRanking() -> Bool {
+        if continuedThisCredit { return false }
+        return HighScoreManager.shared.checkIfQualifies(
+            score: ScoreManager.instance.getScore(), difficulty: selectedDifficulty)
+    }
+
     private func routeAfterGameOver() {
-        if HighScoreManager.shared.rankOf(score: ScoreManager.instance.getScore(),
-                                          difficulty: selectedDifficulty) >= 0 {
+        if qualifiesForRanking() {
             beginRegistration()
         } else {
             finishDemoToHighScore()
@@ -996,11 +1052,11 @@ class GameScene: SKScene {
     private func updateBGM() {
         let want: String?
         switch gameState {
-        case .title, .difficultySelect, .characterSelect:
+        case .title, .difficultySelect, .characterSelect, .continueSelect:
             want = SoundManager.BGM_TITLE
         case .clear, .registration, .campaignComplete:
             want = SoundManager.BGM_VICTORY
-        case .playing, .demo, .interstitial:
+        case .playing, .demo, .interstitial, .continuePrompt:
             if boss.isVictorySequence() {
                 want = nil
             } else if boss.isActive() {
@@ -1022,7 +1078,7 @@ class GameScene: SKScene {
         let def = stageData.def
         let facility = def.theaterKind == .facility
         switch gameState {
-        case .title, .difficultySelect, .characterSelect, .interstitial:
+        case .title, .difficultySelect, .characterSelect, .continueSelect, .interstitial:
             parallax.applyDrawFlags(worldVisible: false, overlayClouds: false, canopyVisible: false)
         case .registration:
             parallax.applyDrawFlags(worldVisible: true, overlayClouds: true, canopyVisible: false)
@@ -1033,7 +1089,7 @@ class GameScene: SKScene {
                 worldVisible: true,
                 overlayClouds: !facility && def.hasOverlayClouds,
                 canopyVisible: facility)
-        case .playing, .demo, .gameOver:
+        case .playing, .demo, .gameOver, .continuePrompt:
             let canopy: Bool
             if facility {
                 canopy = true
@@ -1063,6 +1119,9 @@ class GameScene: SKScene {
             bombs: bombStock,
             score: ScoreManager.instance.getScore(),
             gameOverT: gameOverT,
+            continuePromptT: continuePromptT,
+            continuesRemaining: continuesRemaining,
+            continueDip: stageData.getContinueDip(),
             demoT: demoTimer,
             flashT: flashT,
             recapFrame: ScoreManager.instance.recapFrameValue(),
@@ -1103,6 +1162,8 @@ class GameScene: SKScene {
             handleTitleTouch(loc)
         case .difficultySelect:
             handleDifficultyTouch(loc)
+        case .continueSelect:
+            handleContinueSelectTouch(loc)
         case .characterSelect:
             handleCharacterTouch(loc)
         case .playing:
@@ -1114,11 +1175,12 @@ class GameScene: SKScene {
             break
         case .gameOver:
             routeAfterGameOver()
+        case .continuePrompt:
+            acceptContinueCredit()
         case .registration:
             handleRegistrationTouch(loc)
         case .campaignComplete:
-            if HighScoreManager.shared.rankOf(score: ScoreManager.instance.getScore(),
-                                          difficulty: selectedDifficulty) >= 0 {
+            if qualifiesForRanking() {
                 beginRegistration()
             } else {
                 finishDemoToHighScore()
@@ -1295,6 +1357,8 @@ class GameScene: SKScene {
             SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
         } else if h.difficulty.contains(loc) {
             enterDifficultySelect()
+        } else if h.continueMenu.contains(loc) {
+            enterContinueSelect()
         } else if h.fighter.contains(loc) {
             enterCharacterSelect()
         } else {
@@ -1312,6 +1376,19 @@ class GameScene: SKScene {
             selectedDifficulty = i + 1
             stageData.difficultyIndex = selectedDifficulty
             prefs.set(selectedDifficulty, forKey: "ww2_difficulty")
+            SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
+            break
+        }
+    }
+
+    private func handleContinueSelectTouch(_ loc: CGPoint) {
+        if ui.hits.continueBack.contains(loc) {
+            SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
+            enterTitle()
+            return
+        }
+        for i in 0..<3 where ui.hits.continueRows[i].contains(loc) {
+            stageData.saveContinueSetting(i)
             SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
             break
         }

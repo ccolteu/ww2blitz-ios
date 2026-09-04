@@ -249,6 +249,15 @@ class PlayerShip {
         lives = PlayerShip.START_LIVES; hitsLeft = PlayerShip.HITS_PER_LIFE
         respawnTimer = 0; isGameOverFlag = false; respawnPowerDropLatched = false
     }
+
+    /// Extra cabinet body on the same map. Power stays 1; GameScene drops the catchable P.
+    func acceptContinueBody() {
+        restoreLives()
+        resetForStage()
+        isInvulnerable = true
+        invulnTimer = PlayerShip.INVULN_SEC
+        respawnPowerDropLatched = true
+    }
     func grantExtraLife() -> Bool {
         if isGameOverFlag || lives >= PlayerShip.MAX_LIVES { return false }
         lives += 1; return true

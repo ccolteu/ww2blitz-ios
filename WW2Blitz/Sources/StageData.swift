@@ -80,6 +80,7 @@ class StageData {
     private var campaignFinishedLatch = false
     private var currentDifficulty: Difficulty = .normal
     private var combatRank: Float = 0
+    private var savedContinueDip = 0
 
     var currentStage: Int { stageId }
     var missionNumber: Int { sequenceIndex + 1 }
@@ -100,6 +101,32 @@ class StageData {
 
     func getDifficulty() -> Difficulty { currentDifficulty }
     func setDifficulty(_ diff: Difficulty) { currentDifficulty = diff }
+
+    func getContinueDip() -> Int { savedContinueDip }
+
+    func saveContinueSetting(_ credits: Int) {
+        savedContinueDip = StageData.clampContinueDip(credits)
+        UserDefaults.standard.set(savedContinueDip, forKey: StageData.KEY_CONTINUE)
+    }
+
+    func loadPersistentSettings() {
+        savedContinueDip = StageData.clampContinueDip(
+            UserDefaults.standard.integer(forKey: StageData.KEY_CONTINUE))
+    }
+
+    static func continueDipName(_ credits: Int) -> String {
+        if credits <= 0 { return "OFF" }
+        if credits == 1 { return "1 CREDIT" }
+        return "2 CREDITS"
+    }
+
+    private static let KEY_CONTINUE = "continue_credits"
+
+    private static func clampContinueDip(_ value: Int) -> Int {
+        if value < 0 { return 0 }
+        if value > 2 { return 2 }
+        return value
+    }
 
     func resetCombatRank() { combatRank = 0 }
 

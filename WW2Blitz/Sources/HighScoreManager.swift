@@ -32,6 +32,10 @@ class HighScoreManager {
     func stageAt(difficulty: Int, _ i: Int) -> Int { topStages[slot(difficulty, i)] }
     func nameAt(difficulty: Int, _ i: Int) -> String { topNames[slot(difficulty, i)] }
 
+    func checkIfQualifies(score: Int, difficulty: Int) -> Bool {
+        rankOf(score: score, difficulty: difficulty) >= 0
+    }
+
     func rankOf(score: Int, difficulty: Int) -> Int {
         var s = score
         if s < 0 { s = 0 }

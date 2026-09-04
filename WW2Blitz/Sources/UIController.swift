@@ -26,9 +26,12 @@ final class UIController {
     struct Hits {
         var audio = CGRect.null
         var difficulty = CGRect.null
+        var continueMenu = CGRect.null
         var fighter = CGRect.null
         var diffRows = [CGRect](repeating: .null, count: 7)
         var diffBack = CGRect.null
+        var continueRows = [CGRect](repeating: .null, count: 3)
+        var continueBack = CGRect.null
         var shipLeft = CGRect.null
         var shipRight = CGRect.null
         var fighterBack = CGRect.null
@@ -119,6 +122,9 @@ final class UIController {
         bombs: Int,
         score: Int,
         gameOverT: Float,
+        continuePromptT: Float,
+        continuesRemaining: Int,
+        continueDip: Int,
         demoT: Float,
         flashT: Float,
         recapFrame: Int,
@@ -154,6 +160,10 @@ final class UIController {
             drawTitleBackdrop(root)
             dimScreen(root)
             drawDifficultySelect(root, selected: difficulty)
+        case .continueSelect:
+            drawTitleBackdrop(root)
+            dimScreen(root)
+            drawContinueSelect(root, selected: continueDip)
         case .characterSelect:
             drawTitleBackdrop(root)
             dimScreen(root)
@@ -166,7 +176,8 @@ final class UIController {
             } else if attract == .highScore {
                 drawHighScores(root, highScores: highScores, difficulty: difficulty)
             } else {
-                drawTitle(root, difficulty: difficulty, fighterIndex: fighterIndex, version: version)
+                drawTitle(root, difficulty: difficulty, continueDip: continueDip,
+                          fighterIndex: fighterIndex, version: version)
             }
         case .registration:
             dimScreen(root)
@@ -183,13 +194,21 @@ final class UIController {
                            noMiss: recapNoMiss, noBomb: recapNoBomb,
                            secretCount: recapSecretCount, secretUnit: recapSecretUnit,
                            total: recapTotal, frame: recapFrame)
-        case .playing, .demo, .gameOver:
+        case .playing, .demo, .gameOver, .continuePrompt:
             drawHUD(root, lives: lives, hitsLeft: hitsLeft, maxHits: maxHits, bombs: bombs, score: score)
             if state == .demo && (Int(demoT * 2) % 2) == 0 {
                 center(root, "DEMO", cx: screenW * 0.5, ay: screenH * 0.16, size: 42, color: gold)
             }
             if state == .gameOver && (Int(gameOverT * 2) % 2) == 0 {
                 center(root, "GAME OVER", cx: screenW * 0.5, ay: screenH * 0.45, size: 42, color: gold)
+            }
+            if state == .continuePrompt {
+                if (Int(continuePromptT * 2) % 2) == 0 {
+                    center(root, "CONTINUE?", cx: screenW * 0.5, ay: screenH * 0.40, size: 42, color: gold)
+                }
+                let left = max(0, Int(9 - continuePromptT))
+                center(root, "\(left)", cx: screenW * 0.5, ay: screenH * 0.50, size: 42, color: gold)
+                center(root, "CREDIT \(continuesRemaining)", cx: screenW * 0.5, ay: screenH * 0.58, size: 42, color: gold)
             }
         }
     }
@@ -214,7 +233,7 @@ final class UIController {
         root.addChild(n)
     }
 
-    private func drawTitle(_ root: SKNode, difficulty: Int, fighterIndex: Int, version: String) {
+    private func drawTitle(_ root: SKNode, difficulty: Int, continueDip: Int, fighterIndex: Int, version: String) {
         let logo = SKSpriteNode(texture: GameArt.texture("Images/game_logo"))
         let maxH = screenH * 0.35 * 0.67 * 1.20
         let srcW = max(logo.size.width, 1)
@@ -232,14 +251,16 @@ final class UIController {
         let versionY = screenH - px(32)
         let creditY = versionY - px(28)
         let menuBottomAnchorY = creditY - px(130)
-        let menuBlockStride = px(180)
-        let tagSubPadding = px(64)
+        let menuBlockStride = px(148)
+        let tagSubPadding = px(56)
         let fighterMenuY = menuBottomAnchorY
         let fighterTagY = fighterMenuY + tagSubPadding
-        let difficultyMenuY = fighterMenuY - menuBlockStride
+        let continueMenuY = fighterMenuY - menuBlockStride
+        let continueTagY = continueMenuY + tagSubPadding
+        let difficultyMenuY = continueMenuY - menuBlockStride
         let difficultyTagY = difficultyMenuY + tagSubPadding
         let audioMenuY = difficultyMenuY - menuBlockStride
-        let startPrompterY = audioMenuY - px(180)
+        let startPrompterY = audioMenuY - px(160)
 
         if (Int64(Date().timeIntervalSince1970 * 1000) / 600) % 2 == 0 {
             center(root, "1P START", cx: cx, ay: startPrompterY, size: 42, color: gold)
@@ -251,6 +272,11 @@ final class UIController {
         hits.difficulty = goldHit(cx: cx, ay: difficultyMenuY, text: "[ DIFFICULTY ]", extra: CGSize(width: px(120), height: px(60)))
         center(root, Difficulty(rawValue: difficulty)?.displayName ?? "NORMAL",
                cx: cx, ay: difficultyTagY, size: 32, color: white)
+
+        center(root, "[ CONTINUE ]", cx: cx, ay: continueMenuY, size: 42, color: gold)
+        hits.continueMenu = goldHit(cx: cx, ay: continueMenuY, text: "[ CONTINUE ]", extra: CGSize(width: px(120), height: px(60)))
+        center(root, StageData.continueDipName(continueDip),
+               cx: cx, ay: continueTagY, size: 32, color: white)
 
         center(root, "[ FIGHTER ]", cx: cx, ay: fighterMenuY, size: 42, color: gold)
         hits.fighter = goldHit(cx: cx, ay: fighterMenuY, text: "[ FIGHTER ]", extra: CGSize(width: px(120), height: px(60)))
@@ -300,6 +326,26 @@ final class UIController {
         let backY = screenH * 0.88
         center(root, "[ RETURN TO TITLE ]", cx: cx, ay: backY, size: 42, color: gold)
         hits.diffBack = goldHit(cx: cx, ay: backY, text: "[ RETURN TO TITLE ]", extra: .zero)
+    }
+
+    private func drawContinueSelect(_ root: SKNode, selected: Int) {
+        let cx = screenW * 0.5
+        center(root, "SELECT CONTINUE", cx: cx, ay: screenH * 0.16, size: 42, color: gold)
+        let top = screenH * 0.34
+        let step = screenH * 0.12
+        let rowHalf = step * 0.40
+        let hitLeft = visibleLeft() + visibleWidth() * 0.04
+        let hitRight = visibleRight() - visibleWidth() * 0.04
+        for i in 0..<3 {
+            let lineY = top + CGFloat(i) * step
+            hits.continueRows[i] = androidRect(hitLeft, lineY - rowHalf, hitRight, lineY + rowHalf)
+            let text = "\(i). \(StageData.continueDipName(i))"
+            let on = i == selected
+            center(root, text, cx: cx, ay: lineY, size: on ? 42 : 32, color: on ? gold : white)
+        }
+        let backY = screenH * 0.88
+        center(root, "[ RETURN TO TITLE ]", cx: cx, ay: backY, size: 42, color: gold)
+        hits.continueBack = goldHit(cx: cx, ay: backY, text: "[ RETURN TO TITLE ]", extra: .zero)
     }
 
     private func drawCharacterSelect(_ root: SKNode, fighterIndex: Int, flashT: Float) {
