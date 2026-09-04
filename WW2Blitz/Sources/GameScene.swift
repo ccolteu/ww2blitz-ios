@@ -152,9 +152,6 @@ class GameScene: SKScene {
 
         updateBGM()
         updateState(dt: dt)
-        if gameState != .gameOver {
-            updateFloatingScores(dt: dt)
-        }
         applyScreenShake(dt: dt)
         applyScreenFlash(dt: dt)
         renderArcadeUI()
@@ -175,40 +172,46 @@ class GameScene: SKScene {
                     attract = .title
                 }
             }
-            parallax.update(baseSpeed: 50 * dt)
 
         case .difficultySelect, .characterSelect:
             break
 
         case .interstitial:
             interstitialTimer -= dt
-            if interstitialTimer <= 0 { beginPlaying() }
+            if interstitialTimer <= 0 {
+                interstitialTimer = 0
+                beginPlaying()
+            }
 
         case .playing:
             updatePlaying(dt: dt)
 
         case .demo:
             updateDemo(dt: dt)
-            attractTimer += dt
-            if attractTimer >= 30 { finishDemoToHighScore() }
 
         case .clear:
+            tickParallax(scrollSpeedY: 0, dt: dt)
             ScoreManager.instance.updateRecap(dt: dt)
             applyPendingExtends()
+            updateFloatingScores(dt: dt)
+            particles.update(dt: dt)
 
         case .gameOver:
+            tickParallax(scrollSpeedY: 0, dt: dt)
+            particles.update(dt: dt)
             gameOverT += dt
             if gameOverT >= 9 { routeAfterGameOver() }
 
         case .registration:
             flashT += dt
-            parallax.update(baseSpeed: 50 * dt)
+            tickParallax(scrollSpeedY: 50, dt: dt)
 
         case .campaignComplete:
+            tickParallax(scrollSpeedY: 0, dt: dt)
+            particles.update(dt: dt)
+            updateFloatingScores(dt: dt)
             creditsTimer += dt
         }
-
-        particles.update(dt: dt)
     }
 
     private func updatePlaying(dt: Float) {
@@ -216,32 +219,39 @@ class GameScene: SKScene {
     }
 
     private func updateDemo(dt: Float) {
-        demoTimer += dt
         player.setAutoFire(true)
-        demoPilot(dt: dt)
         updateCombat(dt: dt, demo: true)
-        if demoTimer > 30 { finishDemoToHighScore() }
+    }
+
+    private func tickParallax(scrollSpeedY: Float, dt: Float) {
+        let def = stageData.def
+        if def.theaterKind == .facility {
+            parallax.updateStage5(scrollSpeedY: scrollSpeedY, dt: dt)
+        } else if def.theaterKind == .ascent {
+            parallax.updateStage6(scrollSpeedY: scrollSpeedY, dt: dt,
+                                  elapsedTime: timeline.elapsedSeconds())
+        } else {
+            parallax.update(baseSpeed: scrollSpeedY * dt)
+        }
     }
 
     private func updateCombat(dt: Float, demo: Bool) {
         let w = Int(size.width); let h = Int(size.height)
         let def = stageData.def
 
-        if !boss.locksWorldScroll() {
-            if def.theaterKind == .facility {
-                parallax.updateStage5(scrollSpeedY: stageData.scrollSpeedY, dt: dt)
-            } else if def.theaterKind == .ascent {
-                parallax.updateStage6(scrollSpeedY: stageData.scrollSpeedY, dt: dt,
-                                      elapsedTime: timeline.elapsedSeconds())
-            } else {
-                parallax.update(baseSpeed: stageData.scrollSpeedY * dt)
-            }
+        if boss.locksWorldScroll() {
+            stageData.scrollSpeedY = 0
+            tickParallax(scrollSpeedY: 0, dt: dt)
+        } else {
+            tickParallax(scrollSpeedY: stageData.scrollSpeedY, dt: dt)
         }
-        maybeSwapStage6Floor()
         maybeShowStage6Canopy()
 
+        if demo {
+            demoPilot(dt: dt)
+        }
         player.update(dt: dt)
-        if !demo, player.isOnField() {
+        if !demo, dt > 0.0001, player.isOnField() {
             stageData.tickCombatRank(dt: dt, playerAtMaxWeapon: player.getWeaponPower() >= 3)
         }
         if !demo, player.consumeRespawnPowerDrop() {
@@ -253,32 +263,40 @@ class GameScene: SKScene {
         PowerUpManager.instance.items.update(dt: dt, screenW: w, screenH: h,
                                             playerX: player.centerX(), playerY: player.worldY(),
                                             magnetOn: player.isOnField())
+        updateFloatingScores(dt: dt)
 
         timeline.update(dt: dt, enemyManager: enemyManager, screenWidth: w, screenHeight: h,
                         boss: boss, bossEnterSeconds: def.bossAtSeconds, allowBoss: true,
                         playerWeaponPower: player.getWeaponPower(), stageData: stageData)
+        maybeSwapStage6Floor()
         enemyManager.update(dt: dt, playerX: player.centerX(), playerY: player.worldY(),
                           weapons: enemyWeapons)
         boss.update(dt: dt, playerX: player.centerX(), playerY: player.worldY(),
                     weapons: enemyWeapons, playerWeaponPower: player.getWeaponPower(),
                     bombStock: bombStock, timeline: timeline)
+        maybeSwapStage6Floor()
         if boss.isActive() || boss.isExploding() { bossFought = true }
         enemyWeapons.update(dt: dt)
         panicBomb.update(dt: dt, screenW: Float(w), screenH: Float(h))
         resolvePanicBomb(dt: dt)
+        particles.update(dt: dt)
 
-        resolveBulletCollisions(awardScore: !demo)
-        resolvePlayerBulletVsBoss()
+        if player.getHealth() <= 0 {
+            if !demo { enterGameOver() }
+        } else {
+            resolveBulletCollisions(awardScore: !demo)
+            resolvePlayerBulletVsBoss()
 
-        let exploded = bulletManager.resolveEnemyBulletsVsPlayer(
-            player: player, enemyBullets: enemyWeapons.pool,
-            enemyBulletCount: enemyWeapons.getPoolSize(), particles: particles, awardScore: !demo)
-        if exploded && !demo && player.isGameOver() { enterGameOver() }
+            let exploded = bulletManager.resolveEnemyBulletsVsPlayer(
+                player: player, enemyBullets: enemyWeapons.pool,
+                enemyBulletCount: enemyWeapons.getPoolSize(), particles: particles, awardScore: !demo)
+            if exploded && !demo && player.isGameOver() { enterGameOver() }
 
-        if player.isOnField() {
-            resolvePlayerVsEnemies()
-            resolvePlayerVsBoss()
-            resolvePlayerVsPowerUps()
+            if player.isOnField() {
+                resolvePlayerVsEnemies()
+                resolvePlayerVsBoss()
+                resolvePlayerVsPowerUps()
+            }
         }
 
         if !demo { applyPendingExtends() }
@@ -300,13 +318,18 @@ class GameScene: SKScene {
             triggerWhiteFlash(0.25)
         }
 
-        if demo { return }
+        if demo {
+            demoTimer += dt
+            attractTimer += dt
+            if attractTimer >= 30 { finishDemoToHighScore() }
+            return
+        }
 
-        if bossFought, !boss.isActive(), !boss.isExploding() {
+        if gameState == .playing, bossFought, !boss.isActive(), !boss.isExploding() {
             enterStageClear()
         }
 
-        if player.isGameOver() { enterGameOver() }
+        if gameState == .playing, player.isGameOver() { enterGameOver() }
     }
 
     /// Attract CPU: sit near the bottom, slide under the lowest threat, dodge incoming shots.
@@ -775,20 +798,26 @@ class GameScene: SKScene {
     private func enterInterstitial() {
         gameState = .interstitial; interstitialTimer = 3.0
         loadCurrentStage()
+        bossFought = false
         timeline.reset(); player.resetForStage()
         player.setMenuHidden(true)
+        player.setAutoFire(false)
         enemyManager.deactivateAll(); enemyWeapons.deactivateAll()
+        bulletManager.deactivateAll(); homingMissiles.deactivateAll()
+        PowerUpManager.instance.items.deactivateAll()
+        panicBomb.deactivate()
+        particles.hideDrawn()
+        enemyBombDmgBank = 0
+        bossBombDmgBank = 0
+        bombCoreWasOpen = false
+        awaitingSecondTap = false
         boss.deactivate(); parallax.resetScroll()
     }
 
     private func beginPlaying() {
         gameState = .playing
-        bossFought = false
-        timeline.reset(); player.resetForStage()
         player.setMenuHidden(false)
         player.setAutoFire(false)
-        enemyManager.deactivateAll(); enemyWeapons.deactivateAll()
-        boss.deactivate(); parallax.resetScroll()
     }
 
     private func enterStageClear() {
@@ -803,6 +832,7 @@ class GameScene: SKScene {
     private func advanceStage() {
         ScoreManager.instance.resetStageCounters()
         if stageData.isLastInSequence() {
+            hidePlayfieldSprites()
             gameState = .campaignComplete; creditsTimer = 0
             return
         }
@@ -832,6 +862,7 @@ class GameScene: SKScene {
         registrationActiveCharIndex = 0
         registrationCurrentChar = "A"
         flashT = 0
+        hidePlayfieldSprites()
         gameState = .registration
     }
 
@@ -846,6 +877,7 @@ class GameScene: SKScene {
         boss.deactivate(); bulletManager.deactivateAll()
         homingMissiles.deactivateAll(); PowerUpManager.instance.items.deactivateAll()
         panicBomb.deactivate()
+        hidePlayfieldSprites()
         enemyBombDmgBank = 0
         bossBombDmgBank = 0
         bombCoreWasOpen = false
@@ -862,6 +894,19 @@ class GameScene: SKScene {
         restCamera()
         for item in floatScores { item.node.removeFromParent() }
         floatScores.removeAll()
+    }
+
+    /// Android skips gameplay blit on clear / registration / credits / briefing.
+    private func hidePlayfieldSprites() {
+        player.setMenuHidden(true)
+        enemyManager.deactivateAll()
+        enemyWeapons.deactivateAll()
+        bulletManager.deactivateAll()
+        homingMissiles.deactivateAll()
+        PowerUpManager.instance.items.deactivateAll()
+        panicBomb.deactivate()
+        boss.deactivate()
+        particles.hideDrawn()
     }
 
     private func loadCurrentStage() {

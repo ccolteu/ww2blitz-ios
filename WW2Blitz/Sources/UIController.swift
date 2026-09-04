@@ -172,6 +172,7 @@ final class UIController {
             dimScreen(root)
             drawCredits(root, elapsed: creditsT)
         case .clear:
+            dimScreen(root)
             drawHUD(root, lives: lives, hitsLeft: hitsLeft, maxHits: maxHits, bombs: bombs, score: score)
             drawStageClear(root, stage: stage, phase: recapPhase, lives: recapLives,
                            bombs: recapBombs, graze: recapGraze, total: recapTotal, frame: recapFrame)
@@ -670,7 +671,7 @@ final class UIController {
 
     private func dimScreen(_ root: SKNode) {
         let n = SKSpriteNode(color: dim, size: CGSize(width: screenW, height: screenH))
-        n.anchorPoint = .zero; n.position = .zero; n.zPosition = 0
+        n.anchorPoint = .zero; n.position = .zero; n.zPosition = -1
         root.addChild(n)
     }
 

@@ -113,6 +113,14 @@ class ParticleManager {
         }
     }
 
+    func hideDrawn() {
+        for i in 0..<ParticleManager.SPARK_POOL {
+            sparks[i].isActive = false
+            sparkNodes[i].isHidden = true
+        }
+        scene?.children.filter { $0.name == "exp" }.forEach { $0.removeFromParent() }
+    }
+
     func update(dt: Float) {
         let h = Float(scene?.size.height ?? 0)
         for i in 0..<ParticleManager.SPARK_POOL {

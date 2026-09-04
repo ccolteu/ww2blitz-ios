@@ -196,6 +196,10 @@ class EnemyWeaponSystem {
     func deactivateAll() {
         pool.forEach { $0.isActive = false; $0.flags = 0 }
         for i in 0..<EnemyWeaponSystem.CLEAR_SLOTS { clearT[i] = 0 }
+        for n in bulletNodes {
+            n.isHidden = true
+            n.childNode(withName: "glow")?.isHidden = true
+        }
     }
 
     func convertActiveToScoreItems() {

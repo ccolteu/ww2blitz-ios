@@ -130,7 +130,10 @@ class BulletManager {
 
     func getPoolSize() -> Int { poolSize }
     func didSpawnStream() -> Bool { spawnedStreamFlag }
-    func deactivateAll() { bulletPool.forEach { $0.isActive = false } }
+    func deactivateAll() {
+        bulletPool.forEach { $0.isActive = false }
+        bulletNodes.forEach { $0.isHidden = true }
+    }
 
     func resolveEnemyBulletsVsPlayer(
         player: PlayerShip,

@@ -142,7 +142,7 @@ class PlayerShip {
     // MARK: - Update
 
     func update(dt: Float) {
-        if isDragging {
+        if isDragging, dt > 0.0001 {
             followTether(fingerX: lastTouchX, fingerY: lastTouchY,
                          grabOffsetX: grabOffsetX, grabOffsetY: grabOffsetY, dt: dt)
         }

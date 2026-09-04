@@ -133,6 +133,7 @@ class EnemyPoolManager {
             e.deathClearBullets = false; e.diamondLeader = false; e.diamondWingSign = 0
             e.splinterVeer = false; e.shudderTimer = 0
         }
+        enemyNodes.forEach { $0.isHidden = true }
         hasPlayerSample = false; playerVelX = 0; playerVelY = 0
     }
 
