@@ -571,39 +571,60 @@ final class UIController {
     @discardableResult
     private func drawVolumeGage(_ root: SKNode, cx: CGFloat, baseline: CGFloat, fill: Float,
                                 flashT: Float) -> (CGRect, CGRect) {
-        var gageSize: CGFloat = 88
         let caretSize: CGFloat = 56
-        let caretBudget = measure("<", size: caretSize) * 2 + px(80)
-        let maxGageW = max(80, safeTextWidth() - caretBudget)
-        while gageSize > 24 && measure("■", size: gageSize) * 10 > maxGageW { gageSize -= 2 }
-        let slotW = measure("■", size: gageSize)
-        let slots = 10
-        let squaresW = slotW * CGFloat(slots)
-        let squaresLeft = cx - squaresW * 0.5
-        let lit = min(slots, max(0, Int(fill * Float(slots) + 0.5)))
-        for i in 0..<slots {
-            let x = squaresLeft + CGFloat(i) * slotW
-            hudLeft(root, "■", ax: x, ay: baseline, size: gageSize,
-                    color: i < lit ? gold : gageEmpty)
-        }
-        let font = uiFont(gageSize)
-        let squareTop = baseline - font.ascender
-        let squareBottom = baseline - font.descender
-        let track = CGRect(x: squaresLeft, y: squareTop, width: squaresW, height: squareBottom - squareTop)
-        let blink = sin(Double(flashT) * 14) * 0.5 + 0.5
-        let blinkA = CGFloat(80 + blink * 175) / 255
+        let caretFont = uiFont(caretSize)
+        let caretGlyph = firstGlyphBounds("<", font: caretFont)
         let caretW = measure("<", size: caretSize)
         let caretGap = px(18)
+        // Arcade font has no U+25A0; the fallback square at 88pt dwarfs the carets.
+        // Match caret glyph height and center on the caret, like Android's getTextBounds align.
+        var squareSide = max(px(18), caretGlyph.height)
+        let gap = max(px(2), squareSide * 0.12)
+        let slots = 10
+        let caretBudget = caretW * 2 + caretGap * 2 + px(24)
+        let maxGageW = max(80, safeTextWidth() - caretBudget)
+        while squareSide > px(12) && CGFloat(slots) * squareSide + CGFloat(slots - 1) * gap > maxGageW {
+            squareSide -= 1
+        }
+        let squaresW = CGFloat(slots) * squareSide + CGFloat(slots - 1) * gap
+        let squaresLeft = cx - squaresW * 0.5
+        let caretBaselineSK = screenH - baseline
+        let centerY = caretBaselineSK + caretGlyph.midY
+        let lit = min(slots, max(0, Int(fill * Float(slots) + 0.5)))
+        for i in 0..<slots {
+            let x = squaresLeft + CGFloat(i) * (squareSide + gap) + squareSide * 0.5
+            let n = SKShapeNode(rectOf: CGSize(width: squareSide, height: squareSide), cornerRadius: 1)
+            n.position = CGPoint(x: x, y: centerY)
+            n.fillColor = i < lit ? gold : gageEmpty
+            n.strokeColor = .clear
+            n.zPosition = 3
+            root.addChild(n)
+        }
+        let blink = sin(Double(flashT) * 14) * 0.5 + 0.5
+        let blinkA = CGFloat(80 + blink * 175) / 255
         center(root, "<", cx: squaresLeft - caretGap - caretW * 0.5, ay: baseline,
                size: caretSize, color: white.withAlphaComponent(blinkA))
         center(root, ">", cx: squaresLeft + squaresW + caretGap + caretW * 0.5, ay: baseline,
                size: caretSize, color: white.withAlphaComponent(blinkA))
+        let half = squareSide * 0.5
         let pad = px(40)
-        let skTrack = androidRect(track.minX, track.minY, track.maxX, track.maxY)
-        let down = androidRect(0, squareTop - pad, squaresLeft, squareBottom + pad)
-        let up = androidRect(squaresLeft + squaresW, squareTop - pad, screenW, squareBottom + pad)
-        _ = skTrack
+        let androidTop = baseline - caretGlyph.midY - half
+        let androidBottom = baseline - caretGlyph.midY + half
+        let down = androidRect(0, androidTop - pad, squaresLeft, androidBottom + pad)
+        let up = androidRect(squaresLeft + squaresW, androidTop - pad, screenW, androidBottom + pad)
         return (down, up)
+    }
+
+    private func firstGlyphBounds(_ string: String, font: UIFont) -> CGRect {
+        let ctFont = font as CTFont
+        var chars = Array(string.utf16)
+        var glyphs = [CGGlyph](repeating: 0, count: chars.count)
+        let found = CTFontGetGlyphsForCharacters(ctFont, &chars, &glyphs, chars.count)
+        if found, glyphs[0] != 0, let path = CTFontCreatePathForGlyph(ctFont, glyphs[0], nil) {
+            return path.boundingBox
+        }
+        return CGRect(x: 0, y: -font.descender, width: font.capHeight,
+                      height: font.ascender + font.descender)
     }
 
     // MARK: - Text

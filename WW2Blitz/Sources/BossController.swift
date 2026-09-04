@@ -98,7 +98,10 @@ class BossController {
     private var parts = (0..<MAX_PART_COUNT).map { _ in BossComponent() }
     private var screenW: Float = 0; private var screenH: Float = 0
     private var coreX: Float = 0; private var coreY: Float = 0
-    private var hoverY: Float = 0; private var sweepPhase: Float = 0
+    private var hoverY: Float = 0
+    private var enterParkY: Float = 0
+    private var bodyOpaqueMidYFrac: Float = 0.5
+    private var sweepPhase: Float = 0
     private var entering = false; private var active = false
     private var exploding = false; private var explosionTimer: Float = 0
     private var activeExpFrame = 0; private var currentStage = 1
@@ -171,6 +174,7 @@ class BossController {
         applyKit(stage: currentStage)
         loadSheet(stage: currentStage)
         layoutOffsets()
+        refreshEnterParkY()
     }
 
     func bindStage(_ stage: Int) {
@@ -188,6 +192,7 @@ class BossController {
     func beginEntranceForStage(_ stage: Int) {
         if screenW <= 0 { return }
         if currentStage != stage || bodyTex == nil { bindStage(stage) } else { applyKit(stage: stage); layoutOffsets() }
+        refreshEnterParkY()
         active = true; entering = true; sweepPhase = 0
         coreX = screenW * 0.5; coreY = -bodyHalfH - 24
         exploding = false; explosionTimer = 0; activeExpFrame = 0
@@ -345,7 +350,7 @@ class BossController {
         }
         if entering {
             coreY += BossController.ENTER_SPEED * dt
-            if coreY >= hoverY { coreY = hoverY; entering = false; SoundManager.instance.stopAlarm() }
+            if coreY >= enterParkY { coreY = enterParkY; entering = false; SoundManager.instance.stopAlarm() }
         } else if combatKind == .tank {
             coreX = screenW * 0.5
         } else {
@@ -776,15 +781,28 @@ class BossController {
 
     private func loadSheet(stage: Int) {
         let def = StageCatalog.get(stage)
-        bodyTex        = StageBitmaps.loadTexture(named: def.bossBodyPath(), keyed: true)
+        bodyOpaqueMidYFrac = 0.5
+        let bodyImage = StageBitmaps.loadImage(named: def.bossBodyPath(), keyed: true)
+        if let image = bodyImage {
+            let tex = SKTexture(image: image)
+            tex.filteringMode = .linear
+            bodyTex = tex
+            bodyOpaqueMidYFrac = StageBitmaps.opaqueMidYFraction(image)
+            let aspect = tex.size().height / max(tex.size().width, 1)
+            bodyHalfW = screenW * BossController.CORE_WIDTH_FRAC * 0.5
+            bodyHalfH = bodyHalfW * Float(aspect)
+        } else {
+            bodyTex = nil
+        }
         leftWreckTex   = StageBitmaps.loadTexture(named: def.wreckLeftPath(), keyed: true)
         rightWreckTex  = StageBitmaps.loadTexture(named: def.wreckRightPath(), keyed: true)
         centerWreckTex = StageBitmaps.loadTexture(named: def.wreckCenterPath(), keyed: true)
-        if let tex = bodyTex {
-            let aspect = tex.size().height / tex.size().width
-            bodyHalfW = screenW * BossController.CORE_WIDTH_FRAC * 0.5
-            bodyHalfH = bodyHalfW * Float(aspect)
-        }
+        refreshEnterParkY()
+    }
+
+    private func refreshEnterParkY() {
+        let visualOffsetY = (bodyOpaqueMidYFrac - 0.5) * (bodyHalfH * 2)
+        enterParkY = hoverY - visualOffsetY
     }
 
     private func layoutOffsets() {

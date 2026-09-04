@@ -95,6 +95,39 @@ struct StageBitmaps {
         return tex
     }
 
+    /// 0 = top of the bitmap, 1 = bottom. 0.5 if the sheet is empty.
+    static func opaqueMidYFraction(_ image: UIImage) -> Float {
+        guard let cg = image.cgImage else { return 0.5 }
+        let w = cg.width
+        let h = cg.height
+        guard w > 0, h > 0 else { return 0.5 }
+        guard let ctx = CGContext(
+            data: nil, width: w, height: h,
+            bitsPerComponent: 8, bytesPerRow: w * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ), let data = ctx.data else { return 0.5 }
+        ctx.clear(CGRect(x: 0, y: 0, width: w, height: h))
+        ctx.translateBy(x: 0, y: CGFloat(h))
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        let pixels = data.bindMemory(to: UInt8.self, capacity: w * h * 4)
+        var minY = h
+        var maxY = -1
+        var i = 3
+        let count = w * h
+        for p in 0..<count {
+            if pixels[i] > 16 {
+                let y = p / w
+                if y < minY { minY = y }
+                if y > maxY { maxY = y }
+            }
+            i += 4
+        }
+        if maxY < minY { return 0.5 }
+        return Float(minY + maxY) * 0.5 / Float(max(h - 1, 1))
+    }
+
     static func loadImage(named path: String, keyed: Bool = false, lime: Bool = false, widthLock: CGFloat = 0) -> UIImage? {
         let ns = path as NSString
         let file = ns.lastPathComponent
