@@ -9,7 +9,8 @@ class HighScoreManager {
     private(set) var topStages:  [Int]
 
     private let defaults = UserDefaults.standard
-    private let kPrefix = "arcade_leaderboard_"
+    /// Isolated from pre-reindex `arcade_leaderboard_` rows (those stage numbers are the old catalog).
+    private let kPrefix = "arcade_leaderboard_catalog_v2_"
 
     private let fallbackScores = [100000, 90000, 80000, 70000, 60000, 50000, 40000, 30000, 20000, 10000]
     private let fallbackStages = [4, 3, 3, 2, 2, 1, 1, 1, 1, 1]

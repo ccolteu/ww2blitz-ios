@@ -44,39 +44,39 @@ struct FormationSpawner {
     static let S3_CROSS_AT: Float = 10.5; static let S3_CROSS_Y: Float = 0.38
     static let S3_FLANK_START: Float = 14; static let S3_FLANK_END: Float = 19.5
     static let S3_FLANK_SPACING: Float = 0.95; static let S3_BOSS_AT: Float = 25
-    // Stage 4
-    static let S4_FLANK_START: Float = 1; static let S4_FLANK_END: Float = 6
-    static let S4_FLANK_SPACING: Float = 1.25; static let S4_FLANK_VX: Float = 340
-    static let S4_CRUISER_AT: Float = 22; static let S4_CRUISER_HP = 20; static let S4_CRUISER_VY: Float = 80
-    static let S4_WEAVE_START: Float = 15; static let S4_WEAVE_END: Float = 21
-    static let S4_WEAVE_SPACING: Float = 1.5; static let S4_WEAVE_PAIRS = 5; static let S4_WEAVE_VY: Float = 160
-    static let S4_KAMI_AT: Float = 25; static let S4_KAMI_VY: Float = 680
-    static let S4_WALL_START: Float = 29.5; static let S4_WALL_END: Float = 33.5
-    static let S4_WALL_SPACING: Float = 1; static let S4_WALL_COUNT = 4; static let S4_WALL_VY: Float = 440
-    static let S4_HOLD_V_AT: Float = 35; static let S4_BOSS_AT: Float = 45
-    // Stage 5
-    static let S5_FLANK_END: Float = 12; static let S5_FLANK_SPACING: Float = 1.5
-    static let S5_SWEEP_VX: Float = 260; static let S5_SWEEP_VY: Float = 280
-    static let S5_KAMI_V_AT: Float = 8; static let S5_KAMI_VY: Float = 680
-    static let S5_HEAVY_LEFT_AT: Float = 14; static let S5_HEAVY_RIGHT_AT: Float = 32
-    static let S5_HEAVY_HP = 32; static let S5_WAGONS_AT: Float = 18.5; static let S5_WAGON_HP = 14
-    static let S5_DRIZZLE_START: Float = 14; static let S5_DRIZZLE_END: Float = 17.5
-    static let S5_DRIZZLE_SPACING: Float = 2; static let S5_DRIZZLE_VY: Float = 170
-    static let S5_POWER_WAVE_AT: Float = 34; static let S5_POWER_VY: Float = 140
-    static let S5_KAMI_WALL_AT: Float = 38; static let S5_SCROLL_DECAY_AT: Float = 40
-    static let S5_SCROLL_DECAY_SPAN: Float = 5; static let S5_SCROLL_START: Float = 280
-    // Stage 7
-    static let S7_FLURRY_START: Float = 6; static let S7_FLURRY_END: Float = 18
-    static let S7_FLURRY_SPACING: Float = 1.55; static let S7_FLURRY_VY: Float = 140
-    static let S7_HOLD_V_AT: Float = 20; static let S7_KAMI_AT: Float = 24; static let S7_KAMI_VY: Float = 620
-    static let S7_CROSS_AT: Float = 28; static let S7_CROSS_Y: Float = 0.40
-    static let S7_HEAVIES_AT: Float = 32; static let S7_WALL_AT: Float = 36
-    // Stage 8
-    static let S8_REEF_START: Float = 6; static let S8_REEF_END: Float = 16.5
-    static let S8_REEF_SPACING: Float = 1.40; static let S8_REEF_VY: Float = 165
-    static let S8_HOLD_V_AT: Float = 18.5; static let S8_KAMI_AT: Float = 23; static let S8_KAMI_VY: Float = 640
-    static let S8_CROSS_AT: Float = 27; static let S8_CROSS_Y: Float = 0.42
-    static let S8_HEAVIES_AT: Float = 31; static let S8_WALL_AT: Float = 35
+    // Stage 6 (jungle)
+    static let S6_FLANK_START: Float = 1; static let S6_FLANK_END: Float = 6
+    static let S6_FLANK_SPACING: Float = 1.25; static let S6_FLANK_VX: Float = 340
+    static let S6_CRUISER_AT: Float = 22; static let S6_CRUISER_HP = 20; static let S6_CRUISER_VY: Float = 80
+    static let S6_WEAVE_START: Float = 15; static let S6_WEAVE_END: Float = 21
+    static let S6_WEAVE_SPACING: Float = 1.5; static let S6_WEAVE_PAIRS = 5; static let S6_WEAVE_VY: Float = 160
+    static let S6_KAMI_AT: Float = 25; static let S6_KAMI_VY: Float = 680
+    static let S6_WALL_START: Float = 29.5; static let S6_WALL_END: Float = 33.5
+    static let S6_WALL_SPACING: Float = 1; static let S6_WALL_COUNT = 4; static let S6_WALL_VY: Float = 440
+    static let S6_HOLD_V_AT: Float = 35; static let S6_BOSS_AT: Float = 45
+    // Stage 7 (canopy)
+    static let S7_FLANK_END: Float = 12; static let S7_FLANK_SPACING: Float = 1.5
+    static let S7_SWEEP_VX: Float = 260; static let S7_SWEEP_VY: Float = 280
+    static let S7_KAMI_V_AT: Float = 8; static let S7_KAMI_VY: Float = 680
+    static let S7_HEAVY_LEFT_AT: Float = 14; static let S7_HEAVY_RIGHT_AT: Float = 32
+    static let S7_HEAVY_HP = 32; static let S7_WAGONS_AT: Float = 18.5; static let S7_WAGON_HP = 14
+    static let S7_DRIZZLE_START: Float = 14; static let S7_DRIZZLE_END: Float = 17.5
+    static let S7_DRIZZLE_SPACING: Float = 2; static let S7_DRIZZLE_VY: Float = 170
+    static let S7_POWER_WAVE_AT: Float = 34; static let S7_POWER_VY: Float = 140
+    static let S7_KAMI_WALL_AT: Float = 38; static let S7_SCROLL_DECAY_AT: Float = 40
+    static let S7_SCROLL_DECAY_SPAN: Float = 5; static let S7_SCROLL_START: Float = 280
+    // Stage 4 (frozen front)
+    static let S4_FLURRY_START: Float = 6; static let S4_FLURRY_END: Float = 18
+    static let S4_FLURRY_SPACING: Float = 1.55; static let S4_FLURRY_VY: Float = 140
+    static let S4_HOLD_V_AT: Float = 20; static let S4_KAMI_AT: Float = 24; static let S4_KAMI_VY: Float = 620
+    static let S4_CROSS_AT: Float = 28; static let S4_CROSS_Y: Float = 0.40
+    static let S4_HEAVIES_AT: Float = 32; static let S4_WALL_AT: Float = 36
+    // Stage 5 (coral atoll)
+    static let S5_REEF_START: Float = 6; static let S5_REEF_END: Float = 16.5
+    static let S5_REEF_SPACING: Float = 1.40; static let S5_REEF_VY: Float = 165
+    static let S5_HOLD_V_AT: Float = 18.5; static let S5_KAMI_AT: Float = 23; static let S5_KAMI_VY: Float = 640
+    static let S5_CROSS_AT: Float = 27; static let S5_CROSS_Y: Float = 0.42
+    static let S5_HEAVIES_AT: Float = 31; static let S5_WALL_AT: Float = 35
     static let FORM_CLEAR: Float = 2.4
 
     static func spawnSideCross(enemies: EnemyPoolManager, w: Float, h: Float,
@@ -110,22 +110,22 @@ struct FormationSpawner {
         enemies.spawnEnemy(startX: cx+gx*2, startY: cy-gy*2, velocityX: 0, velocityY: vy, enemyType: TYPE_DRONE, pattern: PATTERN_WEAVE)
     }
 
-    static func spawnS5FlankCascade(enemies: EnemyPoolManager, w: Float, h: Float, fromLeft: Bool) {
+    static func spawnS7FlankCascade(enemies: EnemyPoolManager, w: Float, h: Float, fromLeft: Bool) {
         for n in 0..<4 {
             let t = Float(n) / 3
             let x = fromLeft ? (0 + t*0.20)*w : (1 - t*0.20)*w
-            let vx = fromLeft ? S5_SWEEP_VX : -S5_SWEEP_VX
-            enemies.spawnEnemy(startX: x, startY: -0.05*h, velocityX: vx, velocityY: S5_SWEEP_VY, enemyType: TYPE_DRONE, pattern: PATTERN_DIAGONAL_SWEEP)
+            let vx = fromLeft ? S7_SWEEP_VX : -S7_SWEEP_VX
+            enemies.spawnEnemy(startX: x, startY: -0.05*h, velocityX: vx, velocityY: S7_SWEEP_VY, enemyType: TYPE_DRONE, pattern: PATTERN_DIAGONAL_SWEEP)
         }
     }
 
-    static func spawnS5CenterKamiV(enemies: EnemyPoolManager, w: Float, h: Float) {
-        let vy = S5_KAMI_VY * 0.70
-        enemies.spawnEnemy(startX: -0.06*w, startY: 0.10*h, velocityX:  S5_SWEEP_VX,      velocityY: vy, enemyType: TYPE_KAMIKAZE)
-        enemies.spawnEnemy(startX: -0.06*w, startY: 0.22*h, velocityX:  S5_SWEEP_VX*1.10, velocityY: vy, enemyType: TYPE_KAMIKAZE)
-        enemies.spawnEnemy(startX:  1.06*w, startY: 0.10*h, velocityX: -S5_SWEEP_VX,      velocityY: vy, enemyType: TYPE_KAMIKAZE)
-        enemies.spawnEnemy(startX:  1.06*w, startY: 0.22*h, velocityX: -S5_SWEEP_VX*1.10, velocityY: vy, enemyType: TYPE_KAMIKAZE)
-        enemies.spawnEnemy(startX: -0.06*w, startY: 0.34*h, velocityX:  S5_SWEEP_VX*0.90, velocityY: vy, enemyType: TYPE_KAMIKAZE)
+    static func spawnS7CenterKamiV(enemies: EnemyPoolManager, w: Float, h: Float) {
+        let vy = S7_KAMI_VY * 0.70
+        enemies.spawnEnemy(startX: -0.06*w, startY: 0.10*h, velocityX:  S7_SWEEP_VX,      velocityY: vy, enemyType: TYPE_KAMIKAZE)
+        enemies.spawnEnemy(startX: -0.06*w, startY: 0.22*h, velocityX:  S7_SWEEP_VX*1.10, velocityY: vy, enemyType: TYPE_KAMIKAZE)
+        enemies.spawnEnemy(startX:  1.06*w, startY: 0.10*h, velocityX: -S7_SWEEP_VX,      velocityY: vy, enemyType: TYPE_KAMIKAZE)
+        enemies.spawnEnemy(startX:  1.06*w, startY: 0.22*h, velocityX: -S7_SWEEP_VX*1.10, velocityY: vy, enemyType: TYPE_KAMIKAZE)
+        enemies.spawnEnemy(startX: -0.06*w, startY: 0.34*h, velocityX:  S7_SWEEP_VX*0.90, velocityY: vy, enemyType: TYPE_KAMIKAZE)
     }
 
     static func spawnSweepArcSquadron(enemies: EnemyPoolManager, h: Float) {

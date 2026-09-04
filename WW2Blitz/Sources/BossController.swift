@@ -14,9 +14,9 @@ class BossController {
     static let TYPE_STAGE3_LEFT_FLAK = 7
     static let TYPE_STAGE3_RIGHT_FLAK = 8
     static let TYPE_STAGE3_MEGA_CANNON = 9
-    static let TYPE_STAGE4_LEFT_MORTAR = 10
-    static let TYPE_STAGE4_RIGHT_MORTAR = 11
-    static let TYPE_STAGE4_HEAVY_GATLING = 12
+    static let TYPE_STAGE6_LEFT_MORTAR = 10
+    static let TYPE_STAGE6_RIGHT_MORTAR = 11
+    static let TYPE_STAGE6_HEAVY_GATLING = 12
     static let TYPE_WINTER_LEFT_HOWITZER = 10
     static let TYPE_WINTER_RIGHT_HOWITZER = 11
     static let TYPE_WINTER_BLIZZARD = 12
@@ -34,22 +34,22 @@ class BossController {
     static let ENTER_SPEED: Float = 90
     static let SWEEP_RATE: Float  = 0.55
     static let SWEEP_AMP: Float   = 0.18
-    static let S5_CORE_HP = 350; static let S5_FLANK_HP = 180
-    static let S5_LEFT_L: Float = -0.50; static let S5_LEFT_R: Float = -0.18
-    static let S5_RIGHT_L: Float = 0.18; static let S5_RIGHT_R: Float = 0.50
-    static let S5_FLANK_T: Float = -0.35; static let S5_FLANK_B: Float = 0.35
-    static let S5_CORE_L: Float = -0.18; static let S5_CORE_R: Float = 0.18
-    static let S5_CORE_T: Float = -0.45; static let S5_CORE_B: Float = 0.48
-    static let S6_CORE_HP = 380; static let S6_FLANK_HP = 190
-    static let S6_LEFT_L: Float = -0.50; static let S6_LEFT_R: Float = -0.20
-    static let S6_RIGHT_L: Float = 0.20; static let S6_RIGHT_R: Float = 0.50
-    static let S6_FLANK_T: Float = -0.38; static let S6_FLANK_B: Float = 0.38
-    static let S6_CORE_L: Float = -0.20; static let S6_CORE_R: Float = 0.20
-    static let S6_CORE_T: Float = -0.48; static let S6_CORE_B: Float = 0.48
-    static let S6_LEFT_MUZZLE_X: Float = -0.44; static let S6_LEFT_MUZZLE_Y: Float = 0.38
-    static let S6_RIGHT_MUZZLE_X: Float = 0.44; static let S6_RIGHT_MUZZLE_Y: Float = 0.38
-    static let S6_CORE_LENS_X: Float = 0; static let S6_CORE_LENS_Y: Float = -0.02
-    static let S6_PHASE2_CLOCK: Float = 15.1; static let S6_PHASE3_CLOCK: Float = 35.1
+    static let S7_CORE_HP = 350; static let S7_FLANK_HP = 180
+    static let S7_LEFT_L: Float = -0.50; static let S7_LEFT_R: Float = -0.18
+    static let S7_RIGHT_L: Float = 0.18; static let S7_RIGHT_R: Float = 0.50
+    static let S7_FLANK_T: Float = -0.35; static let S7_FLANK_B: Float = 0.35
+    static let S7_CORE_L: Float = -0.18; static let S7_CORE_R: Float = 0.18
+    static let S7_CORE_T: Float = -0.45; static let S7_CORE_B: Float = 0.48
+    static let S8_CORE_HP = 380; static let S8_FLANK_HP = 190
+    static let S8_LEFT_L: Float = -0.50; static let S8_LEFT_R: Float = -0.20
+    static let S8_RIGHT_L: Float = 0.20; static let S8_RIGHT_R: Float = 0.50
+    static let S8_FLANK_T: Float = -0.38; static let S8_FLANK_B: Float = 0.38
+    static let S8_CORE_L: Float = -0.20; static let S8_CORE_R: Float = 0.20
+    static let S8_CORE_T: Float = -0.48; static let S8_CORE_B: Float = 0.48
+    static let S8_LEFT_MUZZLE_X: Float = -0.44; static let S8_LEFT_MUZZLE_Y: Float = 0.38
+    static let S8_RIGHT_MUZZLE_X: Float = 0.44; static let S8_RIGHT_MUZZLE_Y: Float = 0.38
+    static let S8_CORE_LENS_X: Float = 0; static let S8_CORE_LENS_Y: Float = -0.02
+    static let S8_PHASE2_CLOCK: Float = 15.1; static let S8_PHASE3_CLOCK: Float = 35.1
     static let VICTORY_CASCADE_START: Float = 0.5
     static let VICTORY_SHATTER_AT: Float = 3.0
     static let VICTORY_END: Float = 4.5
@@ -60,9 +60,9 @@ class BossController {
     static let S1_CORE_HP = 240; static let S1_WING_HP = 70; static let S1_TURRET_HP = 58
     static let S2_CORE_HP = 330; static let S2_TREAD_HP = 100; static let S2_TURRET_HP = 88
     static let S3_CORE_HP = 480; static let S3_FLAK_HP = 125; static let S3_CANNON_HP = 190
-    static let S4_CORE_HP = 520; static let S4_MORTAR_HP = 140; static let S4_GATLING_HP = 160
-    static let S7_CORE_HP = 500; static let S7_HOWITZER_HP = 150; static let S7_BLIZZARD_HP = 170
-    static let S8_CORE_HP = 480; static let S8_GUN_HP = 145; static let S8_AA_HP = 165
+    static let S6_CORE_HP = 520; static let S6_MORTAR_HP = 140; static let S6_GATLING_HP = 160
+    static let S4_CORE_HP = 500; static let S4_HOWITZER_HP = 150; static let S4_BLIZZARD_HP = 170
+    static let S5_CORE_HP = 480; static let S5_GUN_HP = 145; static let S5_AA_HP = 165
     static let DOWN_ANGLE: Float = 1.5707964
     static let S1_SWEEP_INTERVAL: Float = 0.16
     static let S1_SWEEP_SPEED: Float = 480
@@ -81,19 +81,19 @@ class BossController {
     static let S3_SPIRAL_SPIN: Float = 5.2
     static let S3_SPIRAL_COUNT = 4
     static let S3_SPIRAL_STEP: Float = Float.pi * 2 / Float(S3_SPIRAL_COUNT)
-    static let S4_SPIRAL_INTERVAL: Float = 0.12
-    static let S4_SPIRAL_SPEED: Float = 310
-    static let S4_SPIRAL_SPIN: Float = 4.5
-    static let S4_SPIRAL_COUNT = 6
-    static let S4_SPIRAL_STEP: Float = Float.pi * 2 / Float(S4_SPIRAL_COUNT)
-    static let S7_RING_INTERVAL: Float = 0.20
-    static let S7_RING_SPEED: Float = 280
-    static let S7_RING_SPIN: Float = 2.8
-    static let S7_RING_COUNT = 8
-    static let S7_RING_STEP: Float = Float.pi * 2 / Float(S7_RING_COUNT)
-    static let S8_FAN_INTERVAL: Float = 0.22
-    static let S8_FAN_SPEED: Float = 300
-    static let S8_FAN_STEP: Float = 0.2618
+    static let S6_SPIRAL_INTERVAL: Float = 0.12
+    static let S6_SPIRAL_SPEED: Float = 310
+    static let S6_SPIRAL_SPIN: Float = 4.5
+    static let S6_SPIRAL_COUNT = 6
+    static let S6_SPIRAL_STEP: Float = Float.pi * 2 / Float(S6_SPIRAL_COUNT)
+    static let S4_RING_INTERVAL: Float = 0.20
+    static let S4_RING_SPEED: Float = 280
+    static let S4_RING_SPIN: Float = 2.8
+    static let S4_RING_COUNT = 8
+    static let S4_RING_STEP: Float = Float.pi * 2 / Float(S4_RING_COUNT)
+    static let S5_FAN_INTERVAL: Float = 0.22
+    static let S5_FAN_SPEED: Float = 300
+    static let S5_FAN_STEP: Float = 0.2618
 
     private var parts = (0..<MAX_PART_COUNT).map { _ in BossComponent() }
     private var screenW: Float = 0; private var screenH: Float = 0
@@ -111,14 +111,14 @@ class BossController {
     private var leftFlankBounds = CGRect.zero; private var rightFlankBounds = CGRect.zero
     private var coreBounds = CGRect.zero
     private var leftFlankShudder: Float = 0; private var rightFlankShudder: Float = 0; private var coreShudder: Float = 0
-    private var s5CoreArmorBank: Float = 0; private var s5HitDestroyed = false
-    private var s5HitDestroyX: Float = 0; private var s5HitDestroyY: Float = 0
+    private var s7CoreArmorBank: Float = 0; private var s7HitDestroyed = false
+    private var s7HitDestroyX: Float = 0; private var s7HitDestroyY: Float = 0
     private var hasDroppedLeftReward = false; private var hasDroppedRightReward = false; private var hasDroppedCoreReward = false
-    private var s5WeaponPower = 1; private var s5BombStock = 3
+    private var s7WeaponPower = 1; private var s7BombStock = 3
     private var victorySequenceTimer: Float = 0; private var victoryCascadeGate: Float = 0
-    private var victoryShatterFired = false; private var s5ShowTerminalWreck = false
+    private var victoryShatterFired = false; private var s7ShowTerminalWreck = false
     private var victoryLcg: UInt64 = 2463534242
-    private var s6SawOneFlankDown = false; private var s6SawBothFlanksDown = false
+    private var s8SawOneFlankDown = false; private var s8SawBothFlanksDown = false
     private var partSfxPlayed = [Bool](repeating: false, count: MAX_PART_COUNT)
     private weak var stageTimeline: SpawnTimeline?
     private var s1SweepTimer: Float = 0
@@ -129,11 +129,11 @@ class BossController {
     private var s2SniperTimer: Float = 0
     private var s3DesperationAngle: Float = 0
     private var s3SpiralTimer: Float = 0
-    private var s4SpiralTimer: Float = 0
-    private var s4SpiralAngle: Float = 0
-    private var s7RingTimer: Float = 0
-    private var s7RingAngle: Float = 0
-    private var s8FanTimer: Float = 0
+    private var s6SpiralTimer: Float = 0
+    private var s6SpiralAngle: Float = 0
+    private var s4RingTimer: Float = 0
+    private var s4RingAngle: Float = 0
+    private var s5FanTimer: Float = 0
 
     // SpriteKit
     private weak var scene: SKScene?
@@ -197,10 +197,10 @@ class BossController {
         coreX = screenW * 0.5; coreY = -bodyHalfH - 24
         exploding = false; explosionTimer = 0; activeExpFrame = 0
         victorySequenceTimer = 0; victoryCascadeGate = 0; victoryShatterFired = false
-        s5ShowTerminalWreck = false; corePhaseOpen = false; visualFlags = 0; s5CoreArmorBank = 0
+        s7ShowTerminalWreck = false; corePhaseOpen = false; visualFlags = 0; s7CoreArmorBank = 0
         resetDesperationTimers()
         hasDroppedLeftReward = false; hasDroppedRightReward = false; hasDroppedCoreReward = false
-        s6SawOneFlankDown = false; s6SawBothFlanksDown = false
+        s8SawOneFlankDown = false; s8SawBothFlanksDown = false
         partSfxPlayed = [Bool](repeating: false, count: BossController.MAX_PART_COUNT)
         for p in parts where p.halfW > 0 { p.isDestroyed = false; p.health = p.maxHealth; p.shudderTimer = 0 }
         syncPartWorldPositions()
@@ -220,9 +220,9 @@ class BossController {
     func isCoreVulnerable() -> Bool { parts[1...].allSatisfy { $0.halfW <= 0 || $0.isDestroyed } }
     func getComponents() -> [BossComponent] { parts }
     func getComponentCount() -> Int { BossController.MAX_PART_COUNT }
-    func usesStage5Hitboxes() -> Bool { triPartBoss && active && !exploding }
-    func consumeStage5Break() -> Bool { let b = s5HitDestroyed; s5HitDestroyed = false; return b }
-    func stage5BreakX() -> Float { s5HitDestroyX }; func stage5BreakY() -> Float { s5HitDestroyY }
+    func usesStage7Hitboxes() -> Bool { triPartBoss && active && !exploding }
+    func consumeStage7Break() -> Bool { let b = s7HitDestroyed; s7HitDestroyed = false; return b }
+    func stage7BreakX() -> Float { s7HitDestroyX }; func stage7BreakY() -> Float { s7HitDestroyY }
 
     func consumeVisualFlags() -> Int { let f = visualFlags; visualFlags = 0; return f }
 
@@ -242,7 +242,7 @@ class BossController {
         active = false; entering = false; exploding = false
         explosionTimer = 0; activeExpFrame = 0
         victorySequenceTimer = 0; victoryCascadeGate = 0; victoryShatterFired = false
-        s5ShowTerminalWreck = false; corePhaseOpen = false; visualFlags = 0
+        s7ShowTerminalWreck = false; corePhaseOpen = false; visualFlags = 0
         SoundManager.instance.stopAlarm()
         resetDesperationTimers()
         hideBossSprites()
@@ -252,14 +252,14 @@ class BossController {
         s1SweepTimer = 0; s1SweepFireTimer = 0; s1SweepDirection = 1
         s2DesperationTimer = 0; s2RingTimer = 0; s2SniperTimer = 0
         s3DesperationAngle = 0; s3SpiralTimer = 0
-        s4SpiralTimer = 0; s4SpiralAngle = 0
-        s7RingTimer = 0; s7RingAngle = 0
-        s8FanTimer = 0
+        s6SpiralTimer = 0; s6SpiralAngle = 0
+        s4RingTimer = 0; s4RingAngle = 0
+        s5FanTimer = 0
     }
 
-    func checkStage5CollisionAt(worldX: Float, worldY: Float, damage: Int) -> Bool {
+    func checkStage7CollisionAt(worldX: Float, worldY: Float, damage: Int) -> Bool {
         if !active || exploding || !triPartBoss { return false }
-        s5HitDestroyed = false
+        s7HitDestroyed = false
         let left = parts[BossController.TYPE_LEFT_FLANK]
         let right = parts[BossController.TYPE_RIGHT_FLANK]
         let core = parts[BossController.TYPE_CORE]
@@ -271,12 +271,12 @@ class BossController {
     }
 
     func checkCollisionAt(worldX: Float, worldY: Float, damage: Int) -> Bool {
-        checkStage5CollisionAt(worldX: worldX, worldY: worldY, damage: damage)
+        checkStage7CollisionAt(worldX: worldX, worldY: worldY, damage: damage)
     }
 
-    func applyStage5AreaDamage(left: Float, top: Float, right: Float, bottom: Float, damage: Int) {
+    func applyStage7AreaDamage(left: Float, top: Float, right: Float, bottom: Float, damage: Int) {
         if !active || exploding || !triPartBoss || damage <= 0 { return }
-        s5HitDestroyed = false
+        s7HitDestroyed = false
         let leftPart = parts[BossController.TYPE_LEFT_FLANK]
         let rightPart = parts[BossController.TYPE_RIGHT_FLANK]
         let core = parts[BossController.TYPE_CORE]
@@ -290,7 +290,7 @@ class BossController {
         let dmg = max(1, damage); part.health -= dmg; part.shudderTimer = BossComponent.SHUDDER_DURATION
         if part.health <= 0 {
             part.health = 0; part.isDestroyed = true
-            s5HitDestroyed = true; s5HitDestroyX = part.x; s5HitDestroyY = part.y
+            s7HitDestroyed = true; s7HitDestroyX = part.x; s7HitDestroyY = part.y
             grantModuleReward(part.componentType)
         }
     }
@@ -299,12 +299,12 @@ class BossController {
         let dmg = max(1, damage); let armored = !left.isDestroyed && !right.isDestroyed
         if !armored { core.shudderTimer = BossComponent.SHUDDER_DURATION }
         if armored {
-            s5CoreArmorBank += Float(dmg) * 0.5
-            while s5CoreArmorBank >= 1 && core.health > 0 { s5CoreArmorBank -= 1; core.health -= 1 }
+            s7CoreArmorBank += Float(dmg) * 0.5
+            while s7CoreArmorBank >= 1 && core.health > 0 { s7CoreArmorBank -= 1; core.health -= 1 }
         } else { core.health -= dmg }
         if core.health <= 0 {
             core.health = 0; core.isDestroyed = true
-            s5HitDestroyed = true; s5HitDestroyX = core.x; s5HitDestroyY = core.y
+            s7HitDestroyed = true; s7HitDestroyX = core.x; s7HitDestroyY = core.y
             grantModuleReward(BossController.TYPE_CORE)
         }
     }
@@ -319,7 +319,7 @@ class BossController {
             hasDroppedRightReward = true
             let x = Float(rightFlankBounds.midX); let y = Float(rightFlankBounds.midY)
             ScoreManager.instance.addFlankBreakBonus(x: x, y: y)
-            PowerUpManager.instance.spawnRightFlankDrop(x: x, y: y, playerWeaponPower: s5WeaponPower, bombStock: s5BombStock)
+            PowerUpManager.instance.spawnRightFlankDrop(x: x, y: y, playerWeaponPower: s7WeaponPower, bombStock: s7BombStock)
         } else if componentType == BossController.TYPE_CORE && !hasDroppedCoreReward {
             hasDroppedCoreReward = true
             ScoreManager.instance.addCoreKillBonus(x: Float(coreBounds.midX), y: Float(coreBounds.midY))
@@ -328,7 +328,7 @@ class BossController {
 
     func update(dt: Float, playerX: Float, playerY: Float, weapons: EnemyWeaponSystem,
                 playerWeaponPower: Int = 1, bombStock: Int = 3, timeline: SpawnTimeline? = nil) {
-        s5WeaponPower = playerWeaponPower; s5BombStock = bombStock; stageTimeline = timeline
+        s7WeaponPower = playerWeaponPower; s7BombStock = bombStock; stageTimeline = timeline
         if !active { return }
         tickShudder(dt: dt)
         if !exploding { playNewModuleSfx() }
@@ -358,7 +358,7 @@ class BossController {
             coreX = screenW * 0.5 + sinf(sweepPhase) * screenW * BossController.SWEEP_AMP
         }
         syncPartWorldPositions()
-        if triPartBoss { syncHitboxes() }
+        if triPartBoss { syncStage7Hitboxes() }
         updateCombat(dt: dt, playerX: playerX, playerY: playerY, weapons: weapons)
         updateNode()
     }
@@ -369,8 +369,8 @@ class BossController {
             BossController.TYPE_STAGE2_LEFT_TREAD, BossController.TYPE_STAGE2_RIGHT_TREAD,
             BossController.TYPE_STAGE3_LEFT_FLAK, BossController.TYPE_STAGE3_RIGHT_FLAK,
             BossController.TYPE_STAGE3_MEGA_CANNON,
-            BossController.TYPE_STAGE4_LEFT_MORTAR, BossController.TYPE_STAGE4_RIGHT_MORTAR,
-            BossController.TYPE_STAGE4_HEAVY_GATLING,
+            BossController.TYPE_STAGE6_LEFT_MORTAR, BossController.TYPE_STAGE6_RIGHT_MORTAR,
+            BossController.TYPE_STAGE6_HEAVY_GATLING,
             BossController.TYPE_WINTER_LEFT_HOWITZER, BossController.TYPE_WINTER_RIGHT_HOWITZER,
             BossController.TYPE_WINTER_BLIZZARD,
             BossController.TYPE_ATOLL_LEFT_GUN, BossController.TYPE_ATOLL_RIGHT_GUN,
@@ -396,8 +396,8 @@ class BossController {
         case .orbit:
             updateOrbitCombat(dt: dt, playerX: playerX, playerY: playerY, weapons: weapons, bw: bw)
         case .canopy:
-            if entering { weapons.resetStage5Boss(); return }
-            weapons.updateStage5Boss(dt: dt, centerX: coreX, centerY: coreY, bossWidth: bw,
+            if entering { weapons.resetStage7Boss(); return }
+            weapons.updateStage7Boss(dt: dt, centerX: coreX, centerY: coreY, bossWidth: bw,
                                      playerX: playerX, playerY: playerY,
                                      leftDestroyed: parts[1].isDestroyed, rightDestroyed: parts[2].isDestroyed)
         case .plane:
@@ -419,22 +419,22 @@ class BossController {
                                      cannonDead: parts[9].isDestroyed)
             fireBattleshipDesperation(dt: dt, weapons: weapons)
         case .jungle:
-            if entering { weapons.resetStage4Boss(); return }
-            weapons.updateStage4Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
+            if entering { weapons.resetStage6Boss(); return }
+            weapons.updateStage6Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
                                      pX: playerX, pY: playerY,
                                      leftMortarDead: parts[10].isDestroyed, rightMortarDead: parts[11].isDestroyed,
                                      gatlingDead: parts[12].isDestroyed)
             fireJungleDesperation(dt: dt, weapons: weapons)
         case .winter:
-            if entering { weapons.resetStage7Boss(); return }
-            weapons.updateStage7Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
+            if entering { weapons.resetStage4Boss(); return }
+            weapons.updateStage4Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
                                      pX: playerX, pY: playerY,
                                      leftHowitzerDead: parts[10].isDestroyed, rightHowitzerDead: parts[11].isDestroyed,
                                      blizzardDead: parts[12].isDestroyed)
             fireWinterDesperation(dt: dt, weapons: weapons)
         case .atoll:
-            if entering { weapons.resetStage8Boss(); return }
-            weapons.updateStage8Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
+            if entering { weapons.resetStage5Boss(); return }
+            weapons.updateStage5Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
                                      pX: playerX, pY: playerY,
                                      leftGunDead: parts[10].isDestroyed, rightGunDead: parts[11].isDestroyed,
                                      aaDead: parts[12].isDestroyed)
@@ -513,18 +513,18 @@ class BossController {
 
     private func fireJungleDesperation(dt: Float, weapons: EnemyWeaponSystem) {
         guard isCoreVulnerable() else { return }
-        s4SpiralAngle += BossController.S4_SPIRAL_SPIN * dt
-        s4SpiralTimer -= dt
-        if s4SpiralTimer <= 0 {
-            s4SpiralTimer = BossController.S4_SPIRAL_INTERVAL
+        s6SpiralAngle += BossController.S6_SPIRAL_SPIN * dt
+        s6SpiralTimer -= dt
+        if s6SpiralTimer <= 0 {
+            s6SpiralTimer = BossController.S6_SPIRAL_INTERVAL
             let ox = coreX
             let oy = coreY
-            let spd = BossController.S4_SPIRAL_SPEED
+            let spd = BossController.S6_SPIRAL_SPEED
             var k = 0
-            while k < BossController.S4_SPIRAL_COUNT {
-                let step = Float(k) * BossController.S4_SPIRAL_STEP
-                let aCw = s4SpiralAngle + step
-                let aCcw = -s4SpiralAngle + step
+            while k < BossController.S6_SPIRAL_COUNT {
+                let step = Float(k) * BossController.S6_SPIRAL_STEP
+                let aCw = s6SpiralAngle + step
+                let aCcw = -s6SpiralAngle + step
                 weapons.fireBullet(startX: ox, startY: oy, velX: cosf(aCw) * spd, velY: sinf(aCw) * spd)
                 weapons.fireBullet(startX: ox, startY: oy, velX: cosf(aCcw) * spd, velY: sinf(aCcw) * spd)
                 k += 1
@@ -534,16 +534,16 @@ class BossController {
 
     private func fireWinterDesperation(dt: Float, weapons: EnemyWeaponSystem) {
         guard isCoreVulnerable() else { return }
-        s7RingAngle += BossController.S7_RING_SPIN * dt
-        s7RingTimer -= dt
-        if s7RingTimer <= 0 {
-            s7RingTimer = BossController.S7_RING_INTERVAL
+        s4RingAngle += BossController.S4_RING_SPIN * dt
+        s4RingTimer -= dt
+        if s4RingTimer <= 0 {
+            s4RingTimer = BossController.S4_RING_INTERVAL
             let ox = coreX
             let oy = coreY
-            let spd = BossController.S7_RING_SPEED
+            let spd = BossController.S4_RING_SPEED
             var k = 0
-            while k < BossController.S7_RING_COUNT {
-                let ang = s7RingAngle + Float(k) * BossController.S7_RING_STEP
+            while k < BossController.S4_RING_COUNT {
+                let ang = s4RingAngle + Float(k) * BossController.S4_RING_STEP
                 weapons.fireBullet(startX: ox, startY: oy, velX: cosf(ang) * spd, velY: sinf(ang) * spd)
                 k += 1
             }
@@ -552,15 +552,15 @@ class BossController {
 
     private func fireAtollDesperation(dt: Float, weapons: EnemyWeaponSystem) {
         guard isCoreVulnerable() else { return }
-        s8FanTimer -= dt
-        if s8FanTimer <= 0 {
-            s8FanTimer = BossController.S8_FAN_INTERVAL
+        s5FanTimer -= dt
+        if s5FanTimer <= 0 {
+            s5FanTimer = BossController.S5_FAN_INTERVAL
             let ox = coreX
             let oy = coreY + bodyHalfH * 0.912
-            let spd = BossController.S8_FAN_SPEED
+            let spd = BossController.S5_FAN_SPEED
             var i = -2
             while i <= 2 {
-                let ang = BossController.DOWN_ANGLE + Float(i) * BossController.S8_FAN_STEP
+                let ang = BossController.DOWN_ANGLE + Float(i) * BossController.S5_FAN_STEP
                 weapons.fireBullet(startX: ox, startY: oy, velX: cosf(ang) * spd, velY: sinf(ang) * spd)
                 i += 1
             }
@@ -578,19 +578,19 @@ class BossController {
     }
 
     private func updateOrbitCombat(dt: Float, playerX: Float, playerY: Float, weapons: EnemyWeaponSystem, bw: Float) {
-        if entering { weapons.resetStage6Boss(); return }
+        if entering { weapons.resetStage8Boss(); return }
         let left = parts[1]; let right = parts[2]
-        if left.isDestroyed && right.isDestroyed && !s6SawBothFlanksDown {
-            s6SawBothFlanksDown = true; s6SawOneFlankDown = true
-            stageTimeline?.forceElapsed(BossController.S6_PHASE3_CLOCK)
-        } else if (left.isDestroyed || right.isDestroyed) && !s6SawOneFlankDown {
-            s6SawOneFlankDown = true; stageTimeline?.forceElapsed(BossController.S6_PHASE2_CLOCK)
+        if left.isDestroyed && right.isDestroyed && !s8SawBothFlanksDown {
+            s8SawBothFlanksDown = true; s8SawOneFlankDown = true
+            stageTimeline?.forceElapsed(BossController.S8_PHASE3_CLOCK)
+        } else if (left.isDestroyed || right.isDestroyed) && !s8SawOneFlankDown {
+            s8SawOneFlankDown = true; stageTimeline?.forceElapsed(BossController.S8_PHASE2_CLOCK)
         }
         let bh = bodyHalfH * 2
-        weapons.updateStage6Boss(dt: dt,
-            leftX: coreX + BossController.S6_LEFT_MUZZLE_X*bw, leftY: coreY + BossController.S6_LEFT_MUZZLE_Y*bh,
-            rightX: coreX + BossController.S6_RIGHT_MUZZLE_X*bw, rightY: coreY + BossController.S6_RIGHT_MUZZLE_Y*bh,
-            lensX: coreX + BossController.S6_CORE_LENS_X*bw, lensY: coreY + BossController.S6_CORE_LENS_Y*bh,
+        weapons.updateStage8Boss(dt: dt,
+            leftX: coreX + BossController.S8_LEFT_MUZZLE_X*bw, leftY: coreY + BossController.S8_LEFT_MUZZLE_Y*bh,
+            rightX: coreX + BossController.S8_RIGHT_MUZZLE_X*bw, rightY: coreY + BossController.S8_RIGHT_MUZZLE_Y*bh,
+            lensX: coreX + BossController.S8_CORE_LENS_X*bw, lensY: coreY + BossController.S8_CORE_LENS_Y*bh,
             playerX: playerX, playerY: playerY,
             leftDestroyed: left.isDestroyed, rightDestroyed: right.isDestroyed)
     }
@@ -600,7 +600,7 @@ class BossController {
         SoundManager.instance.playSFX(SoundManager.SFX_HEAVY_EXPLOSION)
         weapons.convertActiveToScoreItems()
         exploding = true; explosionTimer = 0; victorySequenceTimer = 0
-        victoryCascadeGate = 0; victoryShatterFired = false; s5ShowTerminalWreck = false
+        victoryCascadeGate = 0; victoryShatterFired = false; s7ShowTerminalWreck = false
         visualFlags |= BossController.FX_VICTORY_START
     }
 
@@ -615,7 +615,7 @@ class BossController {
             }
         }
         if !victoryShatterFired && t >= BossController.VICTORY_SHATTER_AT {
-            victoryShatterFired = true; s5ShowTerminalWreck = true
+            victoryShatterFired = true; s7ShowTerminalWreck = true
             for i in 0..<BossController.VICTORY_CLUSTER {
                 let u = (Float(i) + 0.5) / Float(BossController.VICTORY_CLUSTER)
                 ParticleManager.instance.spawnExplosion(x: coreX - bodyHalfW + u*bodyHalfW*2,
@@ -659,7 +659,7 @@ class BossController {
             node.size = size
             node.position = pos
             node.zPosition = 36.4
-        } else if let tex = bodyTex, !(triPartBoss && s5ShowTerminalWreck) {
+        } else if let tex = bodyTex, !(triPartBoss && s7ShowTerminalWreck) {
             node.isHidden = false
             node.texture = tex
             node.size = size
@@ -690,7 +690,7 @@ class BossController {
                 center.position = pos
             }
         }
-        if triPartBoss && s5ShowTerminalWreck, let center = centerWreckNode, centerWreckTex != nil {
+        if triPartBoss && s7ShowTerminalWreck, let center = centerWreckNode, centerWreckTex != nil {
             center.isHidden = false
             center.texture = centerWreckTex
             center.size = size
@@ -715,9 +715,9 @@ class BossController {
                     parts[BossController.TYPE_WINTER_RIGHT_HOWITZER].isDestroyed,
                     parts[BossController.TYPE_WINTER_BLIZZARD].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
         case .jungle:
-            return (parts[BossController.TYPE_STAGE4_LEFT_MORTAR].isDestroyed,
-                    parts[BossController.TYPE_STAGE4_RIGHT_MORTAR].isDestroyed,
-                    parts[BossController.TYPE_STAGE4_HEAVY_GATLING].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
+            return (parts[BossController.TYPE_STAGE6_LEFT_MORTAR].isDestroyed,
+                    parts[BossController.TYPE_STAGE6_RIGHT_MORTAR].isDestroyed,
+                    parts[BossController.TYPE_STAGE6_HEAVY_GATLING].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
         case .battleship:
             return (parts[BossController.TYPE_STAGE3_LEFT_FLAK].isDestroyed,
                     parts[BossController.TYPE_STAGE3_RIGHT_FLAK].isDestroyed,
@@ -759,13 +759,13 @@ class BossController {
         }
     }
 
-    private func syncHitboxes() {
+    private func syncStage7Hitboxes() {
         let bw = bodyHalfW*2; let bh = bodyHalfH*2; let cx = coreX; let cy = coreY
         let (ll,lr,rl,rr,ft,fb,cl,cr,ct,cb): (Float,Float,Float,Float,Float,Float,Float,Float,Float,Float)
         if combatKind == .orbit {
-            (ll,lr,rl,rr,ft,fb,cl,cr,ct,cb) = (BossController.S6_LEFT_L,BossController.S6_LEFT_R,BossController.S6_RIGHT_L,BossController.S6_RIGHT_R,BossController.S6_FLANK_T,BossController.S6_FLANK_B,BossController.S6_CORE_L,BossController.S6_CORE_R,BossController.S6_CORE_T,BossController.S6_CORE_B)
+            (ll,lr,rl,rr,ft,fb,cl,cr,ct,cb) = (BossController.S8_LEFT_L,BossController.S8_LEFT_R,BossController.S8_RIGHT_L,BossController.S8_RIGHT_R,BossController.S8_FLANK_T,BossController.S8_FLANK_B,BossController.S8_CORE_L,BossController.S8_CORE_R,BossController.S8_CORE_T,BossController.S8_CORE_B)
         } else {
-            (ll,lr,rl,rr,ft,fb,cl,cr,ct,cb) = (BossController.S5_LEFT_L,BossController.S5_LEFT_R,BossController.S5_RIGHT_L,BossController.S5_RIGHT_R,BossController.S5_FLANK_T,BossController.S5_FLANK_B,BossController.S5_CORE_L,BossController.S5_CORE_R,BossController.S5_CORE_T,BossController.S5_CORE_B)
+            (ll,lr,rl,rr,ft,fb,cl,cr,ct,cb) = (BossController.S7_LEFT_L,BossController.S7_LEFT_R,BossController.S7_RIGHT_L,BossController.S7_RIGHT_R,BossController.S7_FLANK_T,BossController.S7_FLANK_B,BossController.S7_CORE_L,BossController.S7_CORE_R,BossController.S7_CORE_T,BossController.S7_CORE_B)
         }
         leftFlankBounds  = CGRect(x: CGFloat(cx+ll*bw), y: CGFloat(cy+ft*bh), width: CGFloat((lr-ll)*bw), height: CGFloat((fb-ft)*bh))
         rightFlankBounds = CGRect(x: CGFloat(cx+rl*bw), y: CGFloat(cy+ft*bh), width: CGFloat((rr-rl)*bw), height: CGFloat((fb-ft)*bh))
@@ -811,12 +811,12 @@ class BossController {
         switch combatKind {
         case .orbit, .canopy:
             let (ll,lr,rl,rr,ft,fb,cl,cr,ct,cb,chp,fhp) = combatKind == .orbit
-                ? (BossController.S6_LEFT_L,BossController.S6_LEFT_R,BossController.S6_RIGHT_L,BossController.S6_RIGHT_R,BossController.S6_FLANK_T,BossController.S6_FLANK_B,BossController.S6_CORE_L,BossController.S6_CORE_R,BossController.S6_CORE_T,BossController.S6_CORE_B,BossController.S6_CORE_HP,BossController.S6_FLANK_HP)
-                : (BossController.S5_LEFT_L,BossController.S5_LEFT_R,BossController.S5_RIGHT_L,BossController.S5_RIGHT_R,BossController.S5_FLANK_T,BossController.S5_FLANK_B,BossController.S5_CORE_L,BossController.S5_CORE_R,BossController.S5_CORE_T,BossController.S5_CORE_B,BossController.S5_CORE_HP,BossController.S5_FLANK_HP)
+                ? (BossController.S8_LEFT_L,BossController.S8_LEFT_R,BossController.S8_RIGHT_L,BossController.S8_RIGHT_R,BossController.S8_FLANK_T,BossController.S8_FLANK_B,BossController.S8_CORE_L,BossController.S8_CORE_R,BossController.S8_CORE_T,BossController.S8_CORE_B,BossController.S8_CORE_HP,BossController.S8_FLANK_HP)
+                : (BossController.S7_LEFT_L,BossController.S7_LEFT_R,BossController.S7_RIGHT_L,BossController.S7_RIGHT_R,BossController.S7_FLANK_T,BossController.S7_FLANK_B,BossController.S7_CORE_L,BossController.S7_CORE_R,BossController.S7_CORE_T,BossController.S7_CORE_B,BossController.S7_CORE_HP,BossController.S7_FLANK_HP)
             setupPart(0, (cl+cr)*0.5*bw, (ct+cb)*0.5*bh, (cr-cl)*0.5*bw, (cb-ct)*0.5*bh, chp)
             setupPart(1, (ll+lr)*0.5*bw, (ft+fb)*0.5*bh, (lr-ll)*0.5*bw, (fb-ft)*0.5*bh, fhp)
             setupPart(2, (rl+rr)*0.5*bw, (ft+fb)*0.5*bh, (rr-rl)*0.5*bw, (fb-ft)*0.5*bh, fhp)
-            syncHitboxes()
+            syncStage7Hitboxes()
         case .plane:
             setupPart(0, 0, 0, bodyHalfW*0.28, bodyHalfH*0.52, BossController.S1_CORE_HP)
             setupPart(1, -bodyHalfW*0.5, -bodyHalfH*0.08, bodyHalfW*0.30, bodyHalfH*0.20, BossController.S1_WING_HP)
@@ -833,20 +833,20 @@ class BossController {
             setupPart(8,  bodyHalfW*0.70, bodyHalfH*0.15, bodyHalfW*0.20, bodyHalfH*0.20, BossController.S3_FLAK_HP)
             setupPart(9, 0, bodyHalfH*0.45, bodyHalfW*0.30, bodyHalfH*0.25, BossController.S3_CANNON_HP)
         case .jungle:
-            setupPart(0, 0, 0, bodyHalfW*0.30, bodyHalfH*0.40, BossController.S4_CORE_HP)
-            setupPart(10, -bodyHalfW*0.75, -bodyHalfH*0.10, bodyHalfW*0.18, bodyHalfH*0.22, BossController.S4_MORTAR_HP)
-            setupPart(11,  bodyHalfW*0.75, -bodyHalfH*0.10, bodyHalfW*0.18, bodyHalfH*0.22, BossController.S4_MORTAR_HP)
-            setupPart(12, 0, bodyHalfH*0.48, bodyHalfW*0.22, bodyHalfH*0.26, BossController.S4_GATLING_HP)
+            setupPart(0, 0, 0, bodyHalfW*0.30, bodyHalfH*0.40, BossController.S6_CORE_HP)
+            setupPart(10, -bodyHalfW*0.75, -bodyHalfH*0.10, bodyHalfW*0.18, bodyHalfH*0.22, BossController.S6_MORTAR_HP)
+            setupPart(11,  bodyHalfW*0.75, -bodyHalfH*0.10, bodyHalfW*0.18, bodyHalfH*0.22, BossController.S6_MORTAR_HP)
+            setupPart(12, 0, bodyHalfH*0.48, bodyHalfW*0.22, bodyHalfH*0.26, BossController.S6_GATLING_HP)
         case .winter:
-            setupPart(0, 0, 0, bodyHalfW*0.28, bodyHalfH*0.38, BossController.S7_CORE_HP)
-            setupPart(10, -bodyHalfW*0.543, bodyHalfH*0.318, bodyHalfW*0.16, bodyHalfH*0.16, BossController.S7_HOWITZER_HP)
-            setupPart(11,  bodyHalfW*0.531, bodyHalfH*0.318, bodyHalfW*0.16, bodyHalfH*0.16, BossController.S7_HOWITZER_HP)
-            setupPart(12, 0, bodyHalfH*0.902, bodyHalfW*0.20, bodyHalfH*0.14, BossController.S7_BLIZZARD_HP)
+            setupPart(0, 0, 0, bodyHalfW*0.28, bodyHalfH*0.38, BossController.S4_CORE_HP)
+            setupPart(10, -bodyHalfW*0.543, bodyHalfH*0.318, bodyHalfW*0.16, bodyHalfH*0.16, BossController.S4_HOWITZER_HP)
+            setupPart(11,  bodyHalfW*0.531, bodyHalfH*0.318, bodyHalfW*0.16, bodyHalfH*0.16, BossController.S4_HOWITZER_HP)
+            setupPart(12, 0, bodyHalfH*0.902, bodyHalfW*0.20, bodyHalfH*0.14, BossController.S4_BLIZZARD_HP)
         case .atoll:
-            setupPart(0, 0, 0, bodyHalfW*0.28, bodyHalfH*0.36, BossController.S8_CORE_HP)
-            setupPart(10, -bodyHalfW*0.650, bodyHalfH*0.205, bodyHalfW*0.14, bodyHalfH*0.14, BossController.S8_GUN_HP)
-            setupPart(11,  bodyHalfW*0.648, bodyHalfH*0.203, bodyHalfW*0.14, bodyHalfH*0.14, BossController.S8_GUN_HP)
-            setupPart(12, 0, bodyHalfH*0.912, bodyHalfW*0.16, bodyHalfH*0.12, BossController.S8_AA_HP)
+            setupPart(0, 0, 0, bodyHalfW*0.28, bodyHalfH*0.36, BossController.S5_CORE_HP)
+            setupPart(10, -bodyHalfW*0.650, bodyHalfH*0.205, bodyHalfW*0.14, bodyHalfH*0.14, BossController.S5_GUN_HP)
+            setupPart(11,  bodyHalfW*0.648, bodyHalfH*0.203, bodyHalfW*0.14, bodyHalfH*0.14, BossController.S5_GUN_HP)
+            setupPart(12, 0, bodyHalfH*0.912, bodyHalfW*0.16, bodyHalfH*0.12, BossController.S5_AA_HP)
         }
     }
 

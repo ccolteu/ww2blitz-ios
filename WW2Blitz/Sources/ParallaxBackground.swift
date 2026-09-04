@@ -6,16 +6,16 @@ class ParallaxBackground {
     private static let SPEED_GROUND: CGFloat = 1.0
     private static let SPEED_MID:    CGFloat = 1.5
     private static let SPEED_HIGH:   CGFloat = 2.2
-    private static let SPEED_S5_LAYER2: CGFloat = 1.5
-    private static let S6_CLOUD_END:   Float = 15.0
-    private static let S6_BURN_END:    Float = 35.0
-    private static let S6_BURN_SPAN:   Float = 20.0
-    private static let S6_BURN_PEAK:   Float = 3.5
-    private static let S6_ORBIT_END:   Float = 45.0
-    private static let S6_ORBIT_SPAN:  Float = 10.0
-    private static let S6_ORBIT_FLOOR: Float = 0.4
-    private static let S6_BRAKE_END:   Float = 50.0
-    private static let S6_BRAKE_SPAN:  Float = 5.0
+    private static let SPEED_S7_LAYER2: CGFloat = 1.5
+    private static let S8_CLOUD_END:   Float = 15.0
+    private static let S8_BURN_END:    Float = 35.0
+    private static let S8_BURN_SPAN:   Float = 20.0
+    private static let S8_BURN_PEAK:   Float = 3.5
+    private static let S8_ORBIT_END:   Float = 45.0
+    private static let S8_ORBIT_SPAN:  Float = 10.0
+    private static let S8_ORBIT_FLOOR: Float = 0.4
+    private static let S8_BRAKE_END:   Float = 50.0
+    private static let S8_BRAKE_SPAN:  Float = 5.0
     private static let MID_ALPHA: CGFloat  = 140.0/255
     private static let HIGH_ALPHA: CGFloat = 36.0/255
 
@@ -38,7 +38,7 @@ class ParallaxBackground {
     private var yMid:    CGFloat = 0
     private var yHigh:   CGFloat = 0
     private var yCanopy: CGFloat = 0
-    var stage6SpeedModifier: Float = 1.0
+    var stage8SpeedModifier: Float = 1.0
 
     private weak var scene: SKScene?
     private var sceneW: CGFloat = 0
@@ -118,33 +118,33 @@ class ParallaxBackground {
         placeTiles()
     }
 
-    func updateStage5(scrollSpeedY: Float, dt: Float) {
+    func updateStage7(scrollSpeedY: Float, dt: Float) {
         yGround = wrapY(yGround - CGFloat(scrollSpeedY * dt), height: groundHeight)
-        yCanopy = wrapY(yCanopy - CGFloat(scrollSpeedY * dt) * ParallaxBackground.SPEED_S5_LAYER2, height: canopyHeight)
+        yCanopy = wrapY(yCanopy - CGFloat(scrollSpeedY * dt) * ParallaxBackground.SPEED_S7_LAYER2, height: canopyHeight)
         placeGroundTiles(); placeCanopyTiles()
     }
 
-    func updateStage6(scrollSpeedY: Float, dt: Float, elapsedTime: Float) {
+    func updateStage8(scrollSpeedY: Float, dt: Float, elapsedTime: Float) {
         let t = elapsedTime
-        if t < ParallaxBackground.S6_CLOUD_END                              { stage6SpeedModifier = 1.0 }
-        else if t < ParallaxBackground.S6_BURN_END {
-            let u = (t - ParallaxBackground.S6_CLOUD_END) / ParallaxBackground.S6_BURN_SPAN
-            stage6SpeedModifier = 1.0 + u * (ParallaxBackground.S6_BURN_PEAK - 1.0)
-        } else if t < ParallaxBackground.S6_ORBIT_END {
-            let u = (t - ParallaxBackground.S6_BURN_END) / ParallaxBackground.S6_ORBIT_SPAN
-            stage6SpeedModifier = ParallaxBackground.S6_BURN_PEAK + u * (ParallaxBackground.S6_ORBIT_FLOOR - ParallaxBackground.S6_BURN_PEAK)
-        } else if t < ParallaxBackground.S6_BRAKE_END {
-            let u = (t - ParallaxBackground.S6_ORBIT_END) / ParallaxBackground.S6_BRAKE_SPAN
-            stage6SpeedModifier = ParallaxBackground.S6_ORBIT_FLOOR + u * (0 - ParallaxBackground.S6_ORBIT_FLOOR)
-        } else { stage6SpeedModifier = 0 }
-        update(baseSpeed: scrollSpeedY * stage6SpeedModifier * dt)
+        if t < ParallaxBackground.S8_CLOUD_END                              { stage8SpeedModifier = 1.0 }
+        else if t < ParallaxBackground.S8_BURN_END {
+            let u = (t - ParallaxBackground.S8_CLOUD_END) / ParallaxBackground.S8_BURN_SPAN
+            stage8SpeedModifier = 1.0 + u * (ParallaxBackground.S8_BURN_PEAK - 1.0)
+        } else if t < ParallaxBackground.S8_ORBIT_END {
+            let u = (t - ParallaxBackground.S8_BURN_END) / ParallaxBackground.S8_ORBIT_SPAN
+            stage8SpeedModifier = ParallaxBackground.S8_BURN_PEAK + u * (ParallaxBackground.S8_ORBIT_FLOOR - ParallaxBackground.S8_BURN_PEAK)
+        } else if t < ParallaxBackground.S8_BRAKE_END {
+            let u = (t - ParallaxBackground.S8_ORBIT_END) / ParallaxBackground.S8_BRAKE_SPAN
+            stage8SpeedModifier = ParallaxBackground.S8_ORBIT_FLOOR + u * (0 - ParallaxBackground.S8_ORBIT_FLOOR)
+        } else { stage8SpeedModifier = 0 }
+        update(baseSpeed: scrollSpeedY * stage8SpeedModifier * dt)
         yCanopy = wrapY(yCanopy - CGFloat(scrollSpeedY * 1.5 * dt), height: canopyHeight)
         placeCanopyTiles()
     }
 
-    func resetScroll() { yGround = 0; yMid = 0; yHigh = 0; yCanopy = 0; stage6SpeedModifier = 1; placeTiles() }
+    func resetScroll() { yGround = 0; yMid = 0; yHigh = 0; yCanopy = 0; stage8SpeedModifier = 1; placeTiles() }
 
-    /// Android only blits some layers depending on game state (no canopy on recap/name-entry except Stage 5).
+    /// Android only blits some layers depending on game state (no canopy on recap/name-entry except Stage 7).
     func applyDrawFlags(worldVisible: Bool, overlayClouds: Bool, canopyVisible: Bool) {
         setPairHidden(groundA, groundB, hidden: !worldVisible)
         setPairHidden(midA, midB, hidden: !worldVisible || !overlayClouds)

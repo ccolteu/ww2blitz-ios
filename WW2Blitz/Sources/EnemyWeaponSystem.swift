@@ -15,16 +15,16 @@ class EnemyWeaponSystem {
     private var coreVentTimer: Float = 0
     private var magmaTimer: Float = 0
     private var spiralAngle: Float = 0
-    private var spiralGate: Float = S6_SPIRAL_INTERVAL
-    private var s5RingAlt: Int = 0
-    private var s5MagmaSeed: UInt64 = 1
-    private var s6RailAlt: Int = 0
-    private var s6LaserTimer: Float = S6_WAVE_INTERVAL
-    private var s6RingTimer: Float  = S6_RING_INTERVAL
-    private var s6BurstRemaining: Int = 0
-    private var s6BurstGap: Float = S6_BURST_GAP
-    private var s6ColumnRemaining: Int = 0
-    private var s6ColumnGap: Float = S6_BURST_GAP
+    private var spiralGate: Float = S8_SPIRAL_INTERVAL
+    private var s7RingAlt: Int = 0
+    private var s7MagmaSeed: UInt64 = 1
+    private var s8RailAlt: Int = 0
+    private var s8LaserTimer: Float = S8_WAVE_INTERVAL
+    private var s8RingTimer: Float  = S8_RING_INTERVAL
+    private var s8BurstRemaining: Int = 0
+    private var s8BurstGap: Float = S8_BURST_GAP
+    private var s8ColumnRemaining: Int = 0
+    private var s8ColumnGap: Float = S8_BURST_GAP
     private var s1NoseTimer: Float = 0
     private var s1WingTimer: Float = 0
     private var s2MainTimer: Float = 0
@@ -32,14 +32,14 @@ class EnemyWeaponSystem {
     private var s3FlakTimer: Float = 0
     private var s3CannonTimer: Float = 0
     private var s3FlakLeft: Bool = true
-    private var s4MortarTimer: Float = 0
-    private var s4GatlingTimer: Float = 0
-    private var s7HowitzerTimer: Float = 0
-    private var s7BlizzardTimer: Float = 0
-    private var s7HowitzerLeft: Bool = true
-    private var s8CoastalTimer: Float = 0
-    private var s8AaTimer: Float = 0
-    private var s8CoastalLeft: Bool = true
+    private var s6MortarTimer: Float = 0
+    private var s6GatlingTimer: Float = 0
+    private var s4HowitzerTimer: Float = 0
+    private var s4BlizzardTimer: Float = 0
+    private var s4HowitzerLeft: Bool = true
+    private var s5CoastalTimer: Float = 0
+    private var s5AaTimer: Float = 0
+    private var s5CoastalLeft: Bool = true
 
     // SpriteKit rendering
     private weak var scene: SKScene?
@@ -77,69 +77,69 @@ class EnemyWeaponSystem {
     static let S3_WALL_HALF: Float  = 0.5235988
     static let S3_WALL_STEP: Float  = 0.1745329
     static let S3_WALL_SPEED: Float = 400
-    static let S4_MORTAR_INTERVAL: Float  = 1.20
-    static let S4_GATLING_INTERVAL: Float = 0.90
-    static let S4_FAN_STEP: Float  = 0.2618
-    static let S4_FAN_HALF: Float  = 0.2618
-    static let S4_MORTAR_SPEED: Float = 580
-    static let S7_HOWITZER_INTERVAL: Float = 1.05
-    static let S7_HOWITZER_SPEED: Float    = 520
-    static let S7_BLIZZARD_INTERVAL: Float = 1.35
-    static let S7_BLIZZARD_SPEED: Float    = 360
-    static let S7_BLIZZARD_STEP: Float     = 0.1745329
-    static let S7_LEFT_MUZZLE_X: Float   = -0.2715
-    static let S7_LEFT_MUZZLE_Y: Float   =  0.1592
-    static let S7_RIGHT_MUZZLE_X: Float  =  0.2656
-    static let S7_RIGHT_MUZZLE_Y: Float  =  0.1592
-    static let S7_CHIN_MUZZLE_X: Float   = -0.0029
-    static let S7_CHIN_MUZZLE_Y: Float   =  0.4512
-    static let S8_COASTAL_INTERVAL: Float = 0.95
-    static let S8_COASTAL_SPEED: Float    = 540
-    static let S8_AA_INTERVAL: Float      = 1.10
-    static let S8_AA_SPEED: Float         = 480
-    static let S8_AA_STEP: Float          = 0.1745329
-    static let S8_LEFT_MUZZLE_X: Float    = -0.3252
-    static let S8_LEFT_MUZZLE_Y: Float    =  0.1025
-    static let S8_RIGHT_MUZZLE_X: Float   =  0.3242
-    static let S8_RIGHT_MUZZLE_Y: Float   =  0.1016
-    static let S8_AA_LEFT_X: Float   = -0.0449
-    static let S8_AA_LEFT_Y: Float   =  0.4561
-    static let S8_AA_RIGHT_X: Float  =  0.0352
-    static let S8_AA_RIGHT_Y: Float  =  0.4561
-    static let S5_VOLLEY_INTERVAL: Float   = 1.8
-    static let S5_PANIC_INTERVAL: Float    = 0.9
-    static let S5_RING_INTERVAL: Float     = 3.0
-    static let S5_VOLLEY_VY: Float         = 400
-    static let S5_BARREL_SEP: Float        = 14
-    static let S5_RING_SPEED: Float        = 360
-    static let S5_FAN_STEP: Float          = 0.1745329
-    static let S5_FAN_SPEED: Float         = 480
-    static let S5_MAGMA_INTERVAL: Float    = 1.5
-    static let S5_MAGMA_VY: Float          = 190
-    static let S5_SPIRAL_SPIN: Float       = 6.5
-    static let S5_SPIRAL_INTERVAL: Float   = 0.15
-    static let S5_SPIRAL_SPEED: Float      = 440
-    static let S6_RAIL_INTERVAL: Float     = 1.4
-    static let S6_BURST_COUNT   = 3
-    static let S6_BURST_GAP: Float         = 0.22
-    static let S6_BURST_SPEED: Float       = 500
-    static let S6_OVERCHARGE_INTERVAL: Float = 0.4
-    static let S6_STREAM_SPEED: Float      = 500
-    static let S6_WAVE_INTERVAL: Float     = 2.5
-    static let S6_CORE_SHOTS    = 4
-    static let S6_CORE_VY: Float           = 220
-    static let S6_RING_INTERVAL: Float     = 1.8
-    static let S6_SPIRAL_INTERVAL: Float   = 0.08
-    static let S6_SPIRAL_SPIN: Float       = 9.5
-    static let S6_HELIX_A1: Float = 1.57
-    static let S6_HELIX_A2: Float = 3.14
-    static let S6_HELIX_A3: Float = 4.71
-    static let S6_LASER_HW: Float = 28
-    static let S6_LASER_HH: Float = 6
-    static let S6_RING_COUNT = 12
-    static let S6_RING_STEP: Float = 0.5235988
-    static let S6_RING_SPEED: Float = 340
-    static let S6_SPIRAL_SPEED: Float = 480
+    static let S6_MORTAR_INTERVAL: Float  = 1.20
+    static let S6_GATLING_INTERVAL: Float = 0.90
+    static let S6_FAN_STEP: Float  = 0.2618
+    static let S6_FAN_HALF: Float  = 0.2618
+    static let S6_MORTAR_SPEED: Float = 580
+    static let S4_HOWITZER_INTERVAL: Float = 1.05
+    static let S4_HOWITZER_SPEED: Float    = 520
+    static let S4_BLIZZARD_INTERVAL: Float = 1.35
+    static let S4_BLIZZARD_SPEED: Float    = 360
+    static let S4_BLIZZARD_STEP: Float     = 0.1745329
+    static let S4_LEFT_MUZZLE_X: Float   = -0.2715
+    static let S4_LEFT_MUZZLE_Y: Float   =  0.1592
+    static let S4_RIGHT_MUZZLE_X: Float  =  0.2656
+    static let S4_RIGHT_MUZZLE_Y: Float  =  0.1592
+    static let S4_CHIN_MUZZLE_X: Float   = -0.0029
+    static let S4_CHIN_MUZZLE_Y: Float   =  0.4512
+    static let S5_COASTAL_INTERVAL: Float = 0.95
+    static let S5_COASTAL_SPEED: Float    = 540
+    static let S5_AA_INTERVAL: Float      = 1.10
+    static let S5_AA_SPEED: Float         = 480
+    static let S5_AA_STEP: Float          = 0.1745329
+    static let S5_LEFT_MUZZLE_X: Float    = -0.3252
+    static let S5_LEFT_MUZZLE_Y: Float    =  0.1025
+    static let S5_RIGHT_MUZZLE_X: Float   =  0.3242
+    static let S5_RIGHT_MUZZLE_Y: Float   =  0.1016
+    static let S5_AA_LEFT_X: Float   = -0.0449
+    static let S5_AA_LEFT_Y: Float   =  0.4561
+    static let S5_AA_RIGHT_X: Float  =  0.0352
+    static let S5_AA_RIGHT_Y: Float  =  0.4561
+    static let S7_VOLLEY_INTERVAL: Float   = 1.8
+    static let S7_PANIC_INTERVAL: Float    = 0.9
+    static let S7_RING_INTERVAL: Float     = 3.0
+    static let S7_VOLLEY_VY: Float         = 400
+    static let S7_BARREL_SEP: Float        = 14
+    static let S7_RING_SPEED: Float        = 360
+    static let S7_FAN_STEP: Float          = 0.1745329
+    static let S7_FAN_SPEED: Float         = 480
+    static let S7_MAGMA_INTERVAL: Float    = 1.5
+    static let S7_MAGMA_VY: Float          = 190
+    static let S7_SPIRAL_SPIN: Float       = 6.5
+    static let S7_SPIRAL_INTERVAL: Float   = 0.15
+    static let S7_SPIRAL_SPEED: Float      = 440
+    static let S8_RAIL_INTERVAL: Float     = 1.4
+    static let S8_BURST_COUNT   = 3
+    static let S8_BURST_GAP: Float         = 0.22
+    static let S8_BURST_SPEED: Float       = 500
+    static let S8_OVERCHARGE_INTERVAL: Float = 0.4
+    static let S8_STREAM_SPEED: Float      = 500
+    static let S8_WAVE_INTERVAL: Float     = 2.5
+    static let S8_CORE_SHOTS    = 4
+    static let S8_CORE_VY: Float           = 220
+    static let S8_RING_INTERVAL: Float     = 1.8
+    static let S8_SPIRAL_INTERVAL: Float   = 0.08
+    static let S8_SPIRAL_SPIN: Float       = 9.5
+    static let S8_HELIX_A1: Float = 1.57
+    static let S8_HELIX_A2: Float = 3.14
+    static let S8_HELIX_A3: Float = 4.71
+    static let S8_LASER_HW: Float = 28
+    static let S8_LASER_HH: Float = 6
+    static let S8_RING_COUNT = 12
+    static let S8_RING_STEP: Float = 0.5235988
+    static let S8_RING_SPEED: Float = 340
+    static let S8_SPIRAL_SPEED: Float = 480
 
     // S1_SWEEP (boss-internal constants used elsewhere)
     static let S1_SWEEP_INTERVAL: Float = 0.16
@@ -229,11 +229,11 @@ class EnemyWeaponSystem {
     func resetStage1Boss() { s1NoseTimer = scaledInterval(EnemyWeaponSystem.S1_NOSE_INTERVAL); s1WingTimer = scaledInterval(EnemyWeaponSystem.S1_WING_INTERVAL) }
     func resetStage2Boss() { s2MainTimer = scaledInterval(EnemyWeaponSystem.S2_MAIN_INTERVAL); s2TreadTimer = scaledInterval(EnemyWeaponSystem.S2_TREAD_INTERVAL) }
     func resetStage3Boss() { s3FlakTimer = scaledInterval(EnemyWeaponSystem.S3_FLAK_INTERVAL); s3CannonTimer = scaledInterval(EnemyWeaponSystem.S3_CANNON_INTERVAL); s3FlakLeft = true }
-    func resetStage4Boss() { s4MortarTimer = scaledInterval(EnemyWeaponSystem.S4_MORTAR_INTERVAL); s4GatlingTimer = scaledInterval(EnemyWeaponSystem.S4_GATLING_INTERVAL) }
-    func resetStage5Boss() { turretTimer = scaledInterval(EnemyWeaponSystem.S5_VOLLEY_INTERVAL); coreVentTimer = scaledInterval(EnemyWeaponSystem.S5_RING_INTERVAL); magmaTimer = 0; spiralAngle = 0; spiralGate = 0; s5RingAlt = 0 }
-    func resetStage6Boss() { turretTimer = scaledInterval(EnemyWeaponSystem.S6_RAIL_INTERVAL); s6LaserTimer = scaledInterval(EnemyWeaponSystem.S6_WAVE_INTERVAL); s6RingTimer = scaledInterval(EnemyWeaponSystem.S6_RING_INTERVAL); spiralAngle = 0; spiralGate = scaledInterval(EnemyWeaponSystem.S6_SPIRAL_INTERVAL); s6RailAlt = 0; s6BurstRemaining = 0; s6BurstGap = scaledInterval(EnemyWeaponSystem.S6_BURST_GAP); s6ColumnRemaining = 0; s6ColumnGap = scaledInterval(EnemyWeaponSystem.S6_BURST_GAP) }
-    func resetStage7Boss() { s7HowitzerTimer = scaledInterval(EnemyWeaponSystem.S7_HOWITZER_INTERVAL); s7BlizzardTimer = scaledInterval(EnemyWeaponSystem.S7_BLIZZARD_INTERVAL); s7HowitzerLeft = true }
-    func resetStage8Boss() { s8CoastalTimer = scaledInterval(EnemyWeaponSystem.S8_COASTAL_INTERVAL); s8AaTimer = scaledInterval(EnemyWeaponSystem.S8_AA_INTERVAL); s8CoastalLeft = true }
+    func resetStage6Boss() { s6MortarTimer = scaledInterval(EnemyWeaponSystem.S6_MORTAR_INTERVAL); s6GatlingTimer = scaledInterval(EnemyWeaponSystem.S6_GATLING_INTERVAL) }
+    func resetStage7Boss() { turretTimer = scaledInterval(EnemyWeaponSystem.S7_VOLLEY_INTERVAL); coreVentTimer = scaledInterval(EnemyWeaponSystem.S7_RING_INTERVAL); magmaTimer = 0; spiralAngle = 0; spiralGate = 0; s7RingAlt = 0 }
+    func resetStage8Boss() { turretTimer = scaledInterval(EnemyWeaponSystem.S8_RAIL_INTERVAL); s8LaserTimer = scaledInterval(EnemyWeaponSystem.S8_WAVE_INTERVAL); s8RingTimer = scaledInterval(EnemyWeaponSystem.S8_RING_INTERVAL); spiralAngle = 0; spiralGate = scaledInterval(EnemyWeaponSystem.S8_SPIRAL_INTERVAL); s8RailAlt = 0; s8BurstRemaining = 0; s8BurstGap = scaledInterval(EnemyWeaponSystem.S8_BURST_GAP); s8ColumnRemaining = 0; s8ColumnGap = scaledInterval(EnemyWeaponSystem.S8_BURST_GAP) }
+    func resetStage4Boss() { s4HowitzerTimer = scaledInterval(EnemyWeaponSystem.S4_HOWITZER_INTERVAL); s4BlizzardTimer = scaledInterval(EnemyWeaponSystem.S4_BLIZZARD_INTERVAL); s4HowitzerLeft = true }
+    func resetStage5Boss() { s5CoastalTimer = scaledInterval(EnemyWeaponSystem.S5_COASTAL_INTERVAL); s5AaTimer = scaledInterval(EnemyWeaponSystem.S5_AA_INTERVAL); s5CoastalLeft = true }
 
     // MARK: - Boss weapon update methods
 
@@ -327,210 +327,210 @@ class EnemyWeaponSystem {
         fireBullet(startX: ox, startY: oy, velX: dx*inv, velY: dy*inv)
     }
 
-    func updateStage4Boss(dt: Float, cX: Float, cY: Float, bossW: Float, bossHalfH: Float,
+    func updateStage6Boss(dt: Float, cX: Float, cY: Float, bossW: Float, bossHalfH: Float,
                           pX: Float, pY: Float, leftMortarDead: Bool, rightMortarDead: Bool, gatlingDead: Bool) {
         if !leftMortarDead || !rightMortarDead {
-            s4MortarTimer -= dt
-            if s4MortarTimer <= 0 {
-                s4MortarTimer = scaledInterval(EnemyWeaponSystem.S4_MORTAR_INTERVAL)
-                if !leftMortarDead  { fireS4MortarFan(x: cX - bossW*0.16, y: cY + bossHalfH*0.28, downRight: true) }
-                if !rightMortarDead { fireS4MortarFan(x: cX + bossW*0.16, y: cY + bossHalfH*0.28, downRight: false) }
+            s6MortarTimer -= dt
+            if s6MortarTimer <= 0 {
+                s6MortarTimer = scaledInterval(EnemyWeaponSystem.S6_MORTAR_INTERVAL)
+                if !leftMortarDead  { fireS6MortarFan(x: cX - bossW*0.16, y: cY + bossHalfH*0.28, downRight: true) }
+                if !rightMortarDead { fireS6MortarFan(x: cX + bossW*0.16, y: cY + bossHalfH*0.28, downRight: false) }
             }
         }
         if gatlingDead { return }
-        s4GatlingTimer -= dt; if s4GatlingTimer > 0 { return }
-        s4GatlingTimer = scaledInterval(EnemyWeaponSystem.S4_GATLING_INTERVAL)
+        s6GatlingTimer -= dt; if s6GatlingTimer > 0 { return }
+        s6GatlingTimer = scaledInterval(EnemyWeaponSystem.S6_GATLING_INTERVAL)
         let sy = cY + bossHalfH * 0.88
         let spd = scaledSpeed(720)
         for idx in -2...2 { fireBullet(startX: cX + Float(idx)*24, startY: sy, velX: 0, velY: spd) }
     }
-    private func fireS4MortarFan(x: Float, y: Float, downRight: Bool) {
-        let base = downRight ? EnemyWeaponSystem.S2_DOWN_ANGLE - EnemyWeaponSystem.S4_FAN_HALF
-                             : EnemyWeaponSystem.S2_DOWN_ANGLE + EnemyWeaponSystem.S4_FAN_HALF
-        let spd = scaledSpeed(EnemyWeaponSystem.S4_MORTAR_SPEED)
-        for i in -1...1 { let ang = base + Float(i)*EnemyWeaponSystem.S4_FAN_STEP; fireBullet(startX: x, startY: y, velX: cosf(ang)*spd, velY: sinf(ang)*spd) }
+    private func fireS6MortarFan(x: Float, y: Float, downRight: Bool) {
+        let base = downRight ? EnemyWeaponSystem.S2_DOWN_ANGLE - EnemyWeaponSystem.S6_FAN_HALF
+                             : EnemyWeaponSystem.S2_DOWN_ANGLE + EnemyWeaponSystem.S6_FAN_HALF
+        let spd = scaledSpeed(EnemyWeaponSystem.S6_MORTAR_SPEED)
+        for i in -1...1 { let ang = base + Float(i)*EnemyWeaponSystem.S6_FAN_STEP; fireBullet(startX: x, startY: y, velX: cosf(ang)*spd, velY: sinf(ang)*spd) }
     }
 
-    func updateStage5Boss(dt: Float, centerX: Float, centerY: Float, bossWidth: Float,
+    func updateStage7Boss(dt: Float, centerX: Float, centerY: Float, bossWidth: Float,
                           playerX: Float, playerY: Float, leftDestroyed: Bool, rightDestroyed: Bool) {
         let ltX = centerX - 0.38*bossWidth; let ltY = centerY
         let rtX = centerX + 0.38*bossWidth; let rtY = centerY
         let cvX = centerX; let cvY = centerY + 0.10*bossWidth
         if !leftDestroyed && !rightDestroyed {
             turretTimer -= dt
-            if turretTimer <= 0 { turretTimer = scaledInterval(EnemyWeaponSystem.S5_VOLLEY_INTERVAL); fireS5DownSpread(ox: ltX, oy: ltY); fireS5DownSpread(ox: rtX, oy: rtY) }
+            if turretTimer <= 0 { turretTimer = scaledInterval(EnemyWeaponSystem.S7_VOLLEY_INTERVAL); fireS7DownSpread(ox: ltX, oy: ltY); fireS7DownSpread(ox: rtX, oy: rtY) }
             coreVentTimer -= dt
-            if coreVentTimer <= 0 { coreVentTimer = scaledInterval(EnemyWeaponSystem.S5_RING_INTERVAL); fireS5Ring(ox: cvX, oy: cvY) }
+            if coreVentTimer <= 0 { coreVentTimer = scaledInterval(EnemyWeaponSystem.S7_RING_INTERVAL); fireS7Ring(ox: cvX, oy: cvY) }
             return
         }
         if !leftDestroyed || !rightDestroyed {
             turretTimer -= dt
             if turretTimer <= 0 {
-                turretTimer = scaledInterval(EnemyWeaponSystem.S5_PANIC_INTERVAL)
-                if !leftDestroyed { fireS5PlayerFan(ox: ltX, oy: ltY, pX: playerX, pY: playerY) }
-                else              { fireS5PlayerFan(ox: rtX, oy: rtY, pX: playerX, pY: playerY) }
+                turretTimer = scaledInterval(EnemyWeaponSystem.S7_PANIC_INTERVAL)
+                if !leftDestroyed { fireS7PlayerFan(ox: ltX, oy: ltY, pX: playerX, pY: playerY) }
+                else              { fireS7PlayerFan(ox: rtX, oy: rtY, pX: playerX, pY: playerY) }
             }
             magmaTimer -= dt
             if magmaTimer <= 0 {
-                magmaTimer = scaledInterval(EnemyWeaponSystem.S5_MAGMA_INTERVAL)
+                magmaTimer = scaledInterval(EnemyWeaponSystem.S7_MAGMA_INTERVAL)
                 for _ in 0..<3 {
-                    s5MagmaSeed = s5MagmaSeed &* 1664525 &+ 1013904223
-                    let u = Float((s5MagmaSeed >> 8) & 0xFFFFFF) / 16777215.0
-                    fireBullet(startX: cvX + (u*0.30 - 0.15)*bossWidth, startY: cvY, velX: 0, velY: scaledSpeed(EnemyWeaponSystem.S5_MAGMA_VY))
+                    s7MagmaSeed = s7MagmaSeed &* 1664525 &+ 1013904223
+                    let u = Float((s7MagmaSeed >> 8) & 0xFFFFFF) / 16777215.0
+                    fireBullet(startX: cvX + (u*0.30 - 0.15)*bossWidth, startY: cvY, velX: 0, velY: scaledSpeed(EnemyWeaponSystem.S7_MAGMA_VY))
                 }
             }
             return
         }
-        spiralAngle += EnemyWeaponSystem.S5_SPIRAL_SPIN * dt
+        spiralAngle += EnemyWeaponSystem.S7_SPIRAL_SPIN * dt
         spiralGate -= dt
-        if spiralGate <= 0 { spiralGate = scaledInterval(EnemyWeaponSystem.S5_SPIRAL_INTERVAL); fireS5SpiralPair(ox: cvX, oy: cvY, ang: spiralAngle); fireS5SpiralPair(ox: cvX, oy: cvY, ang: -spiralAngle) }
+        if spiralGate <= 0 { spiralGate = scaledInterval(EnemyWeaponSystem.S7_SPIRAL_INTERVAL); fireS7SpiralPair(ox: cvX, oy: cvY, ang: spiralAngle); fireS7SpiralPair(ox: cvX, oy: cvY, ang: -spiralAngle) }
     }
-    private func fireS5DownSpread(ox: Float, oy: Float) {
-        for i in 0..<3 { fireBullet(startX: ox + Float(i-1)*EnemyWeaponSystem.S5_BARREL_SEP, startY: oy, velX: 0, velY: scaledSpeed(EnemyWeaponSystem.S5_VOLLEY_VY)) }
+    private func fireS7DownSpread(ox: Float, oy: Float) {
+        for i in 0..<3 { fireBullet(startX: ox + Float(i-1)*EnemyWeaponSystem.S7_BARREL_SEP, startY: oy, velX: 0, velY: scaledSpeed(EnemyWeaponSystem.S7_VOLLEY_VY)) }
     }
-    private func fireS5Ring(ox: Float, oy: Float) {
-        let step = Float.pi * 2 / 8; let phase: Float = s5RingAlt == 0 ? 0 : step * 0.5
-        s5RingAlt = s5RingAlt == 0 ? 1 : 0
-        let spd = scaledSpeed(EnemyWeaponSystem.S5_RING_SPEED)
+    private func fireS7Ring(ox: Float, oy: Float) {
+        let step = Float.pi * 2 / 8; let phase: Float = s7RingAlt == 0 ? 0 : step * 0.5
+        s7RingAlt = s7RingAlt == 0 ? 1 : 0
+        let spd = scaledSpeed(EnemyWeaponSystem.S7_RING_SPEED)
         for i in 0..<8 { let a = phase + Float(i)*step; fireBullet(startX: ox, startY: oy, velX: cosf(a)*spd, velY: sinf(a)*spd) }
     }
-    private func fireS5PlayerFan(ox: Float, oy: Float, pX: Float, pY: Float) {
-        let base = atan2f(pY-oy, pX-ox); let spd = scaledSpeed(EnemyWeaponSystem.S5_FAN_SPEED)
-        for i in 0..<5 { let a = base + Float(i-2)*EnemyWeaponSystem.S5_FAN_STEP; fireBullet(startX: ox, startY: oy, velX: cosf(a)*spd, velY: sinf(a)*spd) }
+    private func fireS7PlayerFan(ox: Float, oy: Float, pX: Float, pY: Float) {
+        let base = atan2f(pY-oy, pX-ox); let spd = scaledSpeed(EnemyWeaponSystem.S7_FAN_SPEED)
+        for i in 0..<5 { let a = base + Float(i-2)*EnemyWeaponSystem.S7_FAN_STEP; fireBullet(startX: ox, startY: oy, velX: cosf(a)*spd, velY: sinf(a)*spd) }
     }
-    private func fireS5SpiralPair(ox: Float, oy: Float, ang: Float) {
-        let spd = scaledSpeed(EnemyWeaponSystem.S5_SPIRAL_SPEED)
+    private func fireS7SpiralPair(ox: Float, oy: Float, ang: Float) {
+        let spd = scaledSpeed(EnemyWeaponSystem.S7_SPIRAL_SPEED)
         fireBullet(startX: ox, startY: oy, velX: cosf(ang)*spd, velY: sinf(ang)*spd)
         fireBullet(startX: ox, startY: oy, velX: cosf(ang + Float.pi)*spd, velY: sinf(ang + Float.pi)*spd)
     }
 
-    func updateStage6Boss(dt: Float, leftX: Float, leftY: Float, rightX: Float, rightY: Float,
+    func updateStage8Boss(dt: Float, leftX: Float, leftY: Float, rightX: Float, rightY: Float,
                           lensX: Float, lensY: Float, playerX: Float, playerY: Float,
                           leftDestroyed: Bool, rightDestroyed: Bool) {
         if !leftDestroyed && !rightDestroyed {
-            tickS6CyanBurstGate(dt: dt, lX: leftX, lY: leftY, rX: rightX, rY: rightY, pX: playerX, pY: playerY)
-            tickS6PinkColumnGate(dt: dt, lensX: lensX, lensY: lensY)
+            tickS8CyanBurstGate(dt: dt, lX: leftX, lY: leftY, rX: rightX, rY: rightY, pX: playerX, pY: playerY)
+            tickS8PinkColumnGate(dt: dt, lensX: lensX, lensY: lensY)
         } else if !leftDestroyed || !rightDestroyed {
-            tickS6CyanStreamGate(dt: dt, leftLive: !leftDestroyed, lX: leftX, lY: leftY, rX: rightX, rY: rightY)
-            tickS6PinkRingGate(dt: dt, lensX: lensX, lensY: lensY)
-        } else { tickS6PinkSpiralGate(dt: dt, lensX: lensX, lensY: lensY) }
+            tickS8CyanStreamGate(dt: dt, leftLive: !leftDestroyed, lX: leftX, lY: leftY, rX: rightX, rY: rightY)
+            tickS8PinkRingGate(dt: dt, lensX: lensX, lensY: lensY)
+        } else { tickS8PinkSpiralGate(dt: dt, lensX: lensX, lensY: lensY) }
     }
-    private func tickS6CyanBurstGate(dt: Float, lX: Float, lY: Float, rX: Float, rY: Float, pX: Float, pY: Float) {
-        if s6BurstRemaining > 0 {
-            s6BurstGap -= dt; if s6BurstGap > 0 { return }
-            let ox = s6RailAlt == 0 ? lX : rX; let oy = s6RailAlt == 0 ? lY : rY
-            fireS6AimedTriple(mx: ox, my: oy, pX: pX, pY: pY)
-            s6BurstRemaining -= 1; s6BurstGap = scaledInterval(EnemyWeaponSystem.S6_BURST_GAP)
-            if s6BurstRemaining == 0 { s6RailAlt = s6RailAlt == 0 ? 1 : 0 }
+    private func tickS8CyanBurstGate(dt: Float, lX: Float, lY: Float, rX: Float, rY: Float, pX: Float, pY: Float) {
+        if s8BurstRemaining > 0 {
+            s8BurstGap -= dt; if s8BurstGap > 0 { return }
+            let ox = s8RailAlt == 0 ? lX : rX; let oy = s8RailAlt == 0 ? lY : rY
+            fireS5AimedTriple(mx: ox, my: oy, pX: pX, pY: pY)
+            s8BurstRemaining -= 1; s8BurstGap = scaledInterval(EnemyWeaponSystem.S8_BURST_GAP)
+            if s8BurstRemaining == 0 { s8RailAlt = s8RailAlt == 0 ? 1 : 0 }
             return
         }
         turretTimer -= dt; if turretTimer > 0 { return }
-        turretTimer = scaledInterval(EnemyWeaponSystem.S6_RAIL_INTERVAL)
-        s6BurstRemaining = EnemyWeaponSystem.S6_BURST_COUNT; s6BurstGap = scaledInterval(EnemyWeaponSystem.S6_BURST_GAP)
+        turretTimer = scaledInterval(EnemyWeaponSystem.S8_RAIL_INTERVAL)
+        s8BurstRemaining = EnemyWeaponSystem.S8_BURST_COUNT; s8BurstGap = scaledInterval(EnemyWeaponSystem.S8_BURST_GAP)
     }
-    private func tickS6PinkColumnGate(dt: Float, lensX: Float, lensY: Float) {
-        if s6ColumnRemaining > 0 {
-            s6ColumnGap -= dt; if s6ColumnGap > 0 { return }
-            fireBullet(startX: lensX, startY: lensY, velX: 0, velY: scaledSpeed(EnemyWeaponSystem.S6_CORE_VY), flags: EnemyBullet.FLAG_PINK)
-            s6ColumnRemaining -= 1; s6ColumnGap = scaledInterval(EnemyWeaponSystem.S6_BURST_GAP); return
+    private func tickS8PinkColumnGate(dt: Float, lensX: Float, lensY: Float) {
+        if s8ColumnRemaining > 0 {
+            s8ColumnGap -= dt; if s8ColumnGap > 0 { return }
+            fireBullet(startX: lensX, startY: lensY, velX: 0, velY: scaledSpeed(EnemyWeaponSystem.S8_CORE_VY), flags: EnemyBullet.FLAG_PINK)
+            s8ColumnRemaining -= 1; s8ColumnGap = scaledInterval(EnemyWeaponSystem.S8_BURST_GAP); return
         }
-        s6LaserTimer -= dt; if s6LaserTimer > 0 { return }
-        s6LaserTimer = scaledInterval(EnemyWeaponSystem.S6_WAVE_INTERVAL)
-        s6ColumnRemaining = EnemyWeaponSystem.S6_CORE_SHOTS; s6ColumnGap = scaledInterval(EnemyWeaponSystem.S6_BURST_GAP)
+        s8LaserTimer -= dt; if s8LaserTimer > 0 { return }
+        s8LaserTimer = scaledInterval(EnemyWeaponSystem.S8_WAVE_INTERVAL)
+        s8ColumnRemaining = EnemyWeaponSystem.S8_CORE_SHOTS; s8ColumnGap = scaledInterval(EnemyWeaponSystem.S8_BURST_GAP)
     }
-    private func tickS6CyanStreamGate(dt: Float, leftLive: Bool, lX: Float, lY: Float, rX: Float, rY: Float) {
+    private func tickS8CyanStreamGate(dt: Float, leftLive: Bool, lX: Float, lY: Float, rX: Float, rY: Float) {
         turretTimer -= dt; if turretTimer > 0 { return }
-        turretTimer = scaledInterval(EnemyWeaponSystem.S6_OVERCHARGE_INTERVAL)
+        turretTimer = scaledInterval(EnemyWeaponSystem.S8_OVERCHARGE_INTERVAL)
         let ox = leftLive ? lX : rX; let oy = leftLive ? lY : rY
-        fireBullet(startX: ox, startY: oy, velX: 0, velY: scaledSpeed(EnemyWeaponSystem.S6_STREAM_SPEED), flags: EnemyBullet.FLAG_CYAN)
+        fireBullet(startX: ox, startY: oy, velX: 0, velY: scaledSpeed(EnemyWeaponSystem.S8_STREAM_SPEED), flags: EnemyBullet.FLAG_CYAN)
     }
-    private func tickS6PinkRingGate(dt: Float, lensX: Float, lensY: Float) {
-        s6RingTimer -= dt; if s6RingTimer > 0 { return }
-        s6RingTimer = scaledInterval(EnemyWeaponSystem.S6_RING_INTERVAL)
-        let spd = scaledSpeed(EnemyWeaponSystem.S6_RING_SPEED)
-        for i in 0..<EnemyWeaponSystem.S6_RING_COUNT { let a = Float(i)*EnemyWeaponSystem.S6_RING_STEP; fireBullet(startX: lensX, startY: lensY, velX: cosf(a)*spd, velY: sinf(a)*spd, flags: EnemyBullet.FLAG_PINK) }
+    private func tickS8PinkRingGate(dt: Float, lensX: Float, lensY: Float) {
+        s8RingTimer -= dt; if s8RingTimer > 0 { return }
+        s8RingTimer = scaledInterval(EnemyWeaponSystem.S8_RING_INTERVAL)
+        let spd = scaledSpeed(EnemyWeaponSystem.S8_RING_SPEED)
+        for i in 0..<EnemyWeaponSystem.S8_RING_COUNT { let a = Float(i)*EnemyWeaponSystem.S8_RING_STEP; fireBullet(startX: lensX, startY: lensY, velX: cosf(a)*spd, velY: sinf(a)*spd, flags: EnemyBullet.FLAG_PINK) }
     }
-    private func tickS6PinkSpiralGate(dt: Float, lensX: Float, lensY: Float) {
-        spiralAngle += EnemyWeaponSystem.S6_SPIRAL_SPIN * dt
+    private func tickS8PinkSpiralGate(dt: Float, lensX: Float, lensY: Float) {
+        spiralAngle += EnemyWeaponSystem.S8_SPIRAL_SPIN * dt
         if spiralAngle > Float.pi*2 { spiralAngle -= Float.pi*2 }
         spiralGate -= dt; if spiralGate > 0 { return }
-        spiralGate = scaledInterval(EnemyWeaponSystem.S6_SPIRAL_INTERVAL)
-        let spd = scaledSpeed(EnemyWeaponSystem.S6_SPIRAL_SPEED)
-        let angles = [spiralAngle, spiralAngle + EnemyWeaponSystem.S6_HELIX_A1,
-                      spiralAngle + EnemyWeaponSystem.S6_HELIX_A2, spiralAngle + EnemyWeaponSystem.S6_HELIX_A3,
-                      -spiralAngle, -spiralAngle + EnemyWeaponSystem.S6_HELIX_A1,
-                      -spiralAngle + EnemyWeaponSystem.S6_HELIX_A2, -spiralAngle + EnemyWeaponSystem.S6_HELIX_A3]
+        spiralGate = scaledInterval(EnemyWeaponSystem.S8_SPIRAL_INTERVAL)
+        let spd = scaledSpeed(EnemyWeaponSystem.S8_SPIRAL_SPEED)
+        let angles = [spiralAngle, spiralAngle + EnemyWeaponSystem.S8_HELIX_A1,
+                      spiralAngle + EnemyWeaponSystem.S8_HELIX_A2, spiralAngle + EnemyWeaponSystem.S8_HELIX_A3,
+                      -spiralAngle, -spiralAngle + EnemyWeaponSystem.S8_HELIX_A1,
+                      -spiralAngle + EnemyWeaponSystem.S8_HELIX_A2, -spiralAngle + EnemyWeaponSystem.S8_HELIX_A3]
         for a in angles { fireBullet(startX: lensX, startY: lensY, velX: cosf(a)*spd, velY: sinf(a)*spd, flags: EnemyBullet.FLAG_PINK) }
     }
-    private func fireS6AimedTriple(mx: Float, my: Float, pX: Float, pY: Float) {
-        let ang = atan2f(pY-my, pX-mx); let spd = scaledSpeed(EnemyWeaponSystem.S6_BURST_SPEED)
+    private func fireS5AimedTriple(mx: Float, my: Float, pX: Float, pY: Float) {
+        let ang = atan2f(pY-my, pX-mx); let spd = scaledSpeed(EnemyWeaponSystem.S8_BURST_SPEED)
         fireBullet(startX: mx, startY: my, velX: cosf(ang)*spd, velY: sinf(ang)*spd, flags: EnemyBullet.FLAG_CYAN)
         fireBullet(startX: mx, startY: my, velX: cosf(ang-0.08)*spd, velY: sinf(ang-0.08)*spd, flags: EnemyBullet.FLAG_CYAN)
         fireBullet(startX: mx, startY: my, velX: cosf(ang+0.08)*spd, velY: sinf(ang+0.08)*spd, flags: EnemyBullet.FLAG_CYAN)
     }
 
-    func updateStage7Boss(dt: Float, cX: Float, cY: Float, bossW: Float, bossHalfH: Float,
+    func updateStage4Boss(dt: Float, cX: Float, cY: Float, bossW: Float, bossHalfH: Float,
                           pX: Float, pY: Float, leftHowitzerDead: Bool, rightHowitzerDead: Bool, blizzardDead: Bool) {
         let bossH = bossHalfH * 2
         if !leftHowitzerDead || !rightHowitzerDead {
-            s7HowitzerTimer -= dt
-            if s7HowitzerTimer <= 0 {
-                s7HowitzerTimer = scaledInterval(EnemyWeaponSystem.S7_HOWITZER_INTERVAL)
-                let fireLeft = s7HowitzerLeft; s7HowitzerLeft = !s7HowitzerLeft
+            s4HowitzerTimer -= dt
+            if s4HowitzerTimer <= 0 {
+                s4HowitzerTimer = scaledInterval(EnemyWeaponSystem.S4_HOWITZER_INTERVAL)
+                let fireLeft = s4HowitzerLeft; s4HowitzerLeft = !s4HowitzerLeft
                 if fireLeft && !leftHowitzerDead {
-                    fireS7Aimed(ox: cX + EnemyWeaponSystem.S7_LEFT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S7_LEFT_MUZZLE_Y*bossH, tX: pX, tY: pY)
+                    fireS4Aimed(ox: cX + EnemyWeaponSystem.S4_LEFT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S4_LEFT_MUZZLE_Y*bossH, tX: pX, tY: pY)
                 } else if !fireLeft && !rightHowitzerDead {
-                    fireS7Aimed(ox: cX + EnemyWeaponSystem.S7_RIGHT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S7_RIGHT_MUZZLE_Y*bossH, tX: pX, tY: pY)
+                    fireS4Aimed(ox: cX + EnemyWeaponSystem.S4_RIGHT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S4_RIGHT_MUZZLE_Y*bossH, tX: pX, tY: pY)
                 } else if !leftHowitzerDead {
-                    fireS7Aimed(ox: cX + EnemyWeaponSystem.S7_LEFT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S7_LEFT_MUZZLE_Y*bossH, tX: pX, tY: pY)
+                    fireS4Aimed(ox: cX + EnemyWeaponSystem.S4_LEFT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S4_LEFT_MUZZLE_Y*bossH, tX: pX, tY: pY)
                 } else {
-                    fireS7Aimed(ox: cX + EnemyWeaponSystem.S7_RIGHT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S7_RIGHT_MUZZLE_Y*bossH, tX: pX, tY: pY)
+                    fireS4Aimed(ox: cX + EnemyWeaponSystem.S4_RIGHT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S4_RIGHT_MUZZLE_Y*bossH, tX: pX, tY: pY)
                 }
             }
         }
         if blizzardDead { return }
-        s7BlizzardTimer -= dt; if s7BlizzardTimer > 0 { return }
-        s7BlizzardTimer = scaledInterval(EnemyWeaponSystem.S7_BLIZZARD_INTERVAL)
-        let spd = scaledSpeed(EnemyWeaponSystem.S7_BLIZZARD_SPEED)
-        let sx = cX + EnemyWeaponSystem.S7_CHIN_MUZZLE_X*bossW; let sy = cY + EnemyWeaponSystem.S7_CHIN_MUZZLE_Y*bossH
-        for i in -3...3 { let a = EnemyWeaponSystem.S2_DOWN_ANGLE + Float(i)*EnemyWeaponSystem.S7_BLIZZARD_STEP; fireBullet(startX: sx, startY: sy, velX: cosf(a)*spd, velY: sinf(a)*spd) }
+        s4BlizzardTimer -= dt; if s4BlizzardTimer > 0 { return }
+        s4BlizzardTimer = scaledInterval(EnemyWeaponSystem.S4_BLIZZARD_INTERVAL)
+        let spd = scaledSpeed(EnemyWeaponSystem.S4_BLIZZARD_SPEED)
+        let sx = cX + EnemyWeaponSystem.S4_CHIN_MUZZLE_X*bossW; let sy = cY + EnemyWeaponSystem.S4_CHIN_MUZZLE_Y*bossH
+        for i in -3...3 { let a = EnemyWeaponSystem.S2_DOWN_ANGLE + Float(i)*EnemyWeaponSystem.S4_BLIZZARD_STEP; fireBullet(startX: sx, startY: sy, velX: cosf(a)*spd, velY: sinf(a)*spd) }
     }
-    private func fireS7Aimed(ox: Float, oy: Float, tX: Float, tY: Float) {
+    private func fireS4Aimed(ox: Float, oy: Float, tX: Float, tY: Float) {
         let dx = tX-ox; let dy = tY-oy; let lenSq = dx*dx+dy*dy
         if lenSq < 0.0001 { return }
-        let inv = scaledSpeed(EnemyWeaponSystem.S7_HOWITZER_SPEED) / sqrtf(lenSq)
+        let inv = scaledSpeed(EnemyWeaponSystem.S4_HOWITZER_SPEED) / sqrtf(lenSq)
         fireBullet(startX: ox, startY: oy, velX: dx*inv, velY: dy*inv)
     }
 
-    func updateStage8Boss(dt: Float, cX: Float, cY: Float, bossW: Float, bossHalfH: Float,
+    func updateStage5Boss(dt: Float, cX: Float, cY: Float, bossW: Float, bossHalfH: Float,
                           pX: Float, pY: Float, leftGunDead: Bool, rightGunDead: Bool, aaDead: Bool) {
         let bossH = bossHalfH * 2
         if !leftGunDead || !rightGunDead {
-            s8CoastalTimer -= dt
-            if s8CoastalTimer <= 0 {
-                s8CoastalTimer = scaledInterval(EnemyWeaponSystem.S8_COASTAL_INTERVAL)
-                let fl = s8CoastalLeft; s8CoastalLeft = !s8CoastalLeft
-                if fl && !leftGunDead { fireS8Aimed(ox: cX + EnemyWeaponSystem.S8_LEFT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S8_LEFT_MUZZLE_Y*bossH, tX: pX, tY: pY) }
-                else if !fl && !rightGunDead { fireS8Aimed(ox: cX + EnemyWeaponSystem.S8_RIGHT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S8_RIGHT_MUZZLE_Y*bossH, tX: pX, tY: pY) }
-                else if !leftGunDead  { fireS8Aimed(ox: cX + EnemyWeaponSystem.S8_LEFT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S8_LEFT_MUZZLE_Y*bossH, tX: pX, tY: pY) }
-                else                  { fireS8Aimed(ox: cX + EnemyWeaponSystem.S8_RIGHT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S8_RIGHT_MUZZLE_Y*bossH, tX: pX, tY: pY) }
+            s5CoastalTimer -= dt
+            if s5CoastalTimer <= 0 {
+                s5CoastalTimer = scaledInterval(EnemyWeaponSystem.S5_COASTAL_INTERVAL)
+                let fl = s5CoastalLeft; s5CoastalLeft = !s5CoastalLeft
+                if fl && !leftGunDead { fireS5Aimed(ox: cX + EnemyWeaponSystem.S5_LEFT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S5_LEFT_MUZZLE_Y*bossH, tX: pX, tY: pY) }
+                else if !fl && !rightGunDead { fireS5Aimed(ox: cX + EnemyWeaponSystem.S5_RIGHT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S5_RIGHT_MUZZLE_Y*bossH, tX: pX, tY: pY) }
+                else if !leftGunDead  { fireS5Aimed(ox: cX + EnemyWeaponSystem.S5_LEFT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S5_LEFT_MUZZLE_Y*bossH, tX: pX, tY: pY) }
+                else                  { fireS5Aimed(ox: cX + EnemyWeaponSystem.S5_RIGHT_MUZZLE_X*bossW, oy: cY + EnemyWeaponSystem.S5_RIGHT_MUZZLE_Y*bossH, tX: pX, tY: pY) }
             }
         }
         if aaDead { return }
-        s8AaTimer -= dt; if s8AaTimer > 0 { return }
-        s8AaTimer = scaledInterval(EnemyWeaponSystem.S8_AA_INTERVAL)
-        let spd = scaledSpeed(EnemyWeaponSystem.S8_AA_SPEED)
-        fireS8AaBurst(ox: cX + EnemyWeaponSystem.S8_AA_LEFT_X*bossW, oy: cY + EnemyWeaponSystem.S8_AA_LEFT_Y*bossH, spd: spd)
-        fireS8AaBurst(ox: cX + EnemyWeaponSystem.S8_AA_RIGHT_X*bossW, oy: cY + EnemyWeaponSystem.S8_AA_RIGHT_Y*bossH, spd: spd)
+        s5AaTimer -= dt; if s5AaTimer > 0 { return }
+        s5AaTimer = scaledInterval(EnemyWeaponSystem.S5_AA_INTERVAL)
+        let spd = scaledSpeed(EnemyWeaponSystem.S5_AA_SPEED)
+        fireS5AaBurst(ox: cX + EnemyWeaponSystem.S5_AA_LEFT_X*bossW, oy: cY + EnemyWeaponSystem.S5_AA_LEFT_Y*bossH, spd: spd)
+        fireS5AaBurst(ox: cX + EnemyWeaponSystem.S5_AA_RIGHT_X*bossW, oy: cY + EnemyWeaponSystem.S5_AA_RIGHT_Y*bossH, spd: spd)
     }
-    private func fireS8Aimed(ox: Float, oy: Float, tX: Float, tY: Float) {
+    private func fireS5Aimed(ox: Float, oy: Float, tX: Float, tY: Float) {
         let dx = tX-ox; let dy = tY-oy; let lenSq = dx*dx+dy*dy
         if lenSq < 0.0001 { return }
-        let inv = scaledSpeed(EnemyWeaponSystem.S8_COASTAL_SPEED) / sqrtf(lenSq)
+        let inv = scaledSpeed(EnemyWeaponSystem.S5_COASTAL_SPEED) / sqrtf(lenSq)
         fireBullet(startX: ox, startY: oy, velX: dx*inv, velY: dy*inv)
     }
-    private func fireS8AaBurst(ox: Float, oy: Float, spd: Float) {
-        for i in -1...1 { let a = EnemyWeaponSystem.S2_DOWN_ANGLE + Float(i)*EnemyWeaponSystem.S8_AA_STEP; fireBullet(startX: ox, startY: oy, velX: cosf(a)*spd, velY: sinf(a)*spd) }
+    private func fireS5AaBurst(ox: Float, oy: Float, spd: Float) {
+        for i in -1...1 { let a = EnemyWeaponSystem.S2_DOWN_ANGLE + Float(i)*EnemyWeaponSystem.S5_AA_STEP; fireBullet(startX: ox, startY: oy, velX: cosf(a)*spd, velY: sinf(a)*spd) }
     }
 
     // MARK: - General update
@@ -541,8 +541,8 @@ class EnemyWeaponSystem {
         for (i, b) in pool.enumerated() {
             if b.isActive {
                 b.x += b.vx * dt; b.y += b.vy * dt
-                let hw: Float = (b.flags & EnemyBullet.FLAG_LASER) != 0 ? EnemyWeaponSystem.S6_LASER_HW : EnemyWeaponSystem.HALF_BULLET_WIDTH
-                let hh: Float = (b.flags & EnemyBullet.FLAG_LASER) != 0 ? EnemyWeaponSystem.S6_LASER_HH : EnemyWeaponSystem.HALF_BULLET_HEIGHT
+                let hw: Float = (b.flags & EnemyBullet.FLAG_LASER) != 0 ? EnemyWeaponSystem.S8_LASER_HW : EnemyWeaponSystem.HALF_BULLET_WIDTH
+                let hh: Float = (b.flags & EnemyBullet.FLAG_LASER) != 0 ? EnemyWeaponSystem.S8_LASER_HH : EnemyWeaponSystem.HALF_BULLET_HEIGHT
                 if b.x+hw < 0 || b.x-hw > w || b.y+hh < 0 || b.y-hh > h { b.isActive = false; b.flags = 0 }
             }
             let n = bulletNodes.count > i ? bulletNodes[i] : nil

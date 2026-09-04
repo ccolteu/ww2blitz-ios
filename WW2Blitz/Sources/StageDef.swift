@@ -1,7 +1,14 @@
 import Foundation
 
-enum BossCombatKind {
-    case plane, tank, battleship, jungle, canopy, orbit, winter, atoll
+enum BossCombatKind: Int {
+    case plane = 1
+    case tank = 2
+    case battleship = 3
+    case winter = 4
+    case atoll = 5
+    case jungle = 6
+    case canopy = 7
+    case orbit = 8
 }
 
 enum StageTheaterKind {
@@ -9,14 +16,14 @@ enum StageTheaterKind {
 }
 
 enum StageWaveKind {
+    static let CLOUD_FORTRESS = 1
     static let IRON_TREADS    = 2
     static let STEEL_ATLANTIC = 3
-    static let JUNGLE_RUINS   = 4
-    static let ASCENT_CANOPY  = 5
-    static let ORBIT_INTRO    = 6
-    static let FROZEN_FRONT   = 7
-    static let CORAL_ATOLL    = 8
-    static let CLOUD_FORTRESS = 1
+    static let FROZEN_FRONT   = 4
+    static let CORAL_ATOLL    = 5
+    static let JUNGLE_RUINS   = 6
+    static let ASCENT_CANOPY  = 7
+    static let ORBIT_INTRO    = 8
     static let OPERATION_WINGMAN = 1
 }
 
@@ -128,49 +135,6 @@ struct StageCatalog {
             ),
             StageDef(
                 id: 4,
-                operationName: Array("JUNGLE RUINS"),
-                scrollSpeedY: 310,
-                bossAtSeconds: 45,
-                stageMusicTrack: SoundManager.BGM_STAGE2,
-                locksElapsedAtBoss: true,
-                usesOpeningPowerV: true,
-                waveScript: StageWaveKind.JUNGLE_RUINS,
-                bossCombat: .jungle,
-                boss: wrecks
-            ),
-            StageDef(
-                id: 5,
-                operationName: Array("ASCENT CANOPY"),
-                scrollSpeedY: 280,
-                bossAtSeconds: 45,
-                stageMusicTrack: SoundManager.BGM_STAGE2,
-                theaterKind: .facility,
-                locksElapsedAtBoss: true,
-                canopyFile: "canopy.png",
-                skinWagonFile: "skin_wagon.png",
-                waveScript: StageWaveKind.ASCENT_CANOPY,
-                bossCombat: .canopy,
-                boss: wrecksTri
-            ),
-            StageDef(
-                id: 6,
-                operationName: Array("ORBIT THRESHOLD"),
-                scrollSpeedY: 180,
-                bossAtSeconds: 50,
-                stageMusicTrack: SoundManager.BGM_STAGE1,
-                theaterKind: .ascent,
-                introOnly: true,
-                introSecs: 5,
-                spaceSwapAt: 30,
-                canopyAt: 35,
-                canopyFile: "canopy.png",
-                floorAltFile: "floor_alt.png",
-                waveScript: StageWaveKind.ORBIT_INTRO,
-                bossCombat: .orbit,
-                boss: wrecksTri
-            ),
-            StageDef(
-                id: 7,
                 operationName: Array("FROZEN FRONT"),
                 scrollSpeedY: 240,
                 bossAtSeconds: 42,
@@ -186,7 +150,7 @@ struct StageCatalog {
                 boss: wrecks
             ),
             StageDef(
-                id: 8,
+                id: 5,
                 operationName: Array("CORAL ATOLL"),
                 scrollSpeedY: 220,
                 bossAtSeconds: 40,
@@ -200,6 +164,49 @@ struct StageCatalog {
                 waveScript: StageWaveKind.CORAL_ATOLL,
                 bossCombat: .atoll,
                 boss: wrecks
+            ),
+            StageDef(
+                id: 6,
+                operationName: Array("JUNGLE RUINS"),
+                scrollSpeedY: 310,
+                bossAtSeconds: 45,
+                stageMusicTrack: SoundManager.BGM_STAGE2,
+                locksElapsedAtBoss: true,
+                usesOpeningPowerV: true,
+                waveScript: StageWaveKind.JUNGLE_RUINS,
+                bossCombat: .jungle,
+                boss: wrecks
+            ),
+            StageDef(
+                id: 7,
+                operationName: Array("ASCENT CANOPY"),
+                scrollSpeedY: 280,
+                bossAtSeconds: 45,
+                stageMusicTrack: SoundManager.BGM_STAGE2,
+                theaterKind: .facility,
+                locksElapsedAtBoss: true,
+                canopyFile: "canopy.png",
+                skinWagonFile: "skin_wagon.png",
+                waveScript: StageWaveKind.ASCENT_CANOPY,
+                bossCombat: .canopy,
+                boss: wrecksTri
+            ),
+            StageDef(
+                id: 8,
+                operationName: Array("ORBIT THRESHOLD"),
+                scrollSpeedY: 180,
+                bossAtSeconds: 50,
+                stageMusicTrack: SoundManager.BGM_STAGE1,
+                theaterKind: .ascent,
+                introOnly: true,
+                introSecs: 5,
+                spaceSwapAt: 30,
+                canopyAt: 35,
+                canopyFile: "canopy.png",
+                floorAltFile: "floor_alt.png",
+                waveScript: StageWaveKind.ORBIT_INTRO,
+                bossCombat: .orbit,
+                boss: wrecksTri
             ),
         ]
     }

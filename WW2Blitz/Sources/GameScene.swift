@@ -64,7 +64,7 @@ class GameScene: SKScene {
     private var flashNode: SKSpriteNode?
     private let hudLayer = SKNode()
     private var worldCamera: SKCameraNode?
-    private var stage6CanopyShown = false
+    private var stage8CanopyShown = false
     private var floatScores: [(node: SKLabelNode, age: Float)] = []
     private let prefs = UserDefaults.standard
 
@@ -227,9 +227,9 @@ class GameScene: SKScene {
     private func tickParallax(scrollSpeedY: Float, dt: Float) {
         let def = stageData.def
         if def.theaterKind == .facility {
-            parallax.updateStage5(scrollSpeedY: scrollSpeedY, dt: dt)
+            parallax.updateStage7(scrollSpeedY: scrollSpeedY, dt: dt)
         } else if def.theaterKind == .ascent {
-            parallax.updateStage6(scrollSpeedY: scrollSpeedY, dt: dt,
+            parallax.updateStage8(scrollSpeedY: scrollSpeedY, dt: dt,
                                   elapsedTime: timeline.elapsedSeconds())
         } else {
             parallax.update(baseSpeed: scrollSpeedY * dt)
@@ -246,7 +246,7 @@ class GameScene: SKScene {
         } else {
             tickParallax(scrollSpeedY: stageData.scrollSpeedY, dt: dt)
         }
-        maybeShowStage6Canopy()
+        maybeShowStage8Canopy()
 
         if demo {
             demoPilot(dt: dt)
@@ -269,13 +269,13 @@ class GameScene: SKScene {
         timeline.update(dt: dt, enemyManager: enemyManager, screenWidth: w, screenHeight: h,
                         boss: boss, bossEnterSeconds: def.bossAtSeconds, allowBoss: true,
                         playerWeaponPower: player.getWeaponPower(), stageData: stageData)
-        maybeSwapStage6Floor()
+        maybeSwapStage8Floor()
         enemyManager.update(dt: dt, playerX: player.centerX(), playerY: player.worldY(),
                           weapons: enemyWeapons)
         boss.update(dt: dt, playerX: player.centerX(), playerY: player.worldY(),
                     weapons: enemyWeapons, playerWeaponPower: player.getWeaponPower(),
                     bombStock: bombStock, timeline: timeline)
-        maybeSwapStage6Floor()
+        maybeSwapStage8Floor()
         if boss.isActive() || boss.isExploding() { bossFought = true }
         enemyWeapons.update(dt: dt)
         panicBomb.update(dt: dt, screenW: Float(w), screenH: Float(h))
@@ -422,20 +422,20 @@ class GameScene: SKScene {
 
     private func resolvePlayerBulletVsBoss() {
         if !boss.isActive() { return }
-        if boss.usesStage5Hitboxes() {
+        if boss.usesStage7Hitboxes() {
             for b in bulletManager.bulletPool where b.isActive {
                 if boss.checkCollisionAt(worldX: b.x, worldY: b.y, damage: 1) {
                     b.isActive = false
-                    if boss.consumeStage5Break() {
-                        particles.triggerExplosion(x: boss.stage5BreakX(), y: boss.stage5BreakY(), playSound: false)
+                    if boss.consumeStage7Break() {
+                        particles.triggerExplosion(x: boss.stage7BreakX(), y: boss.stage7BreakY(), playSound: false)
                     }
                 }
             }
             for m in homingMissiles.pool where m.isActive {
                 if boss.checkCollisionAt(worldX: m.x, worldY: m.y, damage: 1) {
                     m.isActive = false
-                    if boss.consumeStage5Break() {
-                        particles.triggerExplosion(x: boss.stage5BreakX(), y: boss.stage5BreakY(), playSound: false)
+                    if boss.consumeStage7Break() {
+                        particles.triggerExplosion(x: boss.stage7BreakX(), y: boss.stage7BreakY(), playSound: false)
                     }
                 }
             }
@@ -663,10 +663,10 @@ class GameScene: SKScene {
     }
 
     private func applyBombDamageToBoss(box: (left: Float, top: Float, right: Float, bottom: Float), damage: Int) {
-        if boss.usesStage5Hitboxes() {
-            boss.applyStage5AreaDamage(left: box.left, top: box.top, right: box.right, bottom: box.bottom, damage: damage)
-            if boss.consumeStage5Break() {
-                particles.triggerExplosion(x: boss.stage5BreakX(), y: boss.stage5BreakY())
+        if boss.usesStage7Hitboxes() {
+            boss.applyStage7AreaDamage(left: box.left, top: box.top, right: box.right, bottom: box.bottom, damage: damage)
+            if boss.consumeStage7Break() {
+                particles.triggerExplosion(x: boss.stage7BreakX(), y: boss.stage7BreakY())
             }
             return
         }
@@ -915,7 +915,7 @@ class GameScene: SKScene {
         currentStage = stageData.currentStage
         let def = stageData.def
         theater.load(next: def, width: size.width)
-        stage6CanopyShown = false
+        stage8CanopyShown = false
         parallax.setGround(theater.activeFloorTex)
         parallax.setMid(theater.hasOverlayClouds ? theater.midTex : nil)
         parallax.setHigh(theater.hasOverlayClouds ? theater.highTex : nil)
@@ -926,7 +926,7 @@ class GameScene: SKScene {
         boss.bindStage(currentStage)
     }
 
-    private func maybeSwapStage6Floor() {
+    private func maybeSwapStage8Floor() {
         let def = stageData.def
         if def.theaterKind != .ascent { return }
         if theater.floorSwapped { return }
@@ -935,11 +935,11 @@ class GameScene: SKScene {
         parallax.replaceGround(theater.activeFloorTex)
     }
 
-    private func maybeShowStage6Canopy() {
+    private func maybeShowStage8Canopy() {
         let def = stageData.def
-        if def.theaterKind != .ascent || stage6CanopyShown { return }
+        if def.theaterKind != .ascent || stage8CanopyShown { return }
         if timeline.elapsedSeconds() < def.canopyAt { return }
-        stage6CanopyShown = true
+        stage8CanopyShown = true
         parallax.setCanopy(theater.canopyTex)
     }
 
@@ -1025,7 +1025,7 @@ class GameScene: SKScene {
             if facility {
                 canopy = true
             } else if def.theaterKind == .ascent {
-                canopy = stage6CanopyShown
+                canopy = stage8CanopyShown
             } else {
                 canopy = false
             }

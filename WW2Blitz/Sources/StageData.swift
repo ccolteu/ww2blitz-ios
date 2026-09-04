@@ -64,8 +64,8 @@ class StageData {
     /// Credits roll after the last entry. Examples:
     ///   [1]              // one-stage credit
     ///   [3, 2, 6, 6]     // reorder + duplicate
-    ///   [1, 2, 3, 7, 8, 4, 5, 6]  // full campaign
-    static let STAGE_SEQUENCE = [1, 2, 3, 7, 8, 4, 5, 6]
+    ///   [1, 2, 3, 4, 5, 6, 7, 8]  // full campaign
+    static let STAGE_SEQUENCE = [1, 2, 3, 4, 5, 6, 7, 8]
     private static let RISE_SECS: Float = 48
     private static let DEATH_KEEP: Float = 0.40
     private static let SPEED_GAIN: Float = 0.22

@@ -154,8 +154,8 @@ class BulletManager {
             let b = enemyBullets[i]; guard b.isActive else { continue }
             let dx = b.x - px; let dy = b.y - py
             if (b.flags & EnemyBullet.FLAG_LASER) != 0 {
-                let hw = EnemyWeaponSystem.S6_LASER_HW + coreR
-                let hh = EnemyWeaponSystem.S6_LASER_HH + coreR
+                let hw = EnemyWeaponSystem.S8_LASER_HW + coreR
+                let hh = EnemyWeaponSystem.S8_LASER_HH + coreR
                 if dx <= hw && dx >= -hw && dy <= hh && dy >= -hh {
                     b.isActive = false; b.flags = 0
                     if !damagedThisFrame {
