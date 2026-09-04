@@ -17,6 +17,7 @@
 		5505F39A05594B388A3E4765 /* PlayerShip.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5579DC35376456F9BEAF255 /* PlayerShip.swift */; };
 		58CF78C7F4094854B7207E70 /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 999FB7D511BD4225BBC5EF62 /* Images */; };
 		5A573DF855C341C5BFA2E9D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0730F6C7FEDF4095BAD5AE60 /* Assets.xcassets */; };
+		A11E1DDE0000000000000011 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A11E1DDE0000000000000010 /* LaunchScreen.storyboard */; };
 		698C10EB148F4352928BE66E /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747CD7295E9A49B08B7E3272 /* Enemy.swift */; };
 		69DE063605EC4DC29494C8F4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77293DEA7F1470F922A53F6 /* SceneDelegate.swift */; };
 		6A5677D1913E43ABBCE264CF /* UIController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6B91B544614D29A46075E5 /* UIController.swift */; };
@@ -54,6 +55,7 @@
 		33787CEA01584544B9B20AF8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3745CE186D5E4F8FA97B2DF4 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		417096BD28E84CCCA1DAB2D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A11E1DDE0000000000000010 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		424CC83535564DC399503AA2 /* EnemyWeaponSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyWeaponSystem.swift; sourceTree = "<group>"; };
 		4586CF25CF5B42D7A55ADFFB /* WW2Blitz.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WW2Blitz.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		52C767114EF64BFABFED5ADA /* StageBitmaps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageBitmaps.swift; sourceTree = "<group>"; };
@@ -149,6 +151,7 @@
 				0A394026714842928E0C5683 /* Sources */,
 				E359D0F386564F8F890EDCAB /* Resources */,
 				417096BD28E84CCCA1DAB2D9 /* Info.plist */,
+				A11E1DDE0000000000000010 /* LaunchScreen.storyboard */,
 			);
 			path = WW2Blitz;
 			sourceTree = "<group>";
@@ -231,6 +234,7 @@
 				FE477FB0C52E47B189AFDEAE /* Fonts in Resources */,
 				E6F1DC0AD79741EF8D1B8CAE /* Stages in Resources */,
 				5A573DF855C341C5BFA2E9D4 /* Assets.xcassets in Resources */,
+				A11E1DDE0000000000000011 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,20 +288,22 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.4;
 				DEVELOPMENT_TEAM = UBJ7T66843;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WW2Blitz/Info.plist;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cc.ww2blitz;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -310,20 +316,22 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.4;
 				DEVELOPMENT_TEAM = UBJ7T66843;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = WW2Blitz/Info.plist;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.cc.ww2blitz;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

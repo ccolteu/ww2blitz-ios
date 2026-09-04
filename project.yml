@@ -12,8 +12,8 @@ settings:
     TARGETED_DEVICE_FAMILY: "1,2"
     INFOPLIST_FILE: WW2Blitz/Info.plist
     PRODUCT_BUNDLE_IDENTIFIER: com.cc.ww2blitz
-    MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.0.4"
+    CURRENT_PROJECT_VERSION: "1.0.4"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: ""
 
@@ -24,6 +24,7 @@ targets:
     sources:
       - path: WW2Blitz/Sources
         type: group
+      - path: WW2Blitz/LaunchScreen.storyboard
       - path: WW2Blitz/Resources
         type: folder
         buildPhase: resources
@@ -34,19 +35,13 @@ targets:
     info:
       path: WW2Blitz/Info.plist
       properties:
-        UILaunchScreen: {}
+        UILaunchStoryboardName: LaunchScreen
         UIStatusBarHidden: true
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationPortraitUpsideDown
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
         "UISupportedInterfaceOrientations~ipad":
           - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationPortraitUpsideDown
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
 
 schemes:
   WW2Blitz:
