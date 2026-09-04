@@ -469,6 +469,11 @@ final class UIController {
             img.position = CGPoint(x: screenW * 0.5, y: screenH * 0.5)
             cardTop = (screenH - drawH) * 0.5
             root.addChild(img)
+        } else {
+            let fill = SKSpriteNode(color: .black, size: CGSize(width: screenW, height: screenH))
+            fill.position = CGPoint(x: screenW * 0.5, y: screenH * 0.5)
+            fill.zPosition = 0
+            root.addChild(fill)
         }
         let titleSize = px(42)
         let line1Y = cardTop + titleSize * 4.2

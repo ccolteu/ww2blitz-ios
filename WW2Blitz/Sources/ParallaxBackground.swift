@@ -144,6 +144,19 @@ class ParallaxBackground {
 
     func resetScroll() { yGround = 0; yMid = 0; yHigh = 0; yCanopy = 0; stage6SpeedModifier = 1; placeTiles() }
 
+    /// Android only blits some layers depending on game state (no canopy on recap/name-entry except Stage 5).
+    func applyDrawFlags(worldVisible: Bool, overlayClouds: Bool, canopyVisible: Bool) {
+        setPairHidden(groundA, groundB, hidden: !worldVisible)
+        setPairHidden(midA, midB, hidden: !worldVisible || !overlayClouds)
+        setPairHidden(highA, highB, hidden: !worldVisible || !overlayClouds)
+        setPairHidden(canopyA, canopyB, hidden: !worldVisible || !canopyVisible)
+    }
+
+    private func setPairHidden(_ a: SKSpriteNode?, _ b: SKSpriteNode?, hidden: Bool) {
+        a?.isHidden = hidden
+        b?.isHidden = hidden
+    }
+
     private func wrapY(_ y: CGFloat, height: CGFloat) -> CGFloat {
         if height <= 0 { return 0 }
         var v = y.truncatingRemainder(dividingBy: height)

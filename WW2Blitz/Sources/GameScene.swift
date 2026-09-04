@@ -152,6 +152,7 @@ class GameScene: SKScene {
 
         updateBGM()
         updateState(dt: dt)
+        syncParallaxDraw()
         applyScreenShake(dt: dt)
         applyScreenFlash(dt: dt)
         renderArcadeUI()
@@ -1001,6 +1002,37 @@ class GameScene: SKScene {
             SoundManager.instance.playBGM(track)
         } else {
             SoundManager.instance.stopBGM()
+        }
+    }
+
+    private func syncParallaxDraw() {
+        let def = stageData.def
+        let facility = def.theaterKind == .facility
+        switch gameState {
+        case .title, .difficultySelect, .characterSelect, .interstitial:
+            parallax.applyDrawFlags(worldVisible: false, overlayClouds: false, canopyVisible: false)
+        case .registration:
+            parallax.applyDrawFlags(worldVisible: true, overlayClouds: true, canopyVisible: false)
+        case .campaignComplete:
+            parallax.applyDrawFlags(worldVisible: true, overlayClouds: false, canopyVisible: facility)
+        case .clear:
+            parallax.applyDrawFlags(
+                worldVisible: true,
+                overlayClouds: !facility && def.hasOverlayClouds,
+                canopyVisible: facility)
+        case .playing, .demo, .gameOver:
+            let canopy: Bool
+            if facility {
+                canopy = true
+            } else if def.theaterKind == .ascent {
+                canopy = stage6CanopyShown
+            } else {
+                canopy = false
+            }
+            parallax.applyDrawFlags(
+                worldVisible: true,
+                overlayClouds: def.hasOverlayClouds,
+                canopyVisible: canopy)
         }
     }
 
