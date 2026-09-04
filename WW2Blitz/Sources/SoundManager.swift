@@ -5,8 +5,15 @@ class SoundManager {
 
     static let BGM_STAGE1  = "bgm_stage1"
     static let BGM_STAGE2  = "bgm_stage2"
+    static let BGM_STAGE3  = "bgm_stage3"
+    static let BGM_STAGE4  = "bgm_stage4"
+    static let BGM_STAGE5  = "bgm_stage5"
+    static let BGM_STAGE6  = "bgm_stage6"
+    static let BGM_STAGE7  = "bgm_stage7"
+    static let BGM_STAGE8  = "bgm_stage8"
     static let BGM_TITLE   = "bgm_title"
     static let BGM_BOSS    = "bgm_boss"
+    static let BGM_BOSS2   = "bgm_boss2"
     static let BGM_VICTORY = "bgm_victory"
 
     static let SFX_VULCAN          = 0
@@ -16,9 +23,11 @@ class SoundManager {
     static let SFX_ALARM           = 4
     static let SFX_PICKUP          = 5
     static let SFX_BOMB            = 6
+    static let SFX_BOSS_WARNING    = 7
 
     private let sfxNames = ["sfx_vulcan","sfx_laser","sfx_small_explosion",
-                            "sfx_heavy_explosion","sfx_alarm","sfx_pickup","sfx_bomb"]
+                            "sfx_heavy_explosion","sfx_alarm","sfx_pickup","sfx_bomb",
+                            "sfx_boss_warning"]
     private static let MAX_VOICES = 16
 
     private var engine = AVAudioEngine()

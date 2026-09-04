@@ -1001,7 +1001,7 @@ class GameScene: SKScene {
             if boss.isVictorySequence() {
                 want = nil
             } else if boss.isActive() {
-                want = SoundManager.BGM_BOSS
+                want = boss.isCoreVulnerable() ? SoundManager.BGM_BOSS2 : SoundManager.BGM_BOSS
             } else {
                 want = stageData.def.stageMusicTrack
             }

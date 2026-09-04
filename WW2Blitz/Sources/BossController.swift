@@ -205,7 +205,8 @@ class BossController {
         for p in parts where p.halfW > 0 { p.isDestroyed = false; p.health = p.maxHealth; p.shudderTimer = 0 }
         syncPartWorldPositions()
         updateNode()
-        SoundManager.instance.playAlarm()
+        SoundManager.instance.playSFX(SoundManager.SFX_ALARM)
+        SoundManager.instance.playSFX(SoundManager.SFX_BOSS_WARNING)
     }
 
     func syncPartWorldPositions() {
