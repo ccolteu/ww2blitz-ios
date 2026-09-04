@@ -24,6 +24,12 @@ class EnemyPoolManager {
     static let HOLD_FIRE_GAP: Float   = 0.55
     static let INTERCEPT_REFIRE: Float = 0.85
     static let HEAVY_FIRE_GAP: Float   = 1.5
+    static let MID_FIRE_GAP: Float     = 0.62
+    static let MID_HOLD_SEC: Float     = 22
+    static let MID_HOLD_Y_FRAC: Float  = 0.28
+    static let MID_DESTROYER_HOLD_Y_FRAC: Float = 0.46
+    static let MID_RETREAT_VY: Float   = 620
+    static let MID_DRAW_SCALE: Float   = 1.55
     static let BURST_GAP: Float        = 0.10
     static let SCOUT_REFIRE: Float     = 0.85
     static let RING_COUNT = 8
@@ -66,6 +72,7 @@ class EnemyPoolManager {
     private var skinTankTex: SKTexture? = nil
     private var skinDestroyerTex: SKTexture? = nil
     private var skinWagonTex: SKTexture? = nil
+    private var skinHelicopterTex: SKTexture? = nil
     private var droneRedTex: SKTexture? = nil
 
     init() {
@@ -107,8 +114,8 @@ class EnemyPoolManager {
         }
     }
 
-    func bindTheaterSkins(tank: SKTexture?, destroyer: SKTexture?, wagon: SKTexture?) {
-        skinTankTex = tank; skinDestroyerTex = destroyer; skinWagonTex = wagon
+    func bindTheaterSkins(tank: SKTexture?, destroyer: SKTexture?, wagon: SKTexture?, helicopter: SKTexture?) {
+        skinTankTex = tank; skinDestroyerTex = destroyer; skinWagonTex = wagon; skinHelicopterTex = helicopter
     }
 
     func sweepArcTailDelay() -> Float { sweepTailDelay }
@@ -119,7 +126,9 @@ class EnemyPoolManager {
     func halfWOf(_ e: Enemy) -> Float { halfWOf(e.type) * drawScale(e) }
     func halfHOf(_ e: Enemy) -> Float { halfHOf(e.type) * drawScale(e) }
     private func drawScale(_ e: Enemy) -> Float {
-        (e.isLandVehicle || e.isWagon) ? EnemyPoolManager.GROUND_DRAW_SCALE : 1
+        if e.isMidBoss { return EnemyPoolManager.MID_DRAW_SCALE }
+        if e.isLandVehicle || e.isWagon { return EnemyPoolManager.GROUND_DRAW_SCALE }
+        return 1
     }
     private func typeIndex(_ t: Int) -> Int { t >= 0 && t < EnemyPoolManager.TYPE_COUNT ? t : 0 }
 
@@ -129,6 +138,7 @@ class EnemyPoolManager {
         for e in pool {
             e.isActive = false; e.isRedShipAnchor = false
             e.isDestroyer = false; e.isLandVehicle = false; e.isWagon = false
+            e.isHelicopter = false; e.isMidBoss = false
             e.flightProfile = 0; e.flightTime = 0; e.patternDelay = 0
             e.deathClearBullets = false; e.diamondLeader = false; e.diamondWingSign = 0
             e.splinterVeer = false; e.shudderTimer = 0
@@ -141,7 +151,8 @@ class EnemyPoolManager {
                     enemyType: Int, pattern: Int = 0, health: Int = 1,
                     isRedShipAnchor: Bool = false, flightProfile: Int = 0,
                     patternDelay: Float = 0, spawnCue: Int = 0,
-                    isDestroyer: Bool = false, isLandVehicle: Bool = false, isWagon: Bool = false) {
+                    isDestroyer: Bool = false, isLandVehicle: Bool = false, isWagon: Bool = false,
+                    isHelicopter: Bool = false, isMidBoss: Bool = false) {
         for e in pool where !e.isActive {
             e.x = startX; e.y = startY; e.vx = velocityX; e.vy = velocityY
             e.type = enemyType; e.pattern = pattern; e.flightProfile = flightProfile
@@ -151,6 +162,7 @@ class EnemyPoolManager {
             e.burstLeft = 0; e.burstWait = 0; e.aimVx = 0; e.aimVy = 0
             e.isRedShipAnchor = isRedShipAnchor
             e.isDestroyer = isDestroyer; e.isLandVehicle = isLandVehicle; e.isWagon = isWagon
+            e.isHelicopter = isHelicopter; e.isMidBoss = isMidBoss
             e.deathClearBullets = spawnCue == SpawnEvent.CUE_DEATH_CLEAR
             e.diamondLeader     = spawnCue == SpawnEvent.CUE_DIAMOND_LEADER
             e.diamondWingSign   = spawnCue == SpawnEvent.CUE_DIAMOND_WING_L ? -1 :
@@ -165,6 +177,16 @@ class EnemyPoolManager {
     }
 
     func hasActiveRedShipAnchor() -> Bool { pool.contains { $0.isActive && $0.isRedShipAnchor } }
+
+    func hasActiveMidBoss() -> Bool { pool.contains { $0.isActive && $0.isMidBoss } }
+
+    func beginMidBossExit() {
+        for e in pool where e.isActive && e.isMidBoss {
+            e.aiPhase = 2
+            e.vx = 0
+            e.vy = EnemyPoolManager.MID_RETREAT_VY
+        }
+    }
 
     func update(dt: Float, playerX: Float, playerY: Float, weapons: EnemyWeaponSystem) {
         let speed = EnemyPoolManager.AIMED_SHOT_SPEED * (StageData.liveInstance?.shotSpeedScale() ?? 1)
@@ -226,6 +248,7 @@ class EnemyPoolManager {
         if e.isDestroyer    { return skinDestroyerTex ?? textures["enemy_heavy"] }
         if e.isLandVehicle  { return skinTankTex       ?? textures["enemy_heavy"] }
         if e.isWagon        { return skinWagonTex       ?? textures["enemy_heavy"] }
+        if e.isHelicopter   { return skinHelicopterTex ?? textures["enemy_heavy"] }
         if e.isRedShipAnchor { return droneRedTex       ?? textures["enemy_drone"] }
         let names = ["enemy_drone","enemy_kamikaze","enemy_interceptor","enemy_heavy"]
         let t = typeIndex(e.type)
@@ -234,7 +257,8 @@ class EnemyPoolManager {
 
     private func recycleEnemy(_ e: Enemy) {
         e.isActive = false; e.isRedShipAnchor = false; e.isDestroyer = false
-        e.isLandVehicle = false; e.isWagon = false; e.flightProfile = 0; e.flightTime = 0
+        e.isLandVehicle = false; e.isWagon = false; e.isHelicopter = false; e.isMidBoss = false
+        e.flightProfile = 0; e.flightTime = 0
         e.patternDelay = 0; e.deathClearBullets = false; e.diamondLeader = false
         e.diamondWingSign = 0; e.splinterVeer = false
     }
@@ -294,16 +318,20 @@ class EnemyPoolManager {
     private func updateInterceptorHold(_ e: Enemy, dt: Float) {
         let heavyHold = e.type == EnemyPoolManager.TYPE_HEAVY
         let s3AirHeavy = heavyHold && !e.isGroundHeavy && (StageData.liveInstance?.def.airHeavyHighHold ?? false)
-        let holdY = screenH * (e.isGroundHeavy ? EnemyPoolManager.DESTROYER_HOLD_Y_FRAC
-                                               : s3AirHeavy ? EnemyPoolManager.S3_AIR_HEAVY_HOLD_Y_FRAC
-                                               : heavyHold  ? EnemyPoolManager.HEAVY_HOLD_Y_FRAC
-                                               : EnemyPoolManager.HOLD_Y_FRAC)
+        let holdY = screenH * (
+            e.isMidBoss && e.isGroundHeavy ? EnemyPoolManager.MID_DESTROYER_HOLD_Y_FRAC
+            : e.isMidBoss ? EnemyPoolManager.MID_HOLD_Y_FRAC
+            : e.isGroundHeavy ? EnemyPoolManager.DESTROYER_HOLD_Y_FRAC
+            : s3AirHeavy ? EnemyPoolManager.S3_AIR_HEAVY_HOLD_Y_FRAC
+            : heavyHold ? EnemyPoolManager.HEAVY_HOLD_Y_FRAC
+            : EnemyPoolManager.HOLD_Y_FRAC)
         switch e.aiPhase {
         case 0:
             e.x += e.vx * dt; e.y += e.vy * dt
             if e.y >= holdY {
                 e.y = holdY; e.vx = 0; e.vy = 0; e.aiPhase = 1; e.fireTimer = 0
-                e.holdTimer = e.isGroundHeavy ? EnemyPoolManager.DESTROYER_HOLD_SEC
+                e.holdTimer = e.isMidBoss ? EnemyPoolManager.MID_HOLD_SEC
+                              : e.isGroundHeavy ? EnemyPoolManager.DESTROYER_HOLD_SEC
                               : s3AirHeavy    ? EnemyPoolManager.S3_AIR_HEAVY_HOLD_SEC
                               : heavyHold     ? EnemyPoolManager.HEAVY_HOLD_SEC
                               : EnemyPoolManager.HOLD_SEC
@@ -312,7 +340,8 @@ class EnemyPoolManager {
             e.holdTimer -= dt
             if e.holdTimer <= 0 {
                 e.aiPhase = 2
-                e.vy = e.isGroundHeavy ? EnemyPoolManager.DESTROYER_RETREAT_VY
+                e.vy = e.isMidBoss ? EnemyPoolManager.MID_RETREAT_VY
+                       : e.isGroundHeavy ? EnemyPoolManager.DESTROYER_RETREAT_VY
                        : s3AirHeavy    ? EnemyPoolManager.S3_AIR_HEAVY_RETREAT_VY
                        : heavyHold     ? EnemyPoolManager.HEAVY_RETREAT_VY
                        : EnemyPoolManager.DIVE_VY
@@ -340,8 +369,15 @@ class EnemyPoolManager {
         e.fireTimer -= dt; if e.fireTimer > 0 { return }
         switch e.type {
         case EnemyPoolManager.TYPE_HEAVY:
-            fireHeavyRing(e, weapons: weapons, speed: EnemyPoolManager.RING_SPEED * (StageData.liveInstance?.shotSpeedScale() ?? 1))
-            e.fireTimer = scaledInterval(EnemyPoolManager.HEAVY_FIRE_GAP)
+            if e.isMidBoss {
+                if e.aiPhase == 1 {
+                    fireMidBoss(e, weapons: weapons, speed: EnemyPoolManager.RING_SPEED * (StageData.liveInstance?.shotSpeedScale() ?? 1))
+                }
+                e.fireTimer = scaledInterval(EnemyPoolManager.MID_FIRE_GAP)
+            } else {
+                fireHeavyRing(e, weapons: weapons, speed: EnemyPoolManager.RING_SPEED * (StageData.liveInstance?.shotSpeedScale() ?? 1))
+                e.fireTimer = scaledInterval(EnemyPoolManager.HEAVY_FIRE_GAP)
+            }
         case EnemyPoolManager.TYPE_INTERCEPTOR:
             writeSniperAim(e, playerX: playerX, playerY: playerY, speed: speed)
             fireInterceptorSpread(e, weapons: weapons, speed: speed)
@@ -375,6 +411,20 @@ class EnemyPoolManager {
             let fa = baseAng + Float(k) * EnemyPoolManager.SPREAD_RAD
             weapons.fireBullet(startX: e.x, startY: e.y, velX: cosf(fa)*speed, velY: sinf(fa)*speed)
         }
+        SoundManager.instance.playSFX(SoundManager.SFX_LASER)
+    }
+
+    private func fireMidBoss(_ e: Enemy, weapons: EnemyWeaponSystem, speed: Float) {
+        if !writeSniperAim(e, playerX: lastPlayerX, playerY: lastPlayerY, speed: speed) { return }
+        weapons.fireBullet(startX: e.x, startY: e.y, velX: e.aimVx, velY: e.aimVy)
+        let base = atan2f(e.aimVy, e.aimVx)
+        let fan: Float = 0.32
+        weapons.fireBullet(startX: e.x, startY: e.y, velX: cosf(base - fan) * speed, velY: sinf(base - fan) * speed)
+        weapons.fireBullet(startX: e.x, startY: e.y, velX: cosf(base + fan) * speed, velY: sinf(base + fan) * speed)
+        let down = speed * 0.82
+        let side = speed * 0.38
+        weapons.fireBullet(startX: e.x, startY: e.y, velX: -side, velY: down)
+        weapons.fireBullet(startX: e.x, startY: e.y, velX:  side, velY: down)
         SoundManager.instance.playSFX(SoundManager.SFX_LASER)
     }
 

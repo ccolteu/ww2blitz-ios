@@ -20,6 +20,8 @@ class Enemy {
     var isDestroyer: Bool = false
     var isLandVehicle: Bool = false
     var isWagon: Bool = false
+    var isHelicopter: Bool = false
+    var isMidBoss: Bool = false
     var isGroundHeavy: Bool { isDestroyer || isLandVehicle || isWagon }
     var fireTimer: Float = 0
     var burstLeft: Int = 0

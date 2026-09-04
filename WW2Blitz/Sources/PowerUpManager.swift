@@ -237,7 +237,16 @@ class PowerUpManager {
         }
     }
 
-    func dropEnemyLoot(x: Float, y: Float, enemyType: Int, guaranteedPowerup: Bool, stageData: StageData) {
+    func dropEnemyLoot(x: Float, y: Float, enemyType: Int, guaranteedPowerup: Bool,
+                       isMidBoss: Bool = false, bombStock: Int = 3, stageData: StageData) {
+        if isMidBoss {
+            items.spawn(x: x - 28, y: y, type: PowerUpSlot.ITEM_TYPE_MEDAL)
+            items.spawn(x: x, y: y, type: PowerUpSlot.ITEM_TYPE_MEDAL)
+            items.spawn(x: x + 28, y: y, type: PowerUpSlot.ITEM_TYPE_MEDAL)
+            let extra = bombStock < 3 ? PowerUpSlot.ITEM_TYPE_BOMB : PowerUpSlot.ITEM_TYPE_POWERUP
+            items.spawn(x: x, y: y + 36, type: extra)
+            return
+        }
         items.spawn(x: x, y: y, type: PowerUpSlot.ITEM_TYPE_MEDAL)
         if guaranteedPowerup {
             items.spawn(x: x, y: y, type: PowerUpSlot.ITEM_TYPE_POWERUP)

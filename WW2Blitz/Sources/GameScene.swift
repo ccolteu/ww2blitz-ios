@@ -583,13 +583,15 @@ class GameScene: SKScene {
         particles.triggerExplosion(x: e.x, y: e.y)
         PowerUpManager.instance.dropEnemyLoot(
             x: e.x, y: e.y, enemyType: e.type,
-            guaranteedPowerup: e.isRedShipAnchor, stageData: stageData)
+            guaranteedPowerup: e.isRedShipAnchor, isMidBoss: e.isMidBoss,
+            bombStock: bombStock, stageData: stageData)
         if e.deathClearBullets { enemyWeapons.beginDeathClear(originX: e.x, originY: e.y) }
         if e.diamondLeader { enemyManager.triggerDiamondSplinter() }
     }
 
     private func fireRevengeIfNeeded(_ enemy: Enemy) {
         if enemy.deathClearBullets { return }
+        if enemy.isMidBoss { return }
         let popcorn = enemy.type != EnemyPoolManager.TYPE_INTERCEPTOR
             && enemy.type != EnemyPoolManager.TYPE_HEAVY
         if !stageData.revengeOnDeath() {
@@ -926,7 +928,8 @@ class GameScene: SKScene {
         parallax.setCanopy(def.theaterKind == .facility ? theater.canopyTex : nil)
         enemyManager.bindTheaterSkins(tank: theater.skinTankTex,
                                        destroyer: theater.skinDestroyerTex,
-                                       wagon: theater.skinWagonTex)
+                                       wagon: theater.skinWagonTex,
+                                       helicopter: theater.skinHelicopterTex)
         boss.bindStage(currentStage)
         armHiddenMedalRoute()
     }

@@ -53,7 +53,11 @@ class SpawnTimeline {
         HiddenMedalRoute.bind(activeStage)
         HiddenMedalRoute.tick(elapsed: elapsedTime, screenW: w, screenH: h,
                               items: PowerUpManager.instance.items)
-        if allowBoss && !cue.bossCueFired && def.usesSharedBossEntranceCue && elapsedTime >= def.bossAtSeconds {
+        if enemyManager.hasActiveMidBoss() && elapsedTime >= def.bossAtSeconds - SpawnTimeline.MID_EXIT_LEAD {
+            enemyManager.beginMidBossExit()
+        }
+        if allowBoss && !cue.bossCueFired && def.usesSharedBossEntranceCue
+            && elapsedTime >= def.bossAtSeconds && !enemyManager.hasActiveMidBoss() {
             cue.fireBoss(stageId: def.id, boss: boss)
         }
     }
@@ -77,4 +81,6 @@ class SpawnTimeline {
         FormationSpawner.spawnResupplyColumn(enemies: enemies, w: w, h: h)
         powerUpWaveQueued = false; powerUpWaveTimer = 0
     }
+
+    private static let MID_EXIT_LEAD: Float = 4.5
 }

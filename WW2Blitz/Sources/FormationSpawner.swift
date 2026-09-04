@@ -42,12 +42,14 @@ struct FormationSpawner {
     static let S3_SCOUT_SPACING: Float = 1.65; static let S3_CRUISER_AT: Float = 7.5
     static let S3_CRUISER_HP = 16; static let S3_DESTROYER_AT: Float = 16; static let S3_DESTROYER_HP = 12
     static let S3_CROSS_AT: Float = 10.5; static let S3_CROSS_Y: Float = 0.38
+    static let S3_MID_AT: Float = 12; static let S3_MID_HP = 96
+    static let S3_RECOVERY_AT: Float = 38
     static let S3_FLANK_START: Float = 14; static let S3_FLANK_END: Float = 19.5
-    static let S3_FLANK_SPACING: Float = 0.95; static let S3_BOSS_AT: Float = 25
+    static let S3_FLANK_SPACING: Float = 0.95; static let S3_BOSS_AT: Float = 42
     // Stage 6 (jungle)
     static let S6_FLANK_START: Float = 1; static let S6_FLANK_END: Float = 6
     static let S6_FLANK_SPACING: Float = 1.25; static let S6_FLANK_VX: Float = 340
-    static let S6_CRUISER_AT: Float = 22; static let S6_CRUISER_HP = 20; static let S6_CRUISER_VY: Float = 80
+    static let S6_CRUISER_AT: Float = 22; static let S6_CRUISER_HP = 96; static let S6_CRUISER_VY: Float = 80
     static let S6_WEAVE_START: Float = 15; static let S6_WEAVE_END: Float = 21
     static let S6_WEAVE_SPACING: Float = 1.5; static let S6_WEAVE_PAIRS = 5; static let S6_WEAVE_VY: Float = 160
     static let S6_KAMI_AT: Float = 25; static let S6_KAMI_VY: Float = 680
@@ -68,13 +70,15 @@ struct FormationSpawner {
     // Stage 4 (frozen front)
     static let S4_FLURRY_START: Float = 6; static let S4_FLURRY_END: Float = 18
     static let S4_FLURRY_SPACING: Float = 1.55; static let S4_FLURRY_VY: Float = 140
-    static let S4_HOLD_V_AT: Float = 20; static let S4_KAMI_AT: Float = 24; static let S4_KAMI_VY: Float = 620
+    static let S4_HOLD_V_AT: Float = 20; static let S4_MID_AT: Float = 20; static let S4_MID_HP = 96
+    static let S4_KAMI_AT: Float = 24; static let S4_KAMI_VY: Float = 620
     static let S4_CROSS_AT: Float = 28; static let S4_CROSS_Y: Float = 0.40
     static let S4_HEAVIES_AT: Float = 32; static let S4_WALL_AT: Float = 36
     // Stage 5 (coral atoll)
     static let S5_REEF_START: Float = 6; static let S5_REEF_END: Float = 16.5
     static let S5_REEF_SPACING: Float = 1.40; static let S5_REEF_VY: Float = 165
-    static let S5_HOLD_V_AT: Float = 18.5; static let S5_KAMI_AT: Float = 23; static let S5_KAMI_VY: Float = 640
+    static let S5_HOLD_V_AT: Float = 18.5; static let S5_MID_AT: Float = 18.5; static let S5_MID_HP = 96
+    static let S5_KAMI_AT: Float = 23; static let S5_KAMI_VY: Float = 640
     static let S5_CROSS_AT: Float = 27; static let S5_CROSS_Y: Float = 0.42
     static let S5_HEAVIES_AT: Float = 31; static let S5_WALL_AT: Float = 35
     static let FORM_CLEAR: Float = 2.4
@@ -83,6 +87,14 @@ struct FormationSpawner {
                                yFrac: Float, vx: Float, vy: Float, type: Int) {
         enemies.spawnEnemy(startX: -0.06*w, startY: yFrac*h, velocityX:  vx, velocityY: vy, enemyType: type, pattern: PATTERN_DIAGONAL_SWEEP)
         enemies.spawnEnemy(startX:  1.06*w, startY: yFrac*h, velocityX: -vx, velocityY: vy, enemyType: type, pattern: PATTERN_DIAGONAL_SWEEP)
+    }
+
+    static func spawnMidBoss(enemies: EnemyPoolManager, w: Float, h: Float, xFrac: Float, hp: Int,
+                             isDestroyer: Bool = false, isLandVehicle: Bool = false, isHelicopter: Bool = false) {
+        enemies.spawnEnemy(startX: xFrac * w, startY: -0.12 * h, velocityX: 0, velocityY: HEAVY_VY,
+                           enemyType: TYPE_HEAVY, pattern: PATTERN_V_HOLD, health: hp,
+                           isDestroyer: isDestroyer, isLandVehicle: isLandVehicle,
+                           isHelicopter: isHelicopter, isMidBoss: true)
     }
 
     static func spawnVFormation(enemies: EnemyPoolManager, w: Float, h: Float) {

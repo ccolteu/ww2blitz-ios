@@ -222,6 +222,7 @@ class StageTheater {
     private(set) var skinTankTex: SKTexture?
     private(set) var skinDestroyerTex: SKTexture?
     private(set) var skinWagonTex: SKTexture?
+    private(set) var skinHelicopterTex: SKTexture?
     var activeFloorTex: SKTexture?
     var floorSwapped = false
     private var loadedId = -1
@@ -230,7 +231,7 @@ class StageTheater {
         if loadedId == next.id && floorTex != nil { def = next; return }
         def = next; loadedId = next.id
         midTex = nil; highTex = nil; canopyTex = nil; floorAltTex = nil
-        skinTankTex = nil; skinDestroyerTex = nil; skinWagonTex = nil
+        skinTankTex = nil; skinDestroyerTex = nil; skinWagonTex = nil; skinHelicopterTex = nil
         let lock = next.theaterKind == .ascent ? CGFloat(0) : width
         floorTex     = StageBitmaps.loadTexture(named: next.floorPath(), keyed: false, widthLock: lock)
         let keyed    = next.keyedOverlayLayers
@@ -242,6 +243,7 @@ class StageTheater {
         if let p = next.skinTankPath()      { skinTankTex      = StageBitmaps.loadTexture(named: p, keyed: true) }
         if let p = next.skinDestroyerPath() { skinDestroyerTex = StageBitmaps.loadTexture(named: p, keyed: true) }
         if let p = next.skinWagonPath()     { skinWagonTex     = StageBitmaps.loadTexture(named: p, keyed: true) }
+        if let p = next.skinHelicopterPath() { skinHelicopterTex = StageBitmaps.loadTexture(named: p, keyed: true) }
         floorSwapped = false; activeFloorTex = floorTex
     }
 

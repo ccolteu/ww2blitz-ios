@@ -54,6 +54,7 @@ struct StageDef {
     var skinTankFile: String? = nil
     var skinDestroyerFile: String? = nil
     var skinWagonFile: String? = nil
+    var skinHelicopterFile: String? = nil
     var waveScript: Int = 1
     var bossCombat: BossCombatKind = .plane
     var boss: BossWrecks
@@ -75,6 +76,7 @@ struct StageDef {
     func skinTankPath() -> String? { skinTankFile.map { "\(stagePath())/\($0)" } }
     func skinDestroyerPath() -> String? { skinDestroyerFile.map { "\(stagePath())/\($0)" } }
     func skinWagonPath() -> String? { skinWagonFile.map { "\(stagePath())/\($0)" } }
+    func skinHelicopterPath() -> String? { skinHelicopterFile.map { "\(stagePath())/\($0)" } }
 }
 
 // MARK: - Catalog
@@ -123,7 +125,7 @@ struct StageCatalog {
                 id: 3,
                 operationName: Array("STEEL ATLANTIC"),
                 scrollSpeedY: 200,
-                bossAtSeconds: 25,
+                bossAtSeconds: 42,
                 stageMusicTrack: SoundManager.BGM_STAGE3,
                 locksElapsedAtBoss: true,
                 usesOpeningPowerV: true,
@@ -145,6 +147,7 @@ struct StageCatalog {
                 keyedOverlayLayers: true,
                 midFile: "mid.png",
                 highFile: "high.png",
+                skinTankFile: "skin_tank.png",
                 waveScript: StageWaveKind.FROZEN_FRONT,
                 bossCombat: .winter,
                 boss: wrecks
@@ -173,6 +176,7 @@ struct StageCatalog {
                 stageMusicTrack: SoundManager.BGM_STAGE6,
                 locksElapsedAtBoss: true,
                 usesOpeningPowerV: true,
+                skinHelicopterFile: "skin_hellicopter.png",
                 waveScript: StageWaveKind.JUNGLE_RUINS,
                 bossCombat: .jungle,
                 boss: wrecks
