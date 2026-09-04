@@ -1037,7 +1037,7 @@ class GameScene: SKScene {
     }
 
     private func renderArcadeUI() {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.3"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         ui.render(
             state: gameState,
             attract: attract,
