@@ -33,6 +33,9 @@ class SpawnTimeline {
                     elapsedTime = def.introSecs
                 }
             }
+            HiddenMedalRoute.bind(activeStage)
+            HiddenMedalRoute.tick(elapsed: elapsedTime, screenW: w, screenH: h,
+                                  items: PowerUpManager.instance.items)
             return
         }
         if !(def.locksElapsedAtBoss && cue.bossCueFired) { elapsedTime += dt }
@@ -47,6 +50,9 @@ class SpawnTimeline {
                                     w: w, h: h, boss: boss, allowBoss: allowBoss,
                                     stageData: stageData, cue: cue)
         }
+        HiddenMedalRoute.bind(activeStage)
+        HiddenMedalRoute.tick(elapsed: elapsedTime, screenW: w, screenH: h,
+                              items: PowerUpManager.instance.items)
         if allowBoss && !cue.bossCueFired && def.usesSharedBossEntranceCue && elapsedTime >= def.bossAtSeconds {
             cue.fireBoss(stageId: def.id, boss: boss)
         }
@@ -55,6 +61,7 @@ class SpawnTimeline {
     func reset() {
         elapsedTime = 0; activeStage = 0; openingPowerVSpawned = false
         powerUpWaveQueued = false; powerUpWaveTimer = 0; cue.bossCueFired = false
+        HiddenMedalRoute.reset()
         directors.forEach { $0?.reset() }
     }
 

@@ -126,6 +126,10 @@ final class UIController {
         recapLives: Int,
         recapBombs: Int,
         recapGraze: Int,
+        recapNoMiss: Int,
+        recapNoBomb: Int,
+        recapSecretCount: Int,
+        recapSecretUnit: Int,
         recapTotal: Int,
         stage: Int,
         briefing: SKTexture?,
@@ -160,7 +164,7 @@ final class UIController {
                 dimScreen(root)
                 drawSettings(root, flashT: flashT)
             } else if attract == .highScore {
-                drawHighScores(root, highScores: highScores)
+                drawHighScores(root, highScores: highScores, difficulty: difficulty)
             } else {
                 drawTitle(root, difficulty: difficulty, fighterIndex: fighterIndex, version: version)
             }
@@ -175,7 +179,10 @@ final class UIController {
             dimScreen(root)
             drawHUD(root, lives: lives, hitsLeft: hitsLeft, maxHits: maxHits, bombs: bombs, score: score)
             drawStageClear(root, stage: stage, phase: recapPhase, lives: recapLives,
-                           bombs: recapBombs, graze: recapGraze, total: recapTotal, frame: recapFrame)
+                           bombs: recapBombs, graze: recapGraze,
+                           noMiss: recapNoMiss, noBomb: recapNoBomb,
+                           secretCount: recapSecretCount, secretUnit: recapSecretUnit,
+                           total: recapTotal, frame: recapFrame)
         case .playing, .demo, .gameOver:
             drawHUD(root, lives: lives, hitsLeft: hitsLeft, maxHits: maxHits, bombs: bombs, score: score)
             if state == .demo && (Int(demoT * 2) % 2) == 0 {
@@ -255,15 +262,17 @@ final class UIController {
         center(root, "VER \(version)", cx: cx, ay: versionY, size: 20, color: white)
     }
 
-    private func drawHighScores(_ root: SKNode, highScores: HighScoreManager) {
+    private func drawHighScores(_ root: SKNode, highScores: HighScoreManager, difficulty: Int) {
         let cx = screenW * 0.5
-        center(root, "TOP SCORES", cx: cx, ay: screenH * 0.11, size: 48, color: gold)
+        center(root, "TOP SCORES", cx: cx, ay: screenH * 0.08, size: 48, color: gold)
+        let dipName = Difficulty(rawValue: difficulty)?.displayName ?? "NORMAL"
+        center(root, dipName, cx: cx, ay: screenH * 0.13, size: 32, color: white)
         let rowStep = screenH * 0.065
         for i in 0..<HighScoreManager.SLOT_COUNT {
-            var score = highScores.scoreAt(i)
+            var score = highScores.scoreAt(difficulty: difficulty, i)
             if score < 0 { score = 0 }
             if score > 99_999_999 { score = 99_999_999 }
-            let line = "\(i + 1) \(pad8(score))  \(highScores.nameAt(i))  ST\(highScores.stageAt(i))"
+            let line = "\(i + 1) \(pad8(score))  \(highScores.nameAt(difficulty: difficulty, i))  ST\(highScores.stageAt(difficulty: difficulty, i))"
             center(root, line, cx: cx, ay: screenH * 0.20 + CGFloat(i) * rowStep, size: 36, color: white)
         }
         if (Int64(Date().timeIntervalSince1970 * 1000) / 600) % 2 == 0 {
@@ -427,23 +436,34 @@ final class UIController {
     }
 
     private func drawStageClear(_ root: SKNode, stage: Int, phase: Int, lives: Int, bombs: Int,
-                                graze: Int, total: Int, frame: Int) {
+                                graze: Int, noMiss: Int, noBomb: Int,
+                                secretCount: Int, secretUnit: Int, total: Int, frame: Int) {
         let cx = screenW * 0.5
-        center(root, "STAGE \(stage) CLEAR", cx: cx, ay: screenH * 0.20, size: 42, color: gold)
+        let first = screenH * 0.26
+        let step = screenH * 0.068
+        center(root, "STAGE \(stage) CLEAR", cx: cx, ay: first - step * 1.15, size: 42, color: gold)
         if phase >= ScoreManager.PHASE_LIVES {
-            center(root, "LIVES BONUS: \(lives) x 50,000", cx: cx, ay: screenH * 0.34, size: 32, color: white)
+            center(root, "LIVES BONUS: \(lives) x 50,000", cx: cx, ay: first, size: 32, color: white)
         }
         if phase >= ScoreManager.PHASE_BOMBS {
-            center(root, "BOMBS BONUS: \(bombs) x 20,000", cx: cx, ay: screenH * 0.44, size: 32, color: white)
+            center(root, "BOMBS BONUS: \(bombs) x 20,000", cx: cx, ay: first + step, size: 32, color: white)
         }
         if phase >= ScoreManager.PHASE_GRAZE {
-            center(root, "GRAZE BONUS: \(graze) x 500", cx: cx, ay: screenH * 0.54, size: 32, color: white)
+            center(root, "GRAZE BONUS: \(graze) x 500", cx: cx, ay: first + step * 2, size: 32, color: white)
+        }
+        if phase >= ScoreManager.PHASE_SKILL {
+            center(root, "NO MISS BONUS: \(noMiss)", cx: cx, ay: first + step * 3,
+                   size: 32, color: white)
+            center(root, "NO BOMB BONUS: \(noBomb)", cx: cx, ay: first + step * 4,
+                   size: 32, color: white)
+            center(root, "SECRET: \(secretCount) x \(secretUnit)", cx: cx, ay: first + step * 5,
+                   size: 32, color: white)
         }
         if phase >= ScoreManager.PHASE_TOTAL {
-            center(root, "STAGE CLEAR TOTAL:", cx: cx, ay: screenH * 0.66, size: 42, color: gold)
-            center(root, "\(total)", cx: cx, ay: screenH * 0.74, size: 42, color: gold)
+            center(root, "STAGE CLEAR TOTAL:", cx: cx, ay: first + step * 6.55, size: 42, color: gold)
+            center(root, "\(total)", cx: cx, ay: first + step * 7.45, size: 42, color: gold)
             if (frame % 60) < 30 {
-                center(root, "PRESS FIRE TO CONTINUE", cx: cx, ay: screenH * 0.86, size: 32, color: white)
+                center(root, "PRESS FIRE TO CONTINUE", cx: cx, ay: first + step * 8.55, size: 32, color: white)
             }
         }
     }

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0F63CBED68CF4ADF87E09BD7 /* FormationSpawner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82594CCEF12D4DFC902CC03A /* FormationSpawner.swift */; };
 		15CC2E54A5644FC9B898725B /* PlayerBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0D260A3DB6547F19DC11313 /* PlayerBullet.swift */; };
+		A11E1DDE0000000000000002 /* HiddenMedalRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11E1DDE0000000000000001 /* HiddenMedalRoute.swift */; };
 		23BEB9C357CD4D8A893C9F45 /* ScoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2551BD300FB142A7B7FAD476 /* ScoreManager.swift */; };
 		39575CCCA0F14980BA529A02 /* StageDef.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56B0E847519A42CBBA5DE579 /* StageDef.swift */; };
 		3E99F32C097B41CCBB105C5A /* ParallaxBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF9817579B6142508AEB2050 /* ParallaxBackground.swift */; };
@@ -48,6 +49,7 @@
 		0730F6C7FEDF4095BAD5AE60 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1C285AD0EC2D4D66A39FCE92 /* ParticleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleManager.swift; sourceTree = "<group>"; };
 		22E760C4518A4D86B41D5A51 /* EnemyBullet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyBullet.swift; sourceTree = "<group>"; };
+		A11E1DDE0000000000000001 /* HiddenMedalRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenMedalRoute.swift; sourceTree = "<group>"; };
 		2551BD300FB142A7B7FAD476 /* ScoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreManager.swift; sourceTree = "<group>"; };
 		33787CEA01584544B9B20AF8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3745CE186D5E4F8FA97B2DF4 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 				C66A851FFB8C451B98D9FB97 /* GameScene.swift */,
 				3745CE186D5E4F8FA97B2DF4 /* GameViewController.swift */,
 				E0CD77B20F884213B49D4850 /* HighScoreManager.swift */,
+				A11E1DDE0000000000000001 /* HiddenMedalRoute.swift */,
 				802329AED9A64ECCBF12A380 /* HomingMissileManager.swift */,
 				B2B3E4BD7CAE4B91A8096701 /* PanicBomb.swift */,
 				DF9817579B6142508AEB2050 /* ParallaxBackground.swift */,
@@ -251,6 +254,7 @@
 				923EBE8B263D49CFA21049E6 /* GameScene.swift in Sources */,
 				91B5DE4E8C2748978A72228C /* GameViewController.swift in Sources */,
 				B0C0C468E774423898233E6C /* HighScoreManager.swift in Sources */,
+				A11E1DDE0000000000000002 /* HiddenMedalRoute.swift in Sources */,
 				AF9BC55543C44C7FBB2A21BD /* HomingMissileManager.swift in Sources */,
 				BD87F662668C4492ABBCAC4E /* PanicBomb.swift in Sources */,
 				3E99F32C097B41CCBB105C5A /* ParallaxBackground.swift in Sources */,

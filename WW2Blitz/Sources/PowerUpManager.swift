@@ -14,6 +14,7 @@ class PowerUpSlot {
     var homeX: Float = 0; var swayT: Float = 0
     var swayDrop: Bool = false
     var pickupPoints: Int = 0
+    var isSecretMedal: Bool = false
     var isActive: Bool = false
     var itemType: Int = PowerUpSlot.ITEM_TYPE_POWERUP
     var medalFrameTime: Float = 0
@@ -91,6 +92,15 @@ class PowerUpItem {
         return true
     }
 
+    func spawnSecretMedal(x: Float, y: Float) {
+        guard let s = firstFree() else { return }
+        fill(s, x: x, y: y, type: PowerUpSlot.ITEM_TYPE_MEDAL)
+        s.vx = 0
+        s.vy = 78
+        s.pickupPoints = ScoreManager.SECRET_MEDAL_POINTS
+        s.isSecretMedal = true
+    }
+
     func update(dt: Float, screenW: Int, screenH: Int,
                 playerX: Float, playerY: Float, magnetOn: Bool = true) {
         let floor = Float(screenH) + 48
@@ -139,12 +149,23 @@ class PowerUpItem {
             hx = CGFloat(PowerUpItem.MEDAL_HALF * layoutS)
             let idx = min(max(s.medalFrameIndex, 0), medalTex.count - 1)
             if idx < medalTex.count { n.texture = medalTex[idx] }
+            if s.isSecretMedal {
+                n.color = UIColor(red: 1, green: 138.0/255, blue: 138.0/255, alpha: 1)
+                n.colorBlendFactor = 1
+            } else {
+                n.color = .white
+                n.colorBlendFactor = 0
+            }
         } else if s.itemType == PowerUpSlot.ITEM_TYPE_BOMB {
             hx = CGFloat(PowerUpItem.POWERUP_HALF * layoutS)
             n.texture = bombTex
+            n.color = .white
+            n.colorBlendFactor = 0
         } else {
             hx = CGFloat(PowerUpItem.POWERUP_HALF * layoutS)
             n.texture = powerTex
+            n.color = .white
+            n.colorBlendFactor = 0
         }
         n.size = CGSize(width: hx * 2, height: hx * 2)
         ArcadeOutline.sync(n)
@@ -184,7 +205,7 @@ class PowerUpItem {
             s.vy = 90
         }
         s.homeX = x; s.swayT = 0; s.swayDrop = false
-        s.pickupPoints = 0; s.itemType = type
+        s.pickupPoints = 0; s.isSecretMedal = false; s.itemType = type
         s.medalFrameTime = 0; s.medalFrameIndex = 0
         s.isActive = true
     }

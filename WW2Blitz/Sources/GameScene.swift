@@ -552,6 +552,7 @@ class GameScene: SKScene {
                 ? item.pickupPoints
                 : (item.medalFrameIndex == 0 ? PowerUpManager.MEDAL_SCORE_FACE : PowerUpManager.MEDAL_SCORE_EDGE)
             ScoreManager.instance.addPickupScore(x: item.x, y: item.y, base: points)
+            if item.isSecretMedal { ScoreManager.instance.collectSecretMedal() }
             SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
         case PowerUpSlot.ITEM_TYPE_BOMB:
             if bombStock < 3 {
@@ -746,6 +747,7 @@ class GameScene: SKScene {
         player.setAutoFire(true)
         bombStock = 2
         timeline.reset()
+        armHiddenMedalRoute()
         enemyManager.deactivateAll(); enemyWeapons.deactivateAll()
         boss.deactivate(); parallax.resetScroll()
         ScoreManager.instance.syncDifficultyMultiplier(selectedDifficulty)
@@ -801,6 +803,7 @@ class GameScene: SKScene {
         loadCurrentStage()
         bossFought = false
         timeline.reset(); player.resetForStage()
+        armHiddenMedalRoute()
         player.setMenuHidden(true)
         player.setAutoFire(false)
         enemyManager.deactivateAll(); enemyWeapons.deactivateAll()
@@ -851,7 +854,8 @@ class GameScene: SKScene {
     }
 
     private func routeAfterGameOver() {
-        if HighScoreManager.shared.rankOf(score: ScoreManager.instance.getScore()) >= 0 {
+        if HighScoreManager.shared.rankOf(score: ScoreManager.instance.getScore(),
+                                          difficulty: selectedDifficulty) >= 0 {
             beginRegistration()
         } else {
             finishDemoToHighScore()
@@ -924,6 +928,12 @@ class GameScene: SKScene {
                                        destroyer: theater.skinDestroyerTex,
                                        wagon: theater.skinWagonTex)
         boss.bindStage(currentStage)
+        armHiddenMedalRoute()
+    }
+
+    private func armHiddenMedalRoute() {
+        HiddenMedalRoute.bind(stageData.currentStage)
+        ScoreManager.instance.armSecretRoute(HiddenMedalRoute.cueCountValue())
     }
 
     private func maybeSwapStage8Floor() {
@@ -1057,6 +1067,10 @@ class GameScene: SKScene {
             recapLives: ScoreManager.instance.recapLivesCount(),
             recapBombs: ScoreManager.instance.recapBombsCount(),
             recapGraze: ScoreManager.instance.recapGrazeCount(),
+            recapNoMiss: ScoreManager.instance.recapNoMissBonus(),
+            recapNoBomb: ScoreManager.instance.recapNoBombBonus(),
+            recapSecretCount: ScoreManager.instance.recapSecretCollected(),
+            recapSecretUnit: ScoreManager.instance.recapSecretUnit(),
             recapTotal: ScoreManager.instance.recapBonusTotal(),
             stage: currentStage,
             briefing: theater.briefingTex,
@@ -1100,7 +1114,8 @@ class GameScene: SKScene {
         case .registration:
             handleRegistrationTouch(loc)
         case .campaignComplete:
-            if HighScoreManager.shared.rankOf(score: ScoreManager.instance.getScore()) >= 0 {
+            if HighScoreManager.shared.rankOf(score: ScoreManager.instance.getScore(),
+                                          difficulty: selectedDifficulty) >= 0 {
                 beginRegistration()
             } else {
                 finishDemoToHighScore()
@@ -1163,6 +1178,7 @@ class GameScene: SKScene {
         bombCoreWasOpen = boss.isCoreVulnerable()
         bossBombDmgBank = 0
         panicBomb.activate(startX: player.centerX(), startY: player.worldY())
+        ScoreManager.instance.markBombUsed()
         addScreenShake(0.8)
         SoundManager.instance.playSFX(SoundManager.SFX_BOMB)
     }
@@ -1323,7 +1339,8 @@ class GameScene: SKScene {
             if registrationActiveCharIndex >= 3 {
                 HighScoreManager.shared.insert(score: ScoreManager.instance.getScore(),
                                               stage: maxStageCleared,
-                                              name: String(pendingInitials))
+                                              name: String(pendingInitials),
+                                              difficulty: selectedDifficulty)
                 finishDemoToHighScore()
             } else {
                 registrationCurrentChar = "A"

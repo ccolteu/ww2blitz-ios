@@ -268,6 +268,7 @@ class PlayerShip {
 
     func takeDamage() -> Bool {
         if isInvulnerable || isGameOverFlag || respawnTimer > 0 { return false }
+        ScoreManager.instance.markMiss()
         hitsLeft -= 1
         if hitsLeft > 0 {
             isInvulnerable = true; invulnTimer = PlayerShip.INVULN_SEC; return false

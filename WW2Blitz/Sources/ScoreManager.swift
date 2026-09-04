@@ -16,7 +16,17 @@ class ScoreManager {
     private var livesAwarded: Int = 0
     private var bombsAwarded: Int = 0
     private var grazeAwarded: Int = 0
+    private var skillAwarded: Int = 0
     private var recapActive: Bool = false
+    private var stageNoMiss = true
+    private var stageNoBomb = true
+    private var secretCollected = 0
+    private var secretMax = 0
+    private var noMissBonusTarget = 0
+    private var noBombBonusTarget = 0
+    private var secretBonusTarget = 0
+    private var secretUnitPoints = 0
+    private var skillBonusTarget = 0
     private var activeMultiplier: Float = 1.0
     private var nextExtendAt: Int = ScoreManager.EXTEND_FIRST
     private var pendingExtends: Int = 0
@@ -105,8 +115,24 @@ class ScoreManager {
     func recapLivesAwarded() -> Int { livesAwarded }
     func recapBombsAwarded() -> Int { bombsAwarded }
     func recapGrazeAwarded() -> Int { grazeAwarded }
+    func recapNoMissBonus() -> Int { noMissBonusTarget }
+    func recapNoBombBonus() -> Int { noBombBonusTarget }
+    func recapSecretCollected() -> Int { secretCollected }
+    func recapSecretMax() -> Int { secretMax }
+    func recapSecretBonus() -> Int { secretBonusTarget }
+    func recapSecretUnit() -> Int { secretUnitPoints }
     func recapBonusTotal() -> Int {
-        max(0, min(livesBonusTarget + bombsBonusTarget + grazeBonusTarget, Self.MAX_SCORE))
+        max(0, min(livesBonusTarget + bombsBonusTarget + grazeBonusTarget + skillBonusTarget, Self.MAX_SCORE))
+    }
+    func markMiss() { stageNoMiss = false }
+    func markBombUsed() { stageNoBomb = false }
+    func armSecretRoute(_ count: Int) {
+        secretMax = max(0, count)
+        secretCollected = 0
+    }
+    func collectSecretMedal() {
+        secretCollected += 1
+        if secretCollected > secretMax { secretCollected = secretMax }
     }
     func isRecapReady() -> Bool { recapActive && recapPhase == ScoreManager.PHASE_TOTAL }
     func beginRecap(remainingLives: Int, remainingBombs: Int) {
@@ -115,7 +141,12 @@ class ScoreManager {
         livesBonusTarget = livesCount * Self.LIFE_BONUS
         bombsBonusTarget = bombsCount * Self.BOMB_BONUS
         grazeBonusTarget = grazeCount * Self.GRAZE_BONUS
-        livesAwarded = 0; bombsAwarded = 0; grazeAwarded = 0
+        noMissBonusTarget = stageNoMiss ? Self.NO_MISS_BONUS : 0
+        noBombBonusTarget = stageNoBomb ? Self.NO_BOMB_BONUS : 0
+        secretUnitPoints = scalePoints(Self.SECRET_MEDAL_POINTS)
+        secretBonusTarget = secretCollected * secretUnitPoints
+        skillBonusTarget = noMissBonusTarget + noBombBonusTarget + secretBonusTarget
+        livesAwarded = 0; bombsAwarded = 0; grazeAwarded = 0; skillAwarded = 0
         recapPhase = ScoreManager.PHASE_LIVES
         recapTimer = 0; recapFrame = 0; recapActive = true
     }
@@ -130,15 +161,22 @@ class ScoreManager {
             if recapTimer >= Self.PHASE_DUR { snapPhase(1); recapPhase = ScoreManager.PHASE_GRAZE; recapTimer = 0 }
         } else if recapPhase == ScoreManager.PHASE_GRAZE {
             tickPhase(target: grazeBonusTarget, which: 2)
-            if recapTimer >= Self.PHASE_DUR { snapPhase(2); recapPhase = ScoreManager.PHASE_TOTAL; recapTimer = 0 }
+            if recapTimer >= Self.PHASE_DUR { snapPhase(2); recapPhase = ScoreManager.PHASE_SKILL; recapTimer = 0 }
+        } else if recapPhase == ScoreManager.PHASE_SKILL {
+            tickPhase(target: skillBonusTarget, which: 3)
+            if recapTimer >= Self.PHASE_DUR { snapPhase(3); recapPhase = ScoreManager.PHASE_TOTAL; recapTimer = 0 }
         }
     }
     func resetStageCounters() {
         grazeCount = 0; recapPhase = Self.PHASE_IDLE; recapTimer = 0; recapFrame = 0
         livesCount = 0; bombsCount = 0
         livesBonusTarget = 0; bombsBonusTarget = 0; grazeBonusTarget = 0
-        livesAwarded = 0; bombsAwarded = 0; grazeAwarded = 0
+        noMissBonusTarget = 0; noBombBonusTarget = 0; secretBonusTarget = 0
+        secretUnitPoints = 0; skillBonusTarget = 0
+        livesAwarded = 0; bombsAwarded = 0; grazeAwarded = 0; skillAwarded = 0
         recapActive = false
+        stageNoMiss = true; stageNoBomb = true
+        secretCollected = 0; secretMax = 0
     }
     func reset() {
         score = 0; popupCount = 0
@@ -172,17 +210,23 @@ class ScoreManager {
         }
     }
     private func snapPhase(_ which: Int) {
-        let target = which == 0 ? livesBonusTarget : (which == 1 ? bombsBonusTarget : grazeBonusTarget)
+        let target = which == 0 ? livesBonusTarget
+            : (which == 1 ? bombsBonusTarget
+               : (which == 2 ? grazeBonusTarget : skillBonusTarget))
         let delta = target - awardedOf(which)
         if delta > 0 { addScore(delta); setAwarded(which, target) }
     }
     private func awardedOf(_ which: Int) -> Int {
-        which == 0 ? livesAwarded : (which == 1 ? bombsAwarded : grazeAwarded)
+        if which == 0 { return livesAwarded }
+        if which == 1 { return bombsAwarded }
+        if which == 2 { return grazeAwarded }
+        return skillAwarded
     }
     private func setAwarded(_ which: Int, _ value: Int) {
         if which == 0 { livesAwarded = value }
         else if which == 1 { bombsAwarded = value }
-        else { grazeAwarded = value }
+        else if which == 2 { grazeAwarded = value }
+        else { skillAwarded = value }
     }
     private func queuePopup(x: Float, y: Float, value: Int) {
         if popupCount >= Self.POPUP_SLOTS { return }
@@ -197,13 +241,17 @@ class ScoreManager {
     static let LIFE_BONUS  = 50_000
     static let BOMB_BONUS  = 20_000
     static let GRAZE_BONUS = 500
+    static let NO_MISS_BONUS = 200_000
+    static let NO_BOMB_BONUS = 100_000
+    static let SECRET_MEDAL_POINTS = 2_500
     static let EXTEND_FIRST = 50_000
     static let EXTEND_STEP  = 100_000
     static let PHASE_IDLE  = -1
     static let PHASE_LIVES = 0
     static let PHASE_BOMBS = 1
     static let PHASE_GRAZE = 2
-    static let PHASE_TOTAL = 3
+    static let PHASE_SKILL = 3
+    static let PHASE_TOTAL = 4
     private static let PHASE_DUR: Float = 1.5
     private static let TALLY_DUR: Float = 1.0
     private static let CLICK_EVERY_FRAMES = 5
