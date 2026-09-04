@@ -14,10 +14,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        SoundManager.instance.pauseBGM()
+        SoundManager.instance.pauseAll()
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
-        SoundManager.instance.resumeBGM()
+        SoundManager.instance.resumeAll()
     }
 }

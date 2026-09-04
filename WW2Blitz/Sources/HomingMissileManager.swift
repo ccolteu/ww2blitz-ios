@@ -31,8 +31,9 @@ class HomingMissileManager {
             let n = SKSpriteNode(texture: missileTexture)
             n.size = CGSize(width: CGFloat(HomingMissileManager.DRAW_W * s),
                             height: CGFloat(HomingMissileManager.DRAW_H * s))
-            n.zPosition = 45; n.isHidden = true
+            n.zPosition = 39; n.isHidden = true
             scene.addChild(n); missileNodes.append(n)
+            ArcadeOutline.attach(to: n)
         }
     }
 
@@ -42,6 +43,7 @@ class HomingMissileManager {
         for n in missileNodes {
             n.size = CGSize(width: CGFloat(HomingMissileManager.DRAW_W * s),
                             height: CGFloat(HomingMissileManager.DRAW_H * s))
+            ArcadeOutline.sync(n)
         }
     }
 
@@ -104,6 +106,7 @@ class HomingMissileManager {
                 n.isHidden = false
                 n.zRotation = CGFloat(-atan2f(m.vy, m.vx) - Float.pi / 2)
                 n.position = CGPoint(x: CGFloat(m.x), y: CGFloat(sceneH - m.y))
+                ArcadeOutline.sync(n)
             } else { n.isHidden = true }
         }
     }

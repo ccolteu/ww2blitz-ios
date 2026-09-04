@@ -24,10 +24,15 @@ class PanicBomb {
         self.scene = scene
         frames = (1...PanicBomb.FRAME_COUNT).map { GameArt.texture("Images/player_bomb_\($0)") }
         let n = SKSpriteNode(texture: frames[0])
-        n.zPosition = 60; n.isHidden = true; n.alpha = 0.85
+        n.zPosition = 60; n.isHidden = true; n.alpha = 1
         scene.addChild(n)
         node = n
         layout(screenW: Float(scene.size.width), screenH: Float(scene.size.height))
+    }
+
+    func deactivate() {
+        isActive = false
+        node?.isHidden = true
     }
 
     func activate(startX: Float, startY: Float) {
@@ -41,8 +46,8 @@ class PanicBomb {
     func update(dt: Float, screenW: Float, screenH: Float) {
         guard isActive, let node = node else { return }
         currentFrameTime += dt
-        while currentFrameTime >= PanicBomb.FRAME_DURATION {
-            currentFrameTime -= PanicBomb.FRAME_DURATION
+        if currentFrameTime >= PanicBomb.FRAME_DURATION {
+            currentFrameTime = 0
             currentFrameIndex += 1
         }
         if currentFrameIndex >= PanicBomb.FRAME_COUNT {

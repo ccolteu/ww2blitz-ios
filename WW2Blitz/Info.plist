@@ -56,7 +56,6 @@
     </array>
     <key>UIAppFonts</key>
     <array>
-        <string>arcade_font.ttf</string>
         <string>Fonts/arcade_font.ttf</string>
     </array>
 </dict>

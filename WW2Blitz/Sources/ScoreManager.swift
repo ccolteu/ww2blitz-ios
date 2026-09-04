@@ -56,6 +56,16 @@ class ScoreManager {
         if v > Self.MAX_SCORE { v = Self.MAX_SCORE }
         return v
     }
+    func addKillScore(x: Float, y: Float, base: Int) {
+        let awarded = scalePoints(base)
+        addScore(awarded)
+        queuePopup(x: x, y: y, value: awarded)
+    }
+    func addPickupScore(x: Float, y: Float, base: Int) {
+        let awarded = scalePoints(base)
+        addScore(awarded)
+        queuePopup(x: x, y: y, value: awarded)
+    }
     func addFlankBreakBonus(x: Float, y: Float) {
         let awarded = scalePoints(Self.FLANK_BREAK_POINTS)
         addScore(awarded)

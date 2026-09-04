@@ -103,9 +103,11 @@ struct FormationSpawner {
     static func spawnStage3ScoutV(enemies: EnemyPoolManager, w: Float, h: Float) {
         let vy = WEAVE_VY * 1.7; let gx = formGapX(enemies: enemies, type: TYPE_DRONE); let gy = formGapY(enemies: enemies, type: TYPE_DRONE)
         let cx = 0.50*w; let cy = -0.04*h
-        for dx in [0, -gx, gx, -gx*2, gx*2] as [Float] {
-            enemies.spawnEnemy(startX: cx+dx, startY: cy - abs(dx)*0.5, velocityX: 0, velocityY: vy, enemyType: TYPE_DRONE, pattern: PATTERN_WEAVE)
-        }
+        enemies.spawnEnemy(startX: cx, startY: cy, velocityX: 0, velocityY: vy, enemyType: TYPE_DRONE, pattern: PATTERN_WEAVE)
+        enemies.spawnEnemy(startX: cx-gx, startY: cy-gy, velocityX: 0, velocityY: vy, enemyType: TYPE_DRONE, pattern: PATTERN_WEAVE)
+        enemies.spawnEnemy(startX: cx+gx, startY: cy-gy, velocityX: 0, velocityY: vy, enemyType: TYPE_DRONE, pattern: PATTERN_WEAVE)
+        enemies.spawnEnemy(startX: cx-gx*2, startY: cy-gy*2, velocityX: 0, velocityY: vy, enemyType: TYPE_DRONE, pattern: PATTERN_WEAVE)
+        enemies.spawnEnemy(startX: cx+gx*2, startY: cy-gy*2, velocityX: 0, velocityY: vy, enemyType: TYPE_DRONE, pattern: PATTERN_WEAVE)
     }
 
     static func spawnS5FlankCascade(enemies: EnemyPoolManager, w: Float, h: Float, fromLeft: Bool) {

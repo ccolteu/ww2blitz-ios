@@ -13,6 +13,7 @@ class ParticleManager {
 
     private var pool    = (0..<POOL_SIZE).map { _ in ActiveExplosion() }
     private var sparks  = [GrazeSpark](repeating: GrazeSpark(), count: SPARK_POOL)
+    private var sparkNodes: [SKShapeNode] = []
 
     private weak var scene: SKScene?
     private var explosionFrames: [SKTexture] = []
@@ -32,6 +33,17 @@ class ParticleManager {
         self.scene = scene
         loadExplosionFrames()
         onSizeChanged(screenWidth: screenWidth)
+        let r = CGFloat(ParticleManager.SPARK_RADIUS)
+        let sparkColor = UIColor(red: 1, green: 0xF2 / 255, blue: 0xA0 / 255, alpha: 1)
+        for _ in 0..<ParticleManager.SPARK_POOL {
+            let n = SKShapeNode(circleOfRadius: r)
+            n.fillColor = sparkColor
+            n.strokeColor = .clear
+            n.zPosition = 55
+            n.isHidden = true
+            scene.addChild(n)
+            sparkNodes.append(n)
+        }
         ParticleManager.instance = self
     }
 
@@ -90,7 +102,7 @@ class ParticleManager {
                 let node = SKSpriteNode(texture: explosionFrames[0])
                 node.size = CGSize(width: drawW, height: drawH)
                 node.position = CGPoint(x: CGFloat(x), y: scene.size.height - CGFloat(y))
-                node.zPosition = 20
+                node.zPosition = 55
                 node.name = "exp"
                 let anim = SKAction.animate(with: explosionFrames,
                                             timePerFrame: Double(ParticleManager.FRAME_SEC))
@@ -102,12 +114,20 @@ class ParticleManager {
     }
 
     func update(dt: Float) {
+        let h = Float(scene?.size.height ?? 0)
         for i in 0..<ParticleManager.SPARK_POOL {
             if sparks[i].isActive {
                 sparks[i].x += sparks[i].vx * dt
                 sparks[i].y += sparks[i].vy * dt
                 sparks[i].life -= dt
                 if sparks[i].life <= 0 { sparks[i].isActive = false }
+            }
+            let n = sparkNodes[i]
+            if sparks[i].isActive {
+                n.isHidden = false
+                n.position = CGPoint(x: CGFloat(sparks[i].x), y: CGFloat(h - sparks[i].y))
+            } else {
+                n.isHidden = true
             }
         }
     }

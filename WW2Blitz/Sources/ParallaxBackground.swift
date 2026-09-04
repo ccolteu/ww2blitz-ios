@@ -87,8 +87,20 @@ class ParallaxBackground {
         guard let tex = tex, let scene = scene else { canopyHeight = 0; return }
         let h = tex.size().height * sceneW / tex.size().width
         canopyHeight = h
-        canopyA = makeTileNode(tex: tex, z: -14, alpha: 1); canopyB = makeTileNode(tex: tex, z: -14, alpha: 1)
+        // Android draws canopy after enemies/shots and before missiles/player bullets.
+        canopyA = makeTileNode(tex: tex, z: 38, alpha: 1); canopyB = makeTileNode(tex: tex, z: 38, alpha: 1)
         scene.addChild(canopyA!); scene.addChild(canopyB!)
+    }
+
+    func replaceGround(_ tex: SKTexture?) {
+        guard let tex = tex else { return }
+        let h = tex.size().height * sceneW / tex.size().width
+        groundHeight = h
+        groundA?.texture = tex
+        groundB?.texture = tex
+        groundA?.size = CGSize(width: sceneW, height: h)
+        groundB?.size = CGSize(width: sceneW, height: h)
+        placeGroundTiles()
     }
 
     private func makeTileNode(tex: SKTexture, z: CGFloat, alpha: CGFloat, blendMode: SKBlendMode = .alpha) -> SKSpriteNode {

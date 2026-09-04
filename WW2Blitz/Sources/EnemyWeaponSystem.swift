@@ -162,7 +162,7 @@ class EnemyWeaponSystem {
         for _ in 0..<EnemyWeaponSystem.POOL_SIZE {
             let n = SKShapeNode(ellipseIn: CGRect(x: -hw, y: -hh, width: hw*2, height: hh*2))
             n.fillColor = UIColor(red: 0, green: 1, blue: 0.4, alpha: 1)
-            n.strokeColor = .clear; n.zPosition = 30; n.isHidden = true
+            n.strokeColor = .clear; n.zPosition = 37; n.isHidden = true
             let ih = max(hw - inset, 1)
             let iv = max(hh - inset, 1)
             let glow = SKShapeNode(ellipseIn: CGRect(x: -ih, y: -iv, width: ih*2, height: iv*2))

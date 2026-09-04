@@ -5,6 +5,24 @@ class BossController {
     static let TYPE_CORE         = 0
     static let TYPE_LEFT_FLANK   = 1
     static let TYPE_RIGHT_FLANK  = 2
+    static let TYPE_LEFT_WING    = 1
+    static let TYPE_RIGHT_WING   = 2
+    static let TYPE_TURRET       = 3
+    static let TYPE_STAGE2_LEFT_TREAD = 4
+    static let TYPE_STAGE2_RIGHT_TREAD = 5
+    static let TYPE_STAGE2_MAIN_TURRET = 6
+    static let TYPE_STAGE3_LEFT_FLAK = 7
+    static let TYPE_STAGE3_RIGHT_FLAK = 8
+    static let TYPE_STAGE3_MEGA_CANNON = 9
+    static let TYPE_STAGE4_LEFT_MORTAR = 10
+    static let TYPE_STAGE4_RIGHT_MORTAR = 11
+    static let TYPE_STAGE4_HEAVY_GATLING = 12
+    static let TYPE_WINTER_LEFT_HOWITZER = 10
+    static let TYPE_WINTER_RIGHT_HOWITZER = 11
+    static let TYPE_WINTER_BLIZZARD = 12
+    static let TYPE_ATOLL_LEFT_GUN = 10
+    static let TYPE_ATOLL_RIGHT_GUN = 11
+    static let TYPE_ATOLL_AA = 12
     static let FX_PHASE          = 1
     static let FX_DEATH          = 2
     static let FX_VICTORY_START  = 4
@@ -45,6 +63,37 @@ class BossController {
     static let S4_CORE_HP = 520; static let S4_MORTAR_HP = 140; static let S4_GATLING_HP = 160
     static let S7_CORE_HP = 500; static let S7_HOWITZER_HP = 150; static let S7_BLIZZARD_HP = 170
     static let S8_CORE_HP = 480; static let S8_GUN_HP = 145; static let S8_AA_HP = 165
+    static let DOWN_ANGLE: Float = 1.5707964
+    static let S1_SWEEP_INTERVAL: Float = 0.16
+    static let S1_SWEEP_SPEED: Float = 480
+    static let S1_SWEEP_FREQ: Float = 3.5
+    static let S1_SWEEP_AMP: Float = 0.6
+    static let S1_SWEEP_ARC_STEP: Float = 0.12
+    static let S2_RING_INTERVAL: Float = 0.80
+    static let S2_RING_SPEED: Float = 340
+    static let S2_RING_COUNT = 16
+    static let S2_RING_STEP: Float = Float.pi * 2 / Float(S2_RING_COUNT)
+    static let S2_SNIPER_INTERVAL: Float = 0.25
+    static let S2_SNIPER_SPEED: Float = 600
+    static let S2_SNIPER_SEP: Float = 8
+    static let S3_SPIRAL_INTERVAL: Float = 0.10
+    static let S3_SPIRAL_SPEED: Float = 440
+    static let S3_SPIRAL_SPIN: Float = 5.2
+    static let S3_SPIRAL_COUNT = 4
+    static let S3_SPIRAL_STEP: Float = Float.pi * 2 / Float(S3_SPIRAL_COUNT)
+    static let S4_SPIRAL_INTERVAL: Float = 0.12
+    static let S4_SPIRAL_SPEED: Float = 310
+    static let S4_SPIRAL_SPIN: Float = 4.5
+    static let S4_SPIRAL_COUNT = 6
+    static let S4_SPIRAL_STEP: Float = Float.pi * 2 / Float(S4_SPIRAL_COUNT)
+    static let S7_RING_INTERVAL: Float = 0.20
+    static let S7_RING_SPEED: Float = 280
+    static let S7_RING_SPIN: Float = 2.8
+    static let S7_RING_COUNT = 8
+    static let S7_RING_STEP: Float = Float.pi * 2 / Float(S7_RING_COUNT)
+    static let S8_FAN_INTERVAL: Float = 0.22
+    static let S8_FAN_SPEED: Float = 300
+    static let S8_FAN_STEP: Float = 0.2618
 
     private var parts = (0..<MAX_PART_COUNT).map { _ in BossComponent() }
     private var screenW: Float = 0; private var screenH: Float = 0
@@ -67,11 +116,30 @@ class BossController {
     private var victoryShatterFired = false; private var s5ShowTerminalWreck = false
     private var victoryLcg: UInt64 = 2463534242
     private var s6SawOneFlankDown = false; private var s6SawBothFlanksDown = false
+    private var partSfxPlayed = [Bool](repeating: false, count: MAX_PART_COUNT)
     private weak var stageTimeline: SpawnTimeline?
+    private var s1SweepTimer: Float = 0
+    private var s1SweepFireTimer: Float = 0
+    private var s1SweepDirection: Float = 1
+    private var s2DesperationTimer: Float = 0
+    private var s2RingTimer: Float = 0
+    private var s2SniperTimer: Float = 0
+    private var s3DesperationAngle: Float = 0
+    private var s3SpiralTimer: Float = 0
+    private var s4SpiralTimer: Float = 0
+    private var s4SpiralAngle: Float = 0
+    private var s7RingTimer: Float = 0
+    private var s7RingAngle: Float = 0
+    private var s8FanTimer: Float = 0
 
     // SpriteKit
     private weak var scene: SKScene?
     private var bodyNode: SKSpriteNode?
+    private var leftWreckNode: SKSpriteNode?
+    private var rightWreckNode: SKSpriteNode?
+    private var centerWreckNode: SKSpriteNode?
+    private var leftWreckCrop: SKCropNode?
+    private var rightWreckCrop: SKCropNode?
     private var bodyTex: SKTexture?
     private var leftWreckTex: SKTexture?
     private var rightWreckTex: SKTexture?
@@ -81,8 +149,20 @@ class BossController {
     func setup(scene: SKScene) {
         self.scene = scene
         expFrames = (1...BossController.EXPLODE_FRAME_COUNT).map { GameArt.texture("Images/boss_explode_f\($0)") }
-        let n = SKSpriteNode(); n.zPosition = 25; n.isHidden = true
-        scene.addChild(n); bodyNode = n
+        func sprite(_ z: CGFloat) -> SKSpriteNode {
+            let n = SKSpriteNode(); n.zPosition = z; n.isHidden = true
+            scene.addChild(n); return n
+        }
+        bodyNode = sprite(36)
+        leftWreckNode = sprite(36.1)
+        rightWreckNode = sprite(36.1)
+        centerWreckNode = sprite(36.2)
+        let lc = SKCropNode(); lc.zPosition = 36.1; lc.isHidden = true; scene.addChild(lc)
+        let rc = SKCropNode(); rc.zPosition = 36.1; rc.isHidden = true; scene.addChild(rc)
+        let ls = SKSpriteNode(); ls.name = "wreck"; lc.addChild(ls)
+        let rs = SKSpriteNode(); rs.name = "wreck"; rc.addChild(rs)
+        leftWreckCrop = lc
+        rightWreckCrop = rc
     }
 
     func onSizeChanged(width: Int, height: Int) {
@@ -113,8 +193,10 @@ class BossController {
         exploding = false; explosionTimer = 0; activeExpFrame = 0
         victorySequenceTimer = 0; victoryCascadeGate = 0; victoryShatterFired = false
         s5ShowTerminalWreck = false; corePhaseOpen = false; visualFlags = 0; s5CoreArmorBank = 0
+        resetDesperationTimers()
         hasDroppedLeftReward = false; hasDroppedRightReward = false; hasDroppedCoreReward = false
         s6SawOneFlankDown = false; s6SawBothFlanksDown = false
+        partSfxPlayed = [Bool](repeating: false, count: BossController.MAX_PART_COUNT)
         for p in parts where p.halfW > 0 { p.isDestroyed = false; p.health = p.maxHealth; p.shudderTimer = 0 }
         syncPartWorldPositions()
         updateNode()
@@ -139,10 +221,35 @@ class BossController {
 
     func consumeVisualFlags() -> Int { let f = visualFlags; visualFlags = 0; return f }
 
+    func refreshPhaseFlags() {
+        if !active || exploding || entering {
+            corePhaseOpen = isCoreVulnerable()
+            return
+        }
+        let open = isCoreVulnerable()
+        if open && !corePhaseOpen {
+            visualFlags |= BossController.FX_PHASE
+        }
+        corePhaseOpen = open
+    }
+
     func deactivate() {
         active = false; entering = false; exploding = false
+        explosionTimer = 0; activeExpFrame = 0
+        victorySequenceTimer = 0; victoryCascadeGate = 0; victoryShatterFired = false
+        s5ShowTerminalWreck = false; corePhaseOpen = false; visualFlags = 0
         SoundManager.instance.stopAlarm()
-        bodyNode?.isHidden = true
+        resetDesperationTimers()
+        hideBossSprites()
+    }
+
+    private func resetDesperationTimers() {
+        s1SweepTimer = 0; s1SweepFireTimer = 0; s1SweepDirection = 1
+        s2DesperationTimer = 0; s2RingTimer = 0; s2SniperTimer = 0
+        s3DesperationAngle = 0; s3SpiralTimer = 0
+        s4SpiralTimer = 0; s4SpiralAngle = 0
+        s7RingTimer = 0; s7RingAngle = 0
+        s8FanTimer = 0
     }
 
     func checkStage5CollisionAt(worldX: Float, worldY: Float, damage: Int) -> Bool {
@@ -219,12 +326,14 @@ class BossController {
         s5WeaponPower = playerWeaponPower; s5BombStock = bombStock; stageTimeline = timeline
         if !active { return }
         tickShudder(dt: dt)
+        if !exploding { playNewModuleSfx() }
         if exploding {
             if triPartBoss { updateVictory(dt: dt); return }
             explosionTimer += dt
             let idx = Int(explosionTimer / BossController.EXPLODE_FRAME_SEC)
-            if idx >= BossController.EXPLODE_FRAME_COUNT { exploding = false; active = false }
+            if idx >= BossController.EXPLODE_FRAME_COUNT { exploding = false; active = false; hideBossSprites(); return }
             else { activeExpFrame = idx }
+            updateNode()
             return
         }
         if parts[BossController.TYPE_CORE].isDestroyed {
@@ -249,6 +358,33 @@ class BossController {
         updateNode()
     }
 
+    private func playNewModuleSfx() {
+        let heavy: Set<Int> = [
+            BossController.TYPE_LEFT_WING, BossController.TYPE_RIGHT_WING,
+            BossController.TYPE_STAGE2_LEFT_TREAD, BossController.TYPE_STAGE2_RIGHT_TREAD,
+            BossController.TYPE_STAGE3_LEFT_FLAK, BossController.TYPE_STAGE3_RIGHT_FLAK,
+            BossController.TYPE_STAGE3_MEGA_CANNON,
+            BossController.TYPE_STAGE4_LEFT_MORTAR, BossController.TYPE_STAGE4_RIGHT_MORTAR,
+            BossController.TYPE_STAGE4_HEAVY_GATLING,
+            BossController.TYPE_WINTER_LEFT_HOWITZER, BossController.TYPE_WINTER_RIGHT_HOWITZER,
+            BossController.TYPE_WINTER_BLIZZARD,
+            BossController.TYPE_ATOLL_LEFT_GUN, BossController.TYPE_ATOLL_RIGHT_GUN,
+            BossController.TYPE_ATOLL_AA,
+            BossController.TYPE_LEFT_FLANK, BossController.TYPE_RIGHT_FLANK
+        ]
+        for i in 0..<BossController.MAX_PART_COUNT {
+            let part = parts[i]
+            if i != BossController.TYPE_CORE && part.isDestroyed && part.halfW > 0 && !partSfxPlayed[i] {
+                partSfxPlayed[i] = true
+                if heavy.contains(i) {
+                    SoundManager.instance.playSFX(SoundManager.SFX_HEAVY_EXPLOSION)
+                } else {
+                    SoundManager.instance.playSFX(SoundManager.SFX_SMALL_EXPLOSION)
+                }
+            }
+        }
+    }
+
     private func updateCombat(dt: Float, playerX: Float, playerY: Float, weapons: EnemyWeaponSystem) {
         let bw = bodyHalfW * 2
         switch combatKind {
@@ -264,35 +400,176 @@ class BossController {
             weapons.updateStage1Boss(dt: dt, centerX: coreX, centerY: coreY, bossW: bw,
                                      playerX: playerX, playerY: playerY,
                                      leftWingDead: parts[1].isDestroyed, rightWingDead: parts[2].isDestroyed)
+            firePlaneDesperation(dt: dt, weapons: weapons)
         case .tank:
             if entering { weapons.resetStage2Boss(); return }
             weapons.updateStage2Boss(dt: dt, cX: coreX, cY: coreY, w: bw, pX: playerX, pY: playerY,
                                      leftTreadDead: parts[4].isDestroyed, rightTreadDead: parts[5].isDestroyed,
                                      turretDead: parts[6].isDestroyed)
+            fireTankDesperation(dt: dt, weapons: weapons, playerX: playerX, playerY: playerY)
         case .battleship:
             if entering { weapons.resetStage3Boss(); return }
             weapons.updateStage3Boss(dt: dt, cX: coreX, cY: coreY, w: bw, pX: playerX, pY: playerY,
                                      leftFlakDead: parts[7].isDestroyed, rightFlakDead: parts[8].isDestroyed,
                                      cannonDead: parts[9].isDestroyed)
+            fireBattleshipDesperation(dt: dt, weapons: weapons)
         case .jungle:
             if entering { weapons.resetStage4Boss(); return }
             weapons.updateStage4Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
                                      pX: playerX, pY: playerY,
                                      leftMortarDead: parts[10].isDestroyed, rightMortarDead: parts[11].isDestroyed,
                                      gatlingDead: parts[12].isDestroyed)
+            fireJungleDesperation(dt: dt, weapons: weapons)
         case .winter:
             if entering { weapons.resetStage7Boss(); return }
             weapons.updateStage7Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
                                      pX: playerX, pY: playerY,
                                      leftHowitzerDead: parts[10].isDestroyed, rightHowitzerDead: parts[11].isDestroyed,
                                      blizzardDead: parts[12].isDestroyed)
+            fireWinterDesperation(dt: dt, weapons: weapons)
         case .atoll:
             if entering { weapons.resetStage8Boss(); return }
             weapons.updateStage8Boss(dt: dt, cX: coreX, cY: coreY, bossW: bw, bossHalfH: bodyHalfH,
                                      pX: playerX, pY: playerY,
                                      leftGunDead: parts[10].isDestroyed, rightGunDead: parts[11].isDestroyed,
                                      aaDead: parts[12].isDestroyed)
+            fireAtollDesperation(dt: dt, weapons: weapons)
         }
+    }
+
+    private func firePlaneDesperation(dt: Float, weapons: EnemyWeaponSystem) {
+        guard isCoreVulnerable() else { return }
+        s1SweepTimer += dt * s1SweepDirection
+        s1SweepFireTimer -= dt
+        if s1SweepFireTimer <= 0 {
+            s1SweepFireTimer = BossController.S1_SWEEP_INTERVAL
+            let baseAngle = BossController.DOWN_ANGLE
+                + sinf(s1SweepTimer * BossController.S1_SWEEP_FREQ) * BossController.S1_SWEEP_AMP
+            let ox = coreX
+            let oy = coreY - bodyHalfH * 0.10
+            var i = -2
+            while i <= 2 {
+                let ang = baseAngle + Float(i) * BossController.S1_SWEEP_ARC_STEP
+                weapons.fireBullet(startX: ox, startY: oy,
+                                   velX: cosf(ang) * BossController.S1_SWEEP_SPEED,
+                                   velY: sinf(ang) * BossController.S1_SWEEP_SPEED)
+                i += 1
+            }
+        }
+    }
+
+    private func fireTankDesperation(dt: Float, weapons: EnemyWeaponSystem, playerX: Float, playerY: Float) {
+        guard isCoreVulnerable() else { return }
+        s2DesperationTimer += dt
+        s2RingTimer -= dt
+        if s2RingTimer <= 0 {
+            s2RingTimer = BossController.S2_RING_INTERVAL
+            let ox = coreX
+            let oy = coreY - bodyHalfH * 0.40
+            var k = 0
+            while k < BossController.S2_RING_COUNT {
+                let ang = Float(k) * BossController.S2_RING_STEP
+                weapons.fireBullet(startX: ox, startY: oy,
+                                   velX: cosf(ang) * BossController.S2_RING_SPEED,
+                                   velY: sinf(ang) * BossController.S2_RING_SPEED)
+                k += 1
+            }
+        }
+        s2SniperTimer -= dt
+        if s2SniperTimer <= 0 {
+            s2SniperTimer = BossController.S2_SNIPER_INTERVAL
+            let ox = coreX
+            let oy = coreY - bodyHalfH * 0.40
+            fireAtPlayer(weapons: weapons, originX: ox - BossController.S2_SNIPER_SEP, originY: oy,
+                         targetX: playerX, targetY: playerY, speed: BossController.S2_SNIPER_SPEED)
+            fireAtPlayer(weapons: weapons, originX: ox + BossController.S2_SNIPER_SEP, originY: oy,
+                         targetX: playerX, targetY: playerY, speed: BossController.S2_SNIPER_SPEED)
+        }
+    }
+
+    private func fireBattleshipDesperation(dt: Float, weapons: EnemyWeaponSystem) {
+        guard isCoreVulnerable() else { return }
+        s3DesperationAngle += BossController.S3_SPIRAL_SPIN * dt
+        s3SpiralTimer -= dt
+        if s3SpiralTimer <= 0 {
+            s3SpiralTimer = BossController.S3_SPIRAL_INTERVAL
+            let ox = coreX
+            let oy = coreY - bodyHalfH * 0.12
+            var k = 0
+            while k < BossController.S3_SPIRAL_COUNT {
+                let ang = s3DesperationAngle + Float(k) * BossController.S3_SPIRAL_STEP
+                weapons.fireBullet(startX: ox, startY: oy,
+                                   velX: cosf(ang) * BossController.S3_SPIRAL_SPEED,
+                                   velY: sinf(ang) * BossController.S3_SPIRAL_SPEED)
+                k += 1
+            }
+        }
+    }
+
+    private func fireJungleDesperation(dt: Float, weapons: EnemyWeaponSystem) {
+        guard isCoreVulnerable() else { return }
+        s4SpiralAngle += BossController.S4_SPIRAL_SPIN * dt
+        s4SpiralTimer -= dt
+        if s4SpiralTimer <= 0 {
+            s4SpiralTimer = BossController.S4_SPIRAL_INTERVAL
+            let ox = coreX
+            let oy = coreY
+            let spd = BossController.S4_SPIRAL_SPEED
+            var k = 0
+            while k < BossController.S4_SPIRAL_COUNT {
+                let step = Float(k) * BossController.S4_SPIRAL_STEP
+                let aCw = s4SpiralAngle + step
+                let aCcw = -s4SpiralAngle + step
+                weapons.fireBullet(startX: ox, startY: oy, velX: cosf(aCw) * spd, velY: sinf(aCw) * spd)
+                weapons.fireBullet(startX: ox, startY: oy, velX: cosf(aCcw) * spd, velY: sinf(aCcw) * spd)
+                k += 1
+            }
+        }
+    }
+
+    private func fireWinterDesperation(dt: Float, weapons: EnemyWeaponSystem) {
+        guard isCoreVulnerable() else { return }
+        s7RingAngle += BossController.S7_RING_SPIN * dt
+        s7RingTimer -= dt
+        if s7RingTimer <= 0 {
+            s7RingTimer = BossController.S7_RING_INTERVAL
+            let ox = coreX
+            let oy = coreY
+            let spd = BossController.S7_RING_SPEED
+            var k = 0
+            while k < BossController.S7_RING_COUNT {
+                let ang = s7RingAngle + Float(k) * BossController.S7_RING_STEP
+                weapons.fireBullet(startX: ox, startY: oy, velX: cosf(ang) * spd, velY: sinf(ang) * spd)
+                k += 1
+            }
+        }
+    }
+
+    private func fireAtollDesperation(dt: Float, weapons: EnemyWeaponSystem) {
+        guard isCoreVulnerable() else { return }
+        s8FanTimer -= dt
+        if s8FanTimer <= 0 {
+            s8FanTimer = BossController.S8_FAN_INTERVAL
+            let ox = coreX
+            let oy = coreY + bodyHalfH * 0.912
+            let spd = BossController.S8_FAN_SPEED
+            var i = -2
+            while i <= 2 {
+                let ang = BossController.DOWN_ANGLE + Float(i) * BossController.S8_FAN_STEP
+                weapons.fireBullet(startX: ox, startY: oy, velX: cosf(ang) * spd, velY: sinf(ang) * spd)
+                i += 1
+            }
+        }
+    }
+
+    private func fireAtPlayer(weapons: EnemyWeaponSystem, originX: Float, originY: Float,
+                              targetX: Float, targetY: Float, speed: Float) {
+        let dx = targetX - originX
+        let dy = targetY - originY
+        let lenSq = dx * dx + dy * dy
+        if lenSq < 0.0001 { return }
+        let inv = speed / sqrtf(lenSq)
+        weapons.fireBullet(startX: originX, startY: originY, velX: dx * inv, velY: dy * inv)
     }
 
     private func updateOrbitCombat(dt: Float, playerX: Float, playerY: Float, weapons: EnemyWeaponSystem, bw: Float) {
@@ -341,7 +618,8 @@ class BossController {
             }
             SoundManager.instance.playSFX(SoundManager.SFX_BOMB); visualFlags |= BossController.FX_VICTORY_SHATTER
         }
-        if t >= BossController.VICTORY_END { exploding = false; active = false }
+        if t >= BossController.VICTORY_END { exploding = false; active = false; hideBossSprites(); return }
+        updateNode()
     }
 
     private func spawnVictoryExplosion() {
@@ -354,12 +632,126 @@ class BossController {
         return Float((victoryLcg >> 8) & 0xFFFFFF) / 16777215.0
     }
 
+    private func hideBossSprites() {
+        bodyNode?.isHidden = true
+        leftWreckNode?.isHidden = true
+        rightWreckNode?.isHidden = true
+        centerWreckNode?.isHidden = true
+        leftWreckCrop?.isHidden = true
+        rightWreckCrop?.isHidden = true
+    }
+
     private func updateNode() {
-        guard let node = bodyNode, let tex = bodyTex, let scene = scene else { return }
-        if !active { node.isHidden = true; return }
-        node.isHidden = false; node.texture = tex
-        node.size = CGSize(width: CGFloat(bodyHalfW*2), height: CGFloat(bodyHalfH*2))
-        node.position = CGPoint(x: CGFloat(coreX), y: CGFloat(scene.size.height) - CGFloat(coreY))
+        guard let node = bodyNode, let scene = scene else { return }
+        if !active { hideBossSprites(); return }
+        let size = CGSize(width: CGFloat(bodyHalfW * 2), height: CGFloat(bodyHalfH * 2))
+        let pos = CGPoint(x: CGFloat(coreX), y: scene.size.height - CGFloat(coreY))
+        let tri = combatKind == .orbit || combatKind == .canopy
+
+        if exploding && !triPartBoss, activeExpFrame >= 0, activeExpFrame < expFrames.count {
+            node.isHidden = false
+            node.texture = expFrames[activeExpFrame]
+            node.size = size
+            node.position = pos
+            node.zPosition = 36.4
+        } else if let tex = bodyTex, !(triPartBoss && s5ShowTerminalWreck) {
+            node.isHidden = false
+            node.texture = tex
+            node.size = size
+            node.position = pos
+            node.zPosition = 36
+        } else {
+            node.isHidden = true
+        }
+
+        let flags = wreckFlags()
+        placeWreck(leftWreckNode, tex: leftWreckTex, show: flags.left, size: size, pos: pos,
+                   crop: tri ? leftWreckCrop : nil, leftHalf: true)
+        placeWreck(rightWreckNode, tex: rightWreckTex, show: flags.right, size: size, pos: pos,
+                   crop: tri ? rightWreckCrop : nil, leftHalf: false)
+        if tri {
+            leftWreckNode?.isHidden = true
+            rightWreckNode?.isHidden = true
+        } else {
+            leftWreckCrop?.isHidden = true
+            rightWreckCrop?.isHidden = true
+        }
+        if let center = centerWreckNode {
+            let showCenter = flags.center && centerWreckTex != nil
+            center.isHidden = !showCenter
+            if showCenter {
+                center.texture = centerWreckTex
+                center.size = size
+                center.position = pos
+            }
+        }
+        if triPartBoss && s5ShowTerminalWreck, let center = centerWreckNode, centerWreckTex != nil {
+            center.isHidden = false
+            center.texture = centerWreckTex
+            center.size = size
+            center.position = pos
+            leftWreckCrop?.isHidden = true
+            rightWreckCrop?.isHidden = true
+        }
+    }
+
+    private func wreckFlags() -> (left: Bool, right: Bool, center: Bool) {
+        switch combatKind {
+        case .orbit, .canopy:
+            return (parts[BossController.TYPE_LEFT_FLANK].isDestroyed,
+                    parts[BossController.TYPE_RIGHT_FLANK].isDestroyed,
+                    false)
+        case .atoll:
+            return (parts[BossController.TYPE_ATOLL_LEFT_GUN].isDestroyed,
+                    parts[BossController.TYPE_ATOLL_RIGHT_GUN].isDestroyed,
+                    parts[BossController.TYPE_ATOLL_AA].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
+        case .winter:
+            return (parts[BossController.TYPE_WINTER_LEFT_HOWITZER].isDestroyed,
+                    parts[BossController.TYPE_WINTER_RIGHT_HOWITZER].isDestroyed,
+                    parts[BossController.TYPE_WINTER_BLIZZARD].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
+        case .jungle:
+            return (parts[BossController.TYPE_STAGE4_LEFT_MORTAR].isDestroyed,
+                    parts[BossController.TYPE_STAGE4_RIGHT_MORTAR].isDestroyed,
+                    parts[BossController.TYPE_STAGE4_HEAVY_GATLING].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
+        case .battleship:
+            return (parts[BossController.TYPE_STAGE3_LEFT_FLAK].isDestroyed,
+                    parts[BossController.TYPE_STAGE3_RIGHT_FLAK].isDestroyed,
+                    parts[BossController.TYPE_STAGE3_MEGA_CANNON].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
+        case .tank:
+            return (parts[BossController.TYPE_STAGE2_LEFT_TREAD].isDestroyed,
+                    parts[BossController.TYPE_STAGE2_RIGHT_TREAD].isDestroyed,
+                    parts[BossController.TYPE_STAGE2_MAIN_TURRET].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
+        case .plane:
+            return (parts[BossController.TYPE_LEFT_WING].isDestroyed,
+                    parts[BossController.TYPE_RIGHT_WING].isDestroyed,
+                    parts[BossController.TYPE_TURRET].isDestroyed || parts[BossController.TYPE_CORE].isDestroyed)
+        }
+    }
+
+    private func placeWreck(_ node: SKSpriteNode?, tex: SKTexture?, show: Bool, size: CGSize, pos: CGPoint,
+                            crop: SKCropNode?, leftHalf: Bool) {
+        guard let tex, show else {
+            node?.isHidden = true
+            crop?.isHidden = true
+            return
+        }
+        if let crop {
+            let sprite = crop.childNode(withName: "wreck") as? SKSpriteNode
+            sprite?.texture = tex
+            sprite?.size = size
+            sprite?.position = .zero
+            let mask = SKSpriteNode(color: .white, size: CGSize(width: size.width * 0.5, height: size.height))
+            mask.position = CGPoint(x: leftHalf ? -size.width * 0.25 : size.width * 0.25, y: 0)
+            crop.maskNode = mask
+            crop.position = pos
+            crop.isHidden = false
+            node?.isHidden = true
+        } else if let node {
+            node.texture = tex
+            node.size = size
+            node.position = pos
+            node.isHidden = false
+        }
     }
 
     private func syncHitboxes() {

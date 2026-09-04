@@ -5,9 +5,10 @@ import CoreText
 /// Android `assets/fonts/arcade_font.ttf` is Press Start 2P. iOS UIFont name is the PostScript name, not the filename.
 enum ArcadeTypeface {
     static let postScriptName: String = {
-        let url = Bundle.main.url(forResource: "arcade_font", withExtension: "ttf", subdirectory: "Fonts")
-            ?? Bundle.main.url(forResource: "arcade_font", withExtension: "ttf")
-        if let url {
+        for candidate in ["PressStart2P", "Press Start 2P"] {
+            if UIFont(name: candidate, size: 12) != nil { return candidate }
+        }
+        if let url = Bundle.main.url(forResource: "arcade_font", withExtension: "ttf", subdirectory: "Fonts") {
             CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
             if let descs = CTFontManagerCreateFontDescriptorsFromURL(url as CFURL) as? [CTFontDescriptor],
                let desc = descs.first,
@@ -15,9 +16,6 @@ enum ArcadeTypeface {
                UIFont(name: name, size: 12) != nil {
                 return name
             }
-        }
-        for candidate in ["PressStart2P", "Press Start 2P"] {
-            if UIFont(name: candidate, size: 12) != nil { return candidate }
         }
         return UIFont.boldSystemFont(ofSize: 12).fontName
     }()
@@ -48,6 +46,7 @@ final class UIController {
 
     private(set) var hits = Hits()
     private weak var scene: SKScene?
+    private weak var hudParent: SKNode?
     private var overlay: SKNode?
     private var screenW: CGFloat = 0
     private var screenH: CGFloat = 0
@@ -67,8 +66,9 @@ final class UIController {
     private let focusStroke = UIColor(red: 1, green: 0xD5/255, blue: 0x4A/255, alpha: 1)
     private let gageEmpty = UIColor(red: 0x5A/255, green: 0x5A/255, blue: 0x5A/255, alpha: 1)
 
-    func setup(scene: SKScene) {
+    func setup(scene: SKScene, hudParent: SKNode? = nil) {
         self.scene = scene
+        self.hudParent = hudParent
         arcadeName = ArcadeTypeface.postScriptName
         onSizeChanged(width: scene.size.width, height: scene.size.height)
     }
@@ -81,8 +81,9 @@ final class UIController {
 
     private func px(_ v: CGFloat) -> CGFloat { v * s }
 
-    /// aspectFill crops the 1080-wide canvas on a taller phone; keep chrome in the visible strip.
+    /// aspectFit shows the full 1080-wide canvas; aspectFill would crop the sides on a taller phone.
     private func hudXInset() -> CGFloat {
+        guard scene?.scaleMode == .aspectFill else { return 0 }
         guard let view = scene?.view, view.bounds.height > 1, screenH > 1 else { return 0 }
         let viewAspect = view.bounds.width / view.bounds.height
         let sceneAspect = screenW / screenH
@@ -91,6 +92,17 @@ final class UIController {
             return max(0, (screenW - visibleW) * 0.5)
         }
         return 0
+    }
+
+    private func visibleLeft() -> CGFloat { hudXInset() }
+    private func visibleRight() -> CGFloat { screenW - hudXInset() }
+    private func visibleWidth() -> CGFloat { max(1, visibleRight() - visibleLeft()) }
+    private func safeTextWidth() -> CGFloat { max(80, visibleWidth() - px(32)) }
+
+    private func fittedSize(_ text: String, desired: CGFloat, maxWidth: CGFloat) -> CGFloat {
+        var sz = desired
+        while sz > 10 && measure(text, size: sz) > maxWidth { sz -= 1 }
+        return sz
     }
 
     // MARK: - Frame render
@@ -128,7 +140,7 @@ final class UIController {
         guard let scene = scene else { return }
         overlay?.removeFromParent()
         let root = SKNode(); root.name = "arcadeUI"; root.zPosition = 200
-        scene.addChild(root); overlay = root
+        (hudParent ?? scene).addChild(root); overlay = root
         hits = Hits()
 
         switch state {
@@ -201,7 +213,7 @@ final class UIController {
         let srcH = max(logo.size.height, 1)
         var destH = maxH
         var destW = destH * (srcW / srcH)
-        let maxW = screenW * 0.92 * 0.67 * 1.20
+        let maxW = visibleWidth() * 0.92 * 0.67 * 1.20
         if destW > maxW { destW = maxW; destH = destW * (srcH / srcW) }
         logo.size = CGSize(width: destW, height: destH)
         logo.position = CGPoint(x: screenW * 0.5, y: spriteY(androidTop: screenH * 0.06, height: destH))
@@ -265,8 +277,8 @@ final class UIController {
         let bottom = screenH * 0.76
         let step = (bottom - top) / 6
         let rowHalf = step * 0.42
-        let hitLeft = screenW * 0.10
-        let hitRight = screenW * 0.90
+        let hitLeft = visibleLeft() + visibleWidth() * 0.04
+        let hitRight = visibleRight() - visibleWidth() * 0.04
         for i in 0..<7 {
             let lineY = top + CGFloat(i) * step
             hits.diffRows[i] = androidRect(hitLeft, lineY - rowHalf, hitRight, lineY + rowHalf)
@@ -286,7 +298,7 @@ final class UIController {
         center(root, "SELECT FIGHTER", cx: cx, ay: screenH * 0.14, size: 42, color: gold)
 
         let boxHeight = px(320)
-        let textBlockHeight = px(220)
+        let textBlockHeight = px(340)
         let totalGroupHeight = boxHeight + textBlockHeight
         let boxTop = cy - totalGroupHeight * 0.5
         let boxBottom = boxTop + boxHeight
@@ -303,17 +315,18 @@ final class UIController {
             drawArcadeFrame(root, rect: fighterIndex == 1 ? rightA : leftA, focused: true)
         }
 
-        let leftCX = (screenW * 0.08 + screenW * 0.46) * 0.5
-        let rightCX = (screenW * 0.54 + screenW * 0.92) * 0.5
-        let line1Y = boxBottom + px(48)
-        let line2Y = line1Y + px(28)
-        let line3Y = line2Y + px(32)
-        center(root, "TYPE-01:", cx: leftCX, ay: line1Y, size: 32, color: gold)
-        center(root, "P-38 LIGHTNING", cx: leftCX, ay: line2Y, size: 32, color: gold)
-        center(root, "- FOCUS STORM -", cx: leftCX, ay: line3Y, size: 26, color: white)
-        center(root, "TYPE-02:", cx: rightCX, ay: line1Y, size: 32, color: gold)
-        center(root, "F6F HELLCAT", cx: rightCX, ay: line2Y, size: 32, color: gold)
-        center(root, "- LIGHTNING BLITZ -", cx: rightCX, ay: line3Y, size: 26, color: white)
+        let leftCX = leftA.midX
+        let rightCX = rightA.midX
+        let colW = leftA.width - px(8)
+        let line1Y = boxBottom + px(110)
+        let line2Y = line1Y + px(64)
+        let line3Y = line2Y + px(72)
+        center(root, "TYPE-01:", cx: leftCX, ay: line1Y, size: 32, color: gold, maxWidth: colW)
+        center(root, "P-38 LIGHTNING", cx: leftCX, ay: line2Y, size: 32, color: gold, maxWidth: colW)
+        center(root, "- FOCUS STORM -", cx: leftCX, ay: line3Y, size: 26, color: white, maxWidth: colW)
+        center(root, "TYPE-02:", cx: rightCX, ay: line1Y, size: 32, color: gold, maxWidth: colW)
+        center(root, "F6F HELLCAT", cx: rightCX, ay: line2Y, size: 32, color: gold, maxWidth: colW)
+        center(root, "- LIGHTNING BLITZ -", cx: rightCX, ay: line3Y, size: 26, color: white, maxWidth: colW)
 
         let returnY = screenH * 0.88
         center(root, "[ RETURN TO TITLE ]", cx: cx, ay: returnY, size: 42, color: gold)
@@ -441,6 +454,11 @@ final class UIController {
         if elapsed < 0.5 { fade = max(0, min(1, elapsed / 0.5)) }
         var cardTop: CGFloat = 0
         if let tex = briefing {
+            let fill = SKSpriteNode(color: sampleTopLeft(tex), size: CGSize(width: screenW, height: screenH))
+            fill.position = CGPoint(x: screenW * 0.5, y: screenH * 0.5)
+            fill.alpha = 1
+            fill.zPosition = 0
+            root.addChild(fill)
             let img = SKSpriteNode(texture: tex)
             let scale = min(screenW / max(tex.size().width, 1), screenH / max(tex.size().height, 1))
             let drawW = tex.size().width * scale
@@ -466,15 +484,15 @@ final class UIController {
             "DEVELOPER", "Claudiu Colteu", " ", "SPECIAL THANKS TO",
             "THE SHMUP COMMUNITY", " ", "THANK YOU FOR PLAYING!",
         ]
-        var y = screenH - CGFloat(elapsed) * px(75)
+        var y = screenH - CGFloat(elapsed) * 75
         let cx = screenW * 0.5
         for (i, line) in lines.enumerated() {
-            let goldLine = i == 0 || line == "THANK YOU FOR PLAYING!"
-            if y >= -px(60) && y <= screenH + px(60) {
+            let goldLine = i == 0
+            if y >= -60 && y <= screenH + 60 {
                 center(root, line, cx: cx, ay: y, size: goldLine ? 42 : 32,
                        color: goldLine ? gold : white)
             }
-            y += px(55)
+            y += 55
         }
         if elapsed >= 22, (Int(elapsed * 3) % 2) == 0 {
             center(root, "TOUCH SCREEN TO REGISTER SCORE", cx: cx, ay: screenH * 0.85,
@@ -532,6 +550,7 @@ final class UIController {
         n.size = CGSize(width: srcW * scale, height: srcH * scale)
         n.position = CGPoint(x: box.midX, y: box.midY)
         n.zPosition = 5
+        ArcadeOutline.attach(to: n)
         root.addChild(n)
     }
 
@@ -546,8 +565,11 @@ final class UIController {
     @discardableResult
     private func drawVolumeGage(_ root: SKNode, cx: CGFloat, baseline: CGFloat, fill: Float,
                                 flashT: Float) -> (CGRect, CGRect) {
-        let gageSize: CGFloat = 88
+        var gageSize: CGFloat = 88
         let caretSize: CGFloat = 56
+        let caretBudget = measure("<", size: caretSize) * 2 + px(80)
+        let maxGageW = max(80, safeTextWidth() - caretBudget)
+        while gageSize > 24 && measure("■", size: gageSize) * 10 > maxGageW { gageSize -= 2 }
         let slotW = measure("■", size: gageSize)
         let slots = 10
         let squaresW = slotW * CGFloat(slots)
@@ -581,9 +603,24 @@ final class UIController {
     // MARK: - Text
 
     private func center(_ root: SKNode, _ text: String, cx: CGFloat, ay: CGFloat,
-                        size: CGFloat, color: UIColor) {
-        let w = measure(text, size: size)
-        hudLeft(root, text, ax: cx - w * 0.5, ay: ay, size: size, color: color)
+                        size: CGFloat, color: UIColor, maxWidth: CGFloat? = nil) {
+        let cap = maxWidth ?? safeTextWidth()
+        let sz = fittedSize(text, desired: size, maxWidth: cap)
+        let accent = (color == gold || color.cgColor.components?.prefix(3).elementsEqual([1, 1, 0]) == true)
+            ? accentGold : accentGray
+        func lab(_ c: UIColor, dx: CGFloat, dy: CGFloat, z: CGFloat) -> SKLabelNode {
+            let font = uiFont(sz)
+            let l = SKLabelNode(fontNamed: font.fontName)
+            l.text = text; l.fontSize = font.pointSize; l.fontColor = c
+            l.horizontalAlignmentMode = .center
+            l.verticalAlignmentMode = .baseline
+            l.position = CGPoint(x: cx + dx, y: screenH - ay - dy)
+            l.zPosition = z
+            return l
+        }
+        root.addChild(lab(black, dx: px(4), dy: px(4), z: 1))
+        root.addChild(lab(accent, dx: px(2), dy: px(2), z: 2))
+        root.addChild(lab(color, dx: 0, dy: 0, z: 3))
     }
 
     private func hudLeft(_ root: SKNode, _ text: String, ax: CGFloat, ay: CGFloat,
@@ -607,6 +644,30 @@ final class UIController {
 
     // MARK: - Geometry
 
+    private func sampleTopLeft(_ tex: SKTexture) -> UIColor {
+        let cg = tex.cgImage()
+        guard let crop = cg.cropping(to: CGRect(x: 0, y: 0, width: 1, height: 1)) else { return .black }
+        var pixel = [UInt8](repeating: 0, count: 4)
+        guard let ctx = CGContext(
+            data: &pixel,
+            width: 1,
+            height: 1,
+            bitsPerComponent: 8,
+            bytesPerRow: 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return .black }
+        ctx.draw(crop, in: CGRect(x: 0, y: 0, width: 1, height: 1))
+        if pixel[3] == 0 { return .black }
+        let a = CGFloat(pixel[3]) / 255
+        return UIColor(
+            red: CGFloat(pixel[0]) / 255 / a,
+            green: CGFloat(pixel[1]) / 255 / a,
+            blue: CGFloat(pixel[2]) / 255 / a,
+            alpha: 1
+        )
+    }
+
     private func dimScreen(_ root: SKNode) {
         let n = SKSpriteNode(color: dim, size: CGSize(width: screenW, height: screenH))
         n.anchorPoint = .zero; n.position = .zero; n.zPosition = 0
@@ -622,8 +683,9 @@ final class UIController {
     }
 
     private func goldHit(cx: CGFloat, ay: CGFloat, text: String, extra: CGSize) -> CGRect {
-        let font = uiFont(42)
-        let w = measure(text, size: 42)
+        let sz = fittedSize(text, desired: 42, maxWidth: safeTextWidth())
+        let font = uiFont(sz)
+        let w = measure(text, size: sz)
         let l = cx - w * 0.5
         let t = ay - font.ascender
         let r = cx + w * 0.5

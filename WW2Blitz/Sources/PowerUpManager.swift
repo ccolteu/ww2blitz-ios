@@ -58,10 +58,11 @@ class PowerUpItem {
         }
         for _ in 0..<PowerUpItem.POOL_SIZE {
             let n = SKSpriteNode(texture: powerTex)
-            n.zPosition = 42
+            n.zPosition = 52
             n.isHidden = true
             scene.addChild(n)
             nodes.append(n)
+            ArcadeOutline.attach(to: n)
         }
     }
 
@@ -146,6 +147,7 @@ class PowerUpItem {
             n.texture = powerTex
         }
         n.size = CGSize(width: hx * 2, height: hx * 2)
+        ArcadeOutline.sync(n)
     }
 
     private func pullMedal(_ s: PowerUpSlot, dt: Float, px: Float, py: Float, edge: Float, sw: Float) {
@@ -191,7 +193,7 @@ class PowerUpItem {
 class PowerUpManager {
     static let instance = PowerUpManager()
     let items = PowerUpItem()
-    private var lootSeed: UInt64 = 1
+    private var lootSeed: UInt64 = 2463534242
 
     static let MEDAL_SCORE_FACE = 2000
     static let MEDAL_SCORE_EDGE = 200

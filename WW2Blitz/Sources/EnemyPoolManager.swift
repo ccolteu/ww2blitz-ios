@@ -83,6 +83,7 @@ class EnemyPoolManager {
             let n = SKSpriteNode()
             n.zPosition = 35; n.isHidden = true
             scene.addChild(n); enemyNodes.append(n)
+            ArcadeOutline.attach(to: n)
         }
         computeHalfSizes()
         rebuildSweepLut()
@@ -117,7 +118,9 @@ class EnemyPoolManager {
     func halfHOf(_ type: Int) -> Float { halfH[typeIndex(type)] }
     func halfWOf(_ e: Enemy) -> Float { halfWOf(e.type) * drawScale(e) }
     func halfHOf(_ e: Enemy) -> Float { halfHOf(e.type) * drawScale(e) }
-    private func drawScale(_ e: Enemy) -> Float { e.isGroundHeavy ? EnemyPoolManager.GROUND_DRAW_SCALE : 1 }
+    private func drawScale(_ e: Enemy) -> Float {
+        (e.isLandVehicle || e.isWagon) ? EnemyPoolManager.GROUND_DRAW_SCALE : 1
+    }
     private func typeIndex(_ t: Int) -> Int { t >= 0 && t < EnemyPoolManager.TYPE_COUNT ? t : 0 }
 
     func countActive() -> Int { pool.filter { $0.isActive }.count }
@@ -214,6 +217,8 @@ class EnemyPoolManager {
         }
         node.position = CGPoint(x: CGFloat(e.x + dx), y: CGFloat(sceneH - e.y))
         node.zRotation = .pi  // Enemies drawn rotated 180° (facing down in Android) = face up in SpriteKit
+        node.zPosition = e.isGroundHeavy ? 32 : 35
+        ArcadeOutline.sync(node)
     }
 
     private func texureFor(_ e: Enemy) -> SKTexture? {
@@ -362,7 +367,7 @@ class EnemyPoolManager {
     }
 
     private func fireInterceptorSpread(_ e: Enemy, weapons: EnemyWeaponSystem, speed: Float) {
-        let span = 1 + (StageData.liveInstance?.burstBonus() ?? 0)
+        let span = max(0, 1 + (StageData.liveInstance?.burstBonus() ?? 0))
         let lenSq = e.aimVx*e.aimVx + e.aimVy*e.aimVy
         let baseAng: Float = lenSq > 0.0001 ? atan2f(e.aimVy, e.aimVx) : Float.pi * 0.5
         for k in -span...span {
@@ -373,7 +378,7 @@ class EnemyPoolManager {
     }
 
     private func fireHeavyRing(_ e: Enemy, weapons: EnemyWeaponSystem, speed: Float) {
-        let count = 12 + (StageData.liveInstance?.burstBonus() ?? 0)
+        let count = max(1, 12 + (StageData.liveInstance?.burstBonus() ?? 0))
         let step = Float.pi * 2 / Float(count)
         for k in 0..<count {
             let ang = Float(k) * step

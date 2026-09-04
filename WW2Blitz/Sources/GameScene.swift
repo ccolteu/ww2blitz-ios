@@ -28,7 +28,7 @@ class GameScene: SKScene {
     private var stageData = StageData()
     private var currentStage = 1
     private var stageSequence = 1
-    private var bombStock = 3
+    private var bombStock = 2
     private var selectedDifficulty = 3
     private var selectedFighter = 0
     private var interstitialTimer: Float = 3.0
@@ -40,15 +40,37 @@ class GameScene: SKScene {
     private var attract: UIController.Attract = .title
     private var attractTimer: Float = 0
     private var settingsOpen = false
-    private var lastDemoStage = 1
+    private var lastDemoStage = 0
     private var maxStageCleared = 0
     private var bossFought = false
+    private var enemyBombDmgBank: Float = 0
+    private var bossBombDmgBank: Float = 0
+    private var bombCoreWasOpen = false
     private var pendingInitials: [Character] = ["A","A","A"]
     private var registrationActiveCharIndex = 0
     private var registrationCurrentChar: Character = "A"
-    private var lastTapTime: TimeInterval = 0
-    private var touchStartPoint: CGPoint = .zero
+    private var awaitingSecondTap = false
+    private var lastTapUpTime: TimeInterval = 0
+    private var touchDownTime: TimeInterval = 0
+    private var touchDownPoint: CGPoint = .zero
+    private var shakeDuration: Float = 0
+    private var shakeIntensity: Float = 0
+    private var shakeSeed: UInt64 = 14352451
+    private var shakeDx: CGFloat = 0
+    private var shakeDy: CGFloat = 0
+    private var flashDuration: Float = 0
+    private var flashPeak: Float = 0.25
+    private var flashWhiteDecay = false
+    private var flashNode: SKSpriteNode?
+    private let hudLayer = SKNode()
+    private var worldCamera: SKCameraNode?
+    private var stage6CanopyShown = false
+    private var floatScores: [(node: SKLabelNode, age: Float)] = []
     private let prefs = UserDefaults.standard
+
+    private static let doubleTapSeconds: TimeInterval = 0.280
+    private static let tapMaxSeconds: TimeInterval = 0.220
+    private static let tapSlopSq: CGFloat = 48 * 48
 
     // MARK: - Scene lifecycle
 
@@ -56,6 +78,22 @@ class GameScene: SKScene {
         backgroundColor = .black
         anchorPoint = CGPoint(x: 0, y: 0)
         stageData = StageData(); StageData.liveInstance = stageData
+
+        hudLayer.name = "hudLayer"
+        hudLayer.zPosition = 200
+        addChild(hudLayer)
+        let flash = SKSpriteNode(color: .white, size: size)
+        flash.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
+        flash.zPosition = 190
+        flash.isHidden = true
+        flash.alpha = 0
+        hudLayer.addChild(flash)
+        flashNode = flash
+        let cam = SKCameraNode()
+        cam.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
+        addChild(cam)
+        camera = cam
+        worldCamera = cam
 
         // Setup all systems
         player.setup(scene: self)
@@ -66,7 +104,7 @@ class GameScene: SKScene {
         boss.setup(scene: self)
         parallax.setup(scene: self)
         panicBomb.setup(scene: self)
-        ui.setup(scene: self)
+        ui.setup(scene: self, hudParent: hudLayer)
         particles = ParticleManager()
         particles.setup(scene: self, screenWidth: size.width)
         PowerUpManager.instance.items.setup(scene: self)
@@ -89,6 +127,9 @@ class GameScene: SKScene {
         super.didChangeSize(oldSize)
         guard oldSize != size, size.width > 1, size.height > 1 else { return }
         ui.onSizeChanged(width: size.width, height: size.height)
+        restCamera()
+        flashNode?.size = size
+        flashNode?.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
         enemyWeapons.onSizeChanged(width: Int(size.width), height: Int(size.height))
         boss.onSizeChanged(width: Int(size.width), height: Int(size.height))
         bulletManager.onSizeChanged(width: size.width, height: size.height)
@@ -102,15 +143,20 @@ class GameScene: SKScene {
 
     override func update(_ currentTime: TimeInterval) {
         let dt: Float
-        if lastUpdateTime == 0 { dt = 1.0/60.0 }
+        if lastUpdateTime == 0 { dt = 0 }
         else {
             let raw = Float(currentTime - lastUpdateTime)
-            dt = min(raw, 0.05)  // cap to prevent physics explosion
+            dt = min(raw, 0.05)
         }
         lastUpdateTime = currentTime
 
         updateBGM()
         updateState(dt: dt)
+        if gameState != .gameOver {
+            updateFloatingScores(dt: dt)
+        }
+        applyScreenShake(dt: dt)
+        applyScreenFlash(dt: dt)
         renderArcadeUI()
     }
 
@@ -148,6 +194,7 @@ class GameScene: SKScene {
 
         case .clear:
             ScoreManager.instance.updateRecap(dt: dt)
+            applyPendingExtends()
 
         case .gameOver:
             gameOverT += dt
@@ -190,8 +237,13 @@ class GameScene: SKScene {
                 parallax.update(baseSpeed: stageData.scrollSpeedY * dt)
             }
         }
+        maybeSwapStage6Floor()
+        maybeShowStage6Canopy()
 
         player.update(dt: dt)
+        if !demo, player.isOnField() {
+            stageData.tickCombatRank(dt: dt, playerAtMaxWeapon: player.getWeaponPower() >= 3)
+        }
         if !demo, player.consumeRespawnPowerDrop() {
             spawnRespawnPowerUp()
         }
@@ -201,48 +253,56 @@ class GameScene: SKScene {
         PowerUpManager.instance.items.update(dt: dt, screenW: w, screenH: h,
                                             playerX: player.centerX(), playerY: player.worldY(),
                                             magnetOn: player.isOnField())
-        panicBomb.update(dt: dt, screenW: Float(w), screenH: Float(h))
 
-        let allowBoss = !boss.isActive() && !boss.isExploding()
         timeline.update(dt: dt, enemyManager: enemyManager, screenWidth: w, screenHeight: h,
-                        boss: boss, bossEnterSeconds: def.bossAtSeconds, allowBoss: allowBoss,
+                        boss: boss, bossEnterSeconds: def.bossAtSeconds, allowBoss: true,
                         playerWeaponPower: player.getWeaponPower(), stageData: stageData)
         enemyManager.update(dt: dt, playerX: player.centerX(), playerY: player.worldY(),
                           weapons: enemyWeapons)
-        enemyWeapons.update(dt: dt)
         boss.update(dt: dt, playerX: player.centerX(), playerY: player.worldY(),
                     weapons: enemyWeapons, playerWeaponPower: player.getWeaponPower(),
                     bombStock: bombStock, timeline: timeline)
         if boss.isActive() || boss.isExploding() { bossFought = true }
-
-        if !demo {
-            stageData.tickCombatRank(dt: dt, playerAtMaxWeapon: player.getWeaponPower() >= 3)
-        }
+        enemyWeapons.update(dt: dt)
+        panicBomb.update(dt: dt, screenW: Float(w), screenH: Float(h))
+        resolvePanicBomb(dt: dt)
 
         resolveBulletCollisions(awardScore: !demo)
         resolvePlayerBulletVsBoss()
-        if player.isOnField() {
-            resolvePlayerVsEnemies()
-            resolvePlayerVsPowerUps()
-        }
 
         let exploded = bulletManager.resolveEnemyBulletsVsPlayer(
             player: player, enemyBullets: enemyWeapons.pool,
             enemyBulletCount: enemyWeapons.getPoolSize(), particles: particles, awardScore: !demo)
-        if exploded && !demo && player.isGameOver() { enterGameOver(); return }
+        if exploded && !demo && player.isGameOver() { enterGameOver() }
 
-        resolvePanicBomb()
+        if player.isOnField() {
+            resolvePlayerVsEnemies()
+            resolvePlayerVsBoss()
+            resolvePlayerVsPowerUps()
+        }
+
+        if !demo { applyPendingExtends() }
+
+        boss.refreshPhaseFlags()
+        let pulse = boss.consumeVisualFlags()
+        if pulse & BossController.FX_PHASE != 0 {
+            triggerScreenShake(duration: 0.18, intensity: 10)
+            triggerScreenFlash(0.08)
+        }
+        if pulse & BossController.FX_DEATH != 0 {
+            triggerScreenShake(duration: 0.42, intensity: 22)
+            triggerScreenFlash(0.14)
+        }
+        if pulse & BossController.FX_VICTORY_CASCADE != 0 {
+            triggerScreenShake(duration: 0.1, intensity: 8)
+        }
+        if pulse & BossController.FX_VICTORY_SHATTER != 0 {
+            triggerWhiteFlash(0.25)
+        }
 
         if demo { return }
 
-        while ScoreManager.instance.consumeExtend() { player.grantExtraLife() }
-
-        let flags = boss.consumeVisualFlags()
-        if (flags & BossController.FX_VICTORY_START) != 0 {
-            SoundManager.instance.playBGM(SoundManager.BGM_VICTORY, loop: false)
-        }
-
-        if !demo, bossFought, !boss.isActive(), !boss.isExploding() {
+        if bossFought, !boss.isActive(), !boss.isExploding() {
             enterStageClear()
         }
 
@@ -298,38 +358,52 @@ class GameScene: SKScene {
         let enemies = enemyManager.getEnemyPool()
         for b in pool where b.isActive {
             for e in enemies where e.isActive {
-                let dx = b.x - e.x; let dy = b.y - e.y
-                let hitR = enemyManager.halfWOf(e) + 6
-                if dx*dx + dy*dy <= hitR*hitR {
-                    b.isActive = false; e.health -= 1
+                if shotHitsEnemy(dx: b.x - e.x, dy: b.y - e.y, enemy: e) {
+                    b.isActive = false
+                    e.health -= 1
+                    if e.type == EnemyPoolManager.TYPE_HEAVY { e.triggerMicroShudder() }
                     if e.health <= 0 {
-                        destroyEnemy(e, awardScore: awardScore)
-                    } else { e.triggerMicroShudder() }
+                        destroyEnemy(e, awardScore: awardScore, revenge: true)
+                    }
                     break
                 }
             }
         }
         for m in homingMissiles.pool where m.isActive {
             for e in enemies where e.isActive {
-                let dx = m.x-e.x; let dy = m.y-e.y; let r = enemyManager.halfWOf(e)+8
-                if dx*dx+dy*dy <= r*r {
-                    m.isActive = false; e.health -= 3
-                    if e.health <= 0 { destroyEnemy(e, awardScore: awardScore) }
+                if shotHitsEnemy(dx: m.x - e.x, dy: m.y - e.y, enemy: e) {
+                    m.isActive = false
+                    e.health -= 1
+                    if e.type == EnemyPoolManager.TYPE_HEAVY { e.triggerMicroShudder() }
+                    if e.health <= 0 {
+                        destroyEnemy(e, awardScore: awardScore, revenge: true)
+                    }
                     break
                 }
             }
         }
     }
 
+    private func shotHitsEnemy(dx: Float, dy: Float, enemy: Enemy) -> Bool {
+        let popcorn = enemy.type != EnemyPoolManager.TYPE_INTERCEPTOR && enemy.type != EnemyPoolManager.TYPE_HEAVY
+        let pad: Float = popcorn ? 3 : 10
+        let frac: Float = popcorn ? 0.28 : 0.55
+        let sx = pad + enemyManager.halfWOf(enemy) * frac
+        let sy = pad + enemyManager.halfHOf(enemy) * frac
+        if sx <= 0 || sy <= 0 { return false }
+        let nx = dx / sx
+        let ny = dy / sy
+        return nx * nx + ny * ny <= 1
+    }
+
     private func resolvePlayerBulletVsBoss() {
         if !boss.isActive() { return }
         if boss.usesStage5Hitboxes() {
             for b in bulletManager.bulletPool where b.isActive {
-                if boss.checkCollisionAt(worldX: b.x, worldY: b.y, damage: player.getWeaponPower()) {
+                if boss.checkCollisionAt(worldX: b.x, worldY: b.y, damage: 1) {
                     b.isActive = false
                     if boss.consumeStage5Break() {
-                        particles.triggerExplosion(x: boss.stage5BreakX(), y: boss.stage5BreakY())
-                        SoundManager.instance.playSFX(SoundManager.SFX_HEAVY_EXPLOSION)
+                        particles.triggerExplosion(x: boss.stage5BreakX(), y: boss.stage5BreakY(), playSound: false)
                     }
                 }
             }
@@ -337,8 +411,7 @@ class GameScene: SKScene {
                 if boss.checkCollisionAt(worldX: m.x, worldY: m.y, damage: 1) {
                     m.isActive = false
                     if boss.consumeStage5Break() {
-                        particles.triggerExplosion(x: boss.stage5BreakX(), y: boss.stage5BreakY())
-                        SoundManager.instance.playSFX(SoundManager.SFX_HEAVY_EXPLOSION)
+                        particles.triggerExplosion(x: boss.stage5BreakX(), y: boss.stage5BreakY(), playSound: false)
                     }
                 }
             }
@@ -347,8 +420,6 @@ class GameScene: SKScene {
         boss.syncPartWorldPositions()
         let padX: Float = 6
         let padY: Float = 16
-        let missilePadX = padX + HomingMissileManager.DRAW_W * 0.5
-        let missilePadY = padY + HomingMissileManager.DRAW_H * 0.5
         let parts = boss.getComponents()
         let count = boss.getComponentCount()
         for b in bulletManager.bulletPool where b.isActive {
@@ -357,7 +428,7 @@ class GameScene: SKScene {
             }
         }
         for m in homingMissiles.pool where m.isActive {
-            if hitModularBoss(parts: parts, count: count, x: m.x, y: m.y, padX: missilePadX, padY: missilePadY) {
+            if hitModularBoss(parts: parts, count: count, x: m.x, y: m.y, padX: padX, padY: padY) {
                 m.isActive = false
             }
         }
@@ -393,22 +464,52 @@ class GameScene: SKScene {
     }
 
     private func resolvePlayerVsEnemies() {
-        if !player.isOnField() { return }
+        if !player.isOnField() || player.isGameOver() { return }
         let px = player.centerX(); let py = player.worldY()
+        let playerRadius: Float = 12
+        let ramBody: Float = 0.45
         for e in enemyManager.getEnemyPool() where e.isActive {
-            let dx = px-e.x; let dy = py-e.y
-            let r = enemyManager.halfWOf(e) + player.coreHitboxRadius
-            if dx*dx+dy*dy <= r*r {
+            let sx = playerRadius + enemyManager.halfWOf(e) * ramBody
+            let sy = playerRadius + enemyManager.halfHOf(e) * ramBody
+            if sx <= 0 || sy <= 0 { continue }
+            let nx = (e.x - px) / sx
+            let ny = (e.y - py) / sy
+            if nx * nx + ny * ny <= 1 {
+                destroyEnemy(e, awardScore: gameState == .playing, revenge: false)
                 if player.takeDamage() { particles.triggerExplosion(x: px, y: py) }
                 return
             }
         }
     }
 
+    private func resolvePlayerVsBoss() {
+        if player.isGameOver() || !player.isOnField() || !boss.isActive() || boss.isExploding() { return }
+        let px = player.centerX(); let py = player.worldY()
+        let playerRadius: Float = 12
+        boss.syncPartWorldPositions()
+        let parts = boss.getComponents()
+        let count = boss.getComponentCount()
+        var i = 0
+        while i < count {
+            let part = parts[i]
+            if !part.isDestroyed && part.halfW > 0 && part.halfH > 0 {
+                let rx = part.halfW + playerRadius
+                let ry = part.halfH + playerRadius
+                let nx = (px - part.x) / rx
+                let ny = (py - part.y) / ry
+                if nx * nx + ny * ny <= 1 {
+                    if player.takeDamage() { particles.triggerExplosion(x: px, y: py) }
+                    break
+                }
+            }
+            i += 1
+        }
+    }
+
     private func resolvePlayerVsPowerUps() {
         if !player.isOnField() { return }
         let px = player.centerX(); let py = player.worldY()
-        let hitR: Float = 12 * LayoutPx.scale(width: size.width, height: size.height)
+        let hitR: Float = 12
         for slot in PowerUpManager.instance.items.pool where slot.isActive {
             let dx = px-slot.x; let dy = py-slot.y
             let half = PowerUpManager.instance.items.drawHalf(forType: slot.itemType)
@@ -426,13 +527,13 @@ class GameScene: SKScene {
             let points = item.pickupPoints > 0
                 ? item.pickupPoints
                 : (item.medalFrameIndex == 0 ? PowerUpManager.MEDAL_SCORE_FACE : PowerUpManager.MEDAL_SCORE_EDGE)
-            ScoreManager.instance.addScore(ScoreManager.instance.scalePoints(points))
+            ScoreManager.instance.addPickupScore(x: item.x, y: item.y, base: points)
             SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
         case PowerUpSlot.ITEM_TYPE_BOMB:
             if bombStock < 3 {
                 bombStock += 1
             } else {
-                ScoreManager.instance.addScore(ScoreManager.instance.scalePoints(PowerUpManager.BOMB_FULL_SCORE))
+                ScoreManager.instance.addPickupScore(x: item.x, y: item.y, base: PowerUpManager.BOMB_FULL_SCORE)
             }
             SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
         case PowerUpSlot.ITEM_TYPE_SHIELD:
@@ -442,24 +543,52 @@ class GameScene: SKScene {
             if player.getWeaponPower() < 3 {
                 player.upgradeWeapon()
             } else {
-                ScoreManager.instance.addScore(ScoreManager.instance.scalePoints(PowerUpManager.POWERUP_FULL_SCORE))
+                ScoreManager.instance.addPickupScore(x: item.x, y: item.y, base: PowerUpManager.POWERUP_FULL_SCORE)
             }
             SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
         }
     }
 
-    private func destroyEnemy(_ e: Enemy, awardScore: Bool = true) {
-        e.isActive = false
+    private func destroyEnemy(_ e: Enemy, awardScore: Bool = true, revenge: Bool = false) {
         if awardScore {
-            let pts = enemyPoints(e)
-            ScoreManager.instance.addScore(ScoreManager.instance.scalePoints(pts))
+            ScoreManager.instance.addKillScore(x: e.x, y: e.y, base: enemyPoints(e))
         }
+        if revenge { fireRevengeIfNeeded(e) }
+        e.isActive = false
         particles.triggerExplosion(x: e.x, y: e.y)
         PowerUpManager.instance.dropEnemyLoot(
             x: e.x, y: e.y, enemyType: e.type,
             guaranteedPowerup: e.isRedShipAnchor, stageData: stageData)
         if e.deathClearBullets { enemyWeapons.beginDeathClear(originX: e.x, originY: e.y) }
         if e.diamondLeader { enemyManager.triggerDiamondSplinter() }
+    }
+
+    private func fireRevengeIfNeeded(_ enemy: Enemy) {
+        if enemy.deathClearBullets { return }
+        let popcorn = enemy.type != EnemyPoolManager.TYPE_INTERCEPTOR
+            && enemy.type != EnemyPoolManager.TYPE_HEAVY
+        if !stageData.revengeOnDeath() {
+            if !popcorn || !stageData.popcornSuicide() { return }
+        }
+        let px = player.centerX()
+        let py = player.worldY()
+        let dx = px - enemy.x
+        let dy = py - enemy.y
+        let lenSq = dx * dx + dy * dy
+        if lenSq <= 0.0001 { return }
+        let speed = 550 * stageData.shotSpeedScale()
+        let inv = speed / sqrtf(lenSq)
+        let vx = dx * inv
+        let vy = dy * inv
+        if enemy.type == EnemyPoolManager.TYPE_HEAVY && stageData.difficultyIndex == 7 {
+            let ang = atan2f(vy, vx)
+            let spread: Float = 0.18
+            enemyWeapons.fireBullet(startX: enemy.x, startY: enemy.y, velX: cosf(ang - spread) * speed, velY: sinf(ang - spread) * speed)
+            enemyWeapons.fireBullet(startX: enemy.x, startY: enemy.y, velX: vx, velY: vy)
+            enemyWeapons.fireBullet(startX: enemy.x, startY: enemy.y, velX: cosf(ang + spread) * speed, velY: sinf(ang + spread) * speed)
+        } else {
+            enemyWeapons.fireBullet(startX: enemy.x, startY: enemy.y, velX: vx, velY: vy)
+        }
     }
 
     private func spawnRespawnPowerUp() {
@@ -470,35 +599,82 @@ class GameScene: SKScene {
         PowerUpManager.instance.items.spawnSway(x: player.centerX(), y: y, type: PowerUpSlot.ITEM_TYPE_POWERUP)
     }
 
-    private func resolvePanicBomb() {
-        guard panicBomb.isActive else { return }
+    private func resolvePanicBomb(dt: Float) {
+        guard panicBomb.isActive else {
+            enemyBombDmgBank = 0
+            bossBombDmgBank = 0
+            return
+        }
         let box = panicBomb.worldRect()
         if box.right <= box.left { return }
         for b in enemyWeapons.pool where b.isActive {
             if b.x >= box.left && b.x <= box.right && b.y >= box.top && b.y <= box.bottom {
                 b.isActive = false
-                PowerUpManager.instance.spawnBulletCancelDrop(x: b.x, y: b.y)
             }
         }
-        for e in enemyManager.getEnemyPool() where e.isActive {
-            let ew = enemyManager.halfWOf(e)
-            let eh = enemyManager.halfHOf(e)
-            if e.x + ew >= box.left && e.x - ew <= box.right &&
-                e.y + eh >= box.top && e.y - eh <= box.bottom {
-                e.health -= 5
-                if e.health <= 0 { destroyEnemy(e) }
+        enemyBombDmgBank += 250 * dt
+        let enemyDmg = Int(enemyBombDmgBank)
+        if enemyDmg > 0 {
+            enemyBombDmgBank -= Float(enemyDmg)
+            for e in enemyManager.getEnemyPool() where e.isActive {
+                let ew = enemyManager.halfWOf(e)
+                let eh = enemyManager.halfHOf(e)
+                if e.x + ew >= box.left && e.x - ew <= box.right &&
+                    e.y + eh >= box.top && e.y - eh <= box.bottom {
+                    e.health -= enemyDmg
+                    if e.type == EnemyPoolManager.TYPE_HEAVY { e.triggerMicroShudder() }
+                    if e.health <= 0 { destroyEnemy(e) }
+                }
             }
         }
-        if boss.isActive() {
-            boss.applyStage5AreaDamage(left: box.left, top: box.top, right: box.right, bottom: box.bottom, damage: 5)
+        if boss.isActive(), !boss.isExploding() {
+            bossBombDmgBank += 200 * dt
+            var dmg = Int(bossBombDmgBank)
+            if dmg > 0 {
+                bossBombDmgBank -= Float(dmg)
+                if dmg > 12 { dmg = 12 }
+                applyBombDamageToBoss(box: box, damage: dmg)
+            }
+        }
+    }
+
+    private func applyBombDamageToBoss(box: (left: Float, top: Float, right: Float, bottom: Float), damage: Int) {
+        if boss.usesStage5Hitboxes() {
+            boss.applyStage5AreaDamage(left: box.left, top: box.top, right: box.right, bottom: box.bottom, damage: damage)
+            if boss.consumeStage5Break() {
+                particles.triggerExplosion(x: boss.stage5BreakX(), y: boss.stage5BreakY())
+            }
+            return
+        }
+        boss.syncPartWorldPositions()
+        let parts = boss.getComponents()
+        var i = boss.getComponentCount() - 1
+        while i >= 0 {
+            let part = parts[i]
+            if !part.isDestroyed && part.halfW > 0 && part.halfH > 0 {
+                if part.x + part.halfW >= box.left && part.x - part.halfW <= box.right &&
+                    part.y + part.halfH >= box.top && part.y - part.halfH <= box.bottom {
+                    if part.componentType == BossController.TYPE_CORE && !bombCoreWasOpen {
+                        i -= 1
+                        continue
+                    }
+                    part.health -= damage
+                    part.triggerMicroShudder()
+                    if part.health <= 0 {
+                        part.health = 0
+                        part.isDestroyed = true
+                        particles.triggerExplosion(x: part.x, y: part.y)
+                    }
+                }
+            }
+            i -= 1
         }
     }
 
     private func enemyPoints(_ e: Enemy) -> Int {
         switch e.type {
-        case EnemyPoolManager.TYPE_HEAVY:       return 500
+        case EnemyPoolManager.TYPE_HEAVY:       return 1000
         case EnemyPoolManager.TYPE_INTERCEPTOR: return 300
-        case EnemyPoolManager.TYPE_KAMIKAZE:    return 200
         default:                                return 100
         }
     }
@@ -508,11 +684,14 @@ class GameScene: SKScene {
     private func enterTitle() {
         player.setAutoFire(false)
         cleanupGameplay()
-        currentStage = 1
-        loadStage(1)
+        stageData.resetToStart()
+        stageData.resetCombatRank()
+        ScoreManager.instance.syncDifficultyMultiplier(selectedDifficulty)
+        currentStage = stageData.currentStage
+        loadCurrentStage()
         player.resetWeaponPower()
         player.restoreLives()
-        bombStock = 3
+        bombStock = 2
         ScoreManager.instance.reset()
         maxStageCleared = 0
         bossFought = false
@@ -523,7 +702,6 @@ class GameScene: SKScene {
         settingsOpen = false
         gameState = .title
         player.setMenuHidden(true)
-        SoundManager.instance.playBGM(SoundManager.BGM_TITLE)
     }
 
     private func enterDemo() {
@@ -532,20 +710,21 @@ class GameScene: SKScene {
         attractTimer = 0
         demoTimer = 0
         lastDemoStage = pickAttractStage(lastId: lastDemoStage)
-        currentStage = lastDemoStage
-        loadStage(currentStage)
+        stageData.setCurrentStage(lastDemoStage)
+        currentStage = stageData.currentStage
+        loadCurrentStage()
+        stageData.resetCombatRank()
         player.setMenuHidden(false)
         player.resetForStage()
         player.resetWeaponPower()
         player.restoreLives()
         player.upgradeWeapon(); player.upgradeWeapon()
         player.setAutoFire(true)
-        bombStock = 3
+        bombStock = 2
         timeline.reset()
         enemyManager.deactivateAll(); enemyWeapons.deactivateAll()
         boss.deactivate(); parallax.resetScroll()
         ScoreManager.instance.syncDifficultyMultiplier(selectedDifficulty)
-        SoundManager.instance.playBGM(stageData.def.stageMusicTrack)
     }
 
     private func pickAttractStage(lastId: Int) -> Int {
@@ -581,23 +760,25 @@ class GameScene: SKScene {
         ScoreManager.instance.armExtends()
         ScoreManager.instance.syncDifficultyMultiplier(selectedDifficulty)
         stageData.difficultyIndex = selectedDifficulty
-        currentStage = 1; stageSequence = 1; maxStageCleared = 0
+        stageData.resetToStart()
+        stageData.resetCombatRank()
+        currentStage = stageData.currentStage
+        stageSequence = stageData.missionNumber
+        maxStageCleared = 0
         player.restoreLives(); player.resetWeaponPower()
         player.applyFighterConfiguration(selectedFighter)
-        bombStock = 3
+        bombStock = 2
         attract = .title; attractTimer = 0
         enterInterstitial()
     }
 
     private func enterInterstitial() {
         gameState = .interstitial; interstitialTimer = 3.0
-        loadStage(currentStage)
-        stageData.currentStage = currentStage
+        loadCurrentStage()
         timeline.reset(); player.resetForStage()
         player.setMenuHidden(true)
         enemyManager.deactivateAll(); enemyWeapons.deactivateAll()
         boss.deactivate(); parallax.resetScroll()
-        SoundManager.instance.playBGM(stageData.def.stageMusicTrack)
     }
 
     private func beginPlaying() {
@@ -612,20 +793,22 @@ class GameScene: SKScene {
 
     private func enterStageClear() {
         gameState = .clear
-        maxStageCleared = max(maxStageCleared, currentStage)
+        if stageData.missionNumber > maxStageCleared {
+            maxStageCleared = stageData.missionNumber
+        }
         ScoreManager.instance.beginRecap(remainingLives: player.getHealth(), remainingBombs: bombStock)
-        SoundManager.instance.playBGM(SoundManager.BGM_VICTORY, loop: false)
         cleanupGameplay()
     }
 
     private func advanceStage() {
         ScoreManager.instance.resetStageCounters()
-        if currentStage >= StageCatalog.maxId() {
+        if stageData.isLastInSequence() {
             gameState = .campaignComplete; creditsTimer = 0
-            SoundManager.instance.playBGM(SoundManager.BGM_VICTORY)
             return
         }
-        currentStage += 1; stageSequence += 1
+        stageData.advanceToNextStage()
+        currentStage = stageData.currentStage
+        stageSequence = stageData.missionNumber
         ScoreManager.instance.syncDifficultyMultiplier(selectedDifficulty)
         enterInterstitial()
     }
@@ -634,7 +817,6 @@ class GameScene: SKScene {
         SoundManager.instance.stopAlarm()
         gameOverT = 0
         gameState = .gameOver
-        cleanupGameplay()
     }
 
     private func routeAfterGameOver() {
@@ -651,7 +833,6 @@ class GameScene: SKScene {
         registrationCurrentChar = "A"
         flashT = 0
         gameState = .registration
-        SoundManager.instance.playBGM(SoundManager.BGM_VICTORY, loop: false)
     }
 
     private func finishDemoToHighScore() {
@@ -664,14 +845,31 @@ class GameScene: SKScene {
         enemyManager.deactivateAll(); enemyWeapons.deactivateAll()
         boss.deactivate(); bulletManager.deactivateAll()
         homingMissiles.deactivateAll(); PowerUpManager.instance.items.deactivateAll()
+        panicBomb.deactivate()
+        enemyBombDmgBank = 0
+        bossBombDmgBank = 0
+        bombCoreWasOpen = false
+        awaitingSecondTap = false
+        shakeDuration = 0
+        shakeIntensity = 0
+        shakeDx = 0
+        shakeDy = 0
+        flashDuration = 0
+        flashWhiteDecay = false
+        flashNode?.isHidden = true
+        flashNode?.alpha = 0
+        hudLayer.position = .zero
+        restCamera()
+        for item in floatScores { item.node.removeFromParent() }
+        floatScores.removeAll()
     }
 
-    private func loadStage(_ stage: Int) {
-        let def = StageCatalog.get(stage)
-        stageData.currentStage = stage
-        stageData.scrollSpeedY = def.scrollSpeedY
-        stageData.bossAtSeconds = def.bossAtSeconds
+    private func loadCurrentStage() {
+        stageData.bindCurrentPlaylistSlot()
+        currentStage = stageData.currentStage
+        let def = stageData.def
         theater.load(next: def, width: size.width)
+        stage6CanopyShown = false
         parallax.setGround(theater.activeFloorTex)
         parallax.setMid(theater.hasOverlayClouds ? theater.midTex : nil)
         parallax.setHigh(theater.hasOverlayClouds ? theater.highTex : nil)
@@ -679,11 +877,86 @@ class GameScene: SKScene {
         enemyManager.bindTheaterSkins(tank: theater.skinTankTex,
                                        destroyer: theater.skinDestroyerTex,
                                        wagon: theater.skinWagonTex)
-        boss.bindStage(stage)
+        boss.bindStage(currentStage)
+    }
+
+    private func maybeSwapStage6Floor() {
+        let def = stageData.def
+        if def.theaterKind != .ascent { return }
+        if theater.floorSwapped { return }
+        if timeline.elapsedSeconds() < def.spaceSwapAt { return }
+        theater.swapToFloorAlt()
+        parallax.replaceGround(theater.activeFloorTex)
+    }
+
+    private func maybeShowStage6Canopy() {
+        let def = stageData.def
+        if def.theaterKind != .ascent || stage6CanopyShown { return }
+        if timeline.elapsedSeconds() < def.canopyAt { return }
+        stage6CanopyShown = true
+        parallax.setCanopy(theater.canopyTex)
+    }
+
+    private func updateFloatingScores(dt: Float) {
+        let h = Float(size.height)
+        while ScoreManager.instance.hasPopup() {
+            let label = SKLabelNode(fontNamed: ArcadeTypeface.postScriptName)
+            label.text = "\(ScoreManager.instance.popupValue())"
+            label.fontSize = 20
+            label.fontColor = .white
+            label.horizontalAlignmentMode = .center
+            label.verticalAlignmentMode = .center
+            label.zPosition = 180
+            let ax = ScoreManager.instance.popupX()
+            let ay = ScoreManager.instance.popupY()
+            label.position = CGPoint(x: CGFloat(ax), y: CGFloat(h - ay))
+            hudLayer.addChild(label)
+            floatScores.append((label, 0))
+            if floatScores.count > 48 {
+                floatScores[0].node.removeFromParent()
+                floatScores.removeFirst()
+            }
+            ScoreManager.instance.consumePopup()
+        }
+        var i = 0
+        while i < floatScores.count {
+            floatScores[i].age += dt
+            floatScores[i].node.position.y += CGFloat(90 * dt)
+            let life: Float = 0.75
+            let u = max(0, 1 - floatScores[i].age / life)
+            floatScores[i].node.alpha = CGFloat(u)
+            if floatScores[i].age >= life {
+                floatScores[i].node.removeFromParent()
+                floatScores.remove(at: i)
+            } else {
+                i += 1
+            }
+        }
     }
 
     private func updateBGM() {
-        // BGM switching handled at state transitions
+        let want: String?
+        switch gameState {
+        case .title, .difficultySelect, .characterSelect:
+            want = SoundManager.BGM_TITLE
+        case .clear, .registration, .campaignComplete:
+            want = SoundManager.BGM_VICTORY
+        case .playing, .demo, .interstitial:
+            if boss.isVictorySequence() {
+                want = nil
+            } else if boss.isActive() {
+                want = SoundManager.BGM_BOSS
+            } else {
+                want = stageData.def.stageMusicTrack
+            }
+        case .gameOver:
+            want = nil
+        }
+        if let track = want {
+            SoundManager.instance.playBGM(track)
+        } else {
+            SoundManager.instance.stopBGM()
+        }
     }
 
     private func renderArcadeUI() {
@@ -725,7 +998,6 @@ class GameScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let loc = touch.location(in: self)
-        touchStartPoint = loc
         if gameState == .demo || (gameState == .title && attract == .highScore) {
             enterTitle()
             return
@@ -740,12 +1012,12 @@ class GameScene: SKScene {
         case .characterSelect:
             handleCharacterTouch(loc)
         case .playing:
+            maybeFireDoubleTapBomb(timestamp: touch.timestamp)
             player.touchBegan(touch, in: self)
-            let now = touch.timestamp
-            if now - lastTapTime < 0.3 && bombStock > 0 { firePanicBomb() }
-            lastTapTime = now
+            touchDownTime = touch.timestamp
+            touchDownPoint = loc
         case .clear:
-            if ScoreManager.instance.isRecapReady() { advanceStage() }
+            break
         case .gameOver:
             routeAfterGameOver()
         case .registration:
@@ -761,20 +1033,139 @@ class GameScene: SKScene {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if gameState == .title {
+            attractTimer = 0
+            attract = .title
+        }
         guard gameState == .playing else { return }
         touches.forEach { player.touchMoved($0, in: self) }
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if gameState == .clear {
+            if ScoreManager.instance.isRecapReady() { advanceStage() }
+            return
+        }
         guard gameState == .playing else { return }
-        touches.forEach { player.touchEnded($0) }
+        for touch in touches {
+            finishTap(touch)
+            player.touchEnded(touch)
+        }
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard gameState == .playing else { return }
+        for touch in touches {
+            finishTap(touch)
+            player.touchEnded(touch)
+        }
+    }
+
+    private func maybeFireDoubleTapBomb(timestamp: TimeInterval) {
+        if awaitingSecondTap &&
+            timestamp - lastTapUpTime <= Self.doubleTapSeconds &&
+            bombStock > 0 &&
+            !player.isGameOver() {
+            firePanicBomb()
+            awaitingSecondTap = false
+        }
+    }
+
+    private func finishTap(_ touch: UITouch) {
+        let loc = touch.location(in: self)
+        let dx = loc.x - touchDownPoint.x
+        let dy = loc.y - touchDownPoint.y
+        let dur = touch.timestamp - touchDownTime
+        awaitingSecondTap = (dx * dx + dy * dy) <= Self.tapSlopSq && dur <= Self.tapMaxSeconds
+        lastTapUpTime = touch.timestamp
     }
 
     private func firePanicBomb() {
-        guard bombStock > 0 else { return }
+        guard bombStock > 0, !panicBomb.isActive, !player.isGameOver() else { return }
         bombStock -= 1
+        bombCoreWasOpen = boss.isCoreVulnerable()
+        bossBombDmgBank = 0
         panicBomb.activate(startX: player.centerX(), startY: player.worldY())
+        addScreenShake(0.8)
         SoundManager.instance.playSFX(SoundManager.SFX_BOMB)
+    }
+
+    private func applyPendingExtends() {
+        while ScoreManager.instance.consumeExtend() {
+            if player.grantExtraLife() {
+                SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
+            }
+        }
+    }
+
+    private func addScreenShake(_ intensity: Float) {
+        let mag = max(0, intensity)
+        triggerScreenShake(duration: 0.28, intensity: 12 + mag * 22)
+    }
+
+    private func triggerScreenShake(duration: Float, intensity: Float) {
+        shakeDuration = max(0, duration)
+        shakeIntensity = max(0, intensity)
+    }
+
+    private func triggerScreenFlash(_ duration: Float) {
+        flashDuration = max(0, duration)
+        flashWhiteDecay = false
+    }
+
+    private func triggerWhiteFlash(_ duration: Float) {
+        let dur = max(0, duration)
+        flashDuration = dur
+        flashPeak = dur <= 0 ? 0.25 : dur
+        flashWhiteDecay = true
+    }
+
+    private func applyScreenFlash(dt: Float) {
+        guard let flash = flashNode else { return }
+        if flashDuration > 0 {
+            flash.isHidden = false
+            if flashWhiteDecay {
+                let peak = max(flashPeak, 0.0001)
+                flash.color = .white
+                flash.alpha = CGFloat(max(0, min(1, flashDuration / peak)))
+            } else {
+                flash.color = .white
+                flash.alpha = 102 / 255
+            }
+            flashDuration -= dt
+            if flashDuration < 0 { flashDuration = 0 }
+        } else {
+            flash.isHidden = true
+            flash.alpha = 0
+        }
+    }
+
+    private func restCamera() {
+        worldCamera?.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
+    }
+
+    private func nextShakeUnit() -> Float {
+        shakeSeed = shakeSeed &* 1664525 &+ 1013904223
+        return Float((shakeSeed >> 8) & 0xFFFFFF) / 16_777_215
+    }
+
+    private func applyScreenShake(dt: Float) {
+        if shakeDuration > 0 {
+            let mag = CGFloat(shakeIntensity)
+            shakeDx = CGFloat(nextShakeUnit() * 2 - 1) * mag
+            shakeDy = CGFloat(nextShakeUnit() * 2 - 1) * mag
+            worldCamera?.position = CGPoint(
+                x: size.width * 0.5 + shakeDx,
+                y: size.height * 0.5 + shakeDy)
+            hudLayer.position = CGPoint(x: shakeDx, y: shakeDy)
+            shakeDuration -= dt
+            if shakeDuration < 0 { shakeDuration = 0 }
+        } else {
+            shakeDx = 0
+            shakeDy = 0
+            restCamera()
+            hudLayer.position = .zero
+        }
     }
 
     private func bumpVolume(_ current: Float, up: Bool) -> Float {
@@ -854,7 +1245,7 @@ class GameScene: SKScene {
             SoundManager.instance.playSFX(SoundManager.SFX_PICKUP)
             if registrationActiveCharIndex >= 3 {
                 HighScoreManager.shared.insert(score: ScoreManager.instance.getScore(),
-                                              stage: max(maxStageCleared, currentStage),
+                                              stage: maxStageCleared,
                                               name: String(pendingInitials))
                 finishDemoToHighScore()
             } else {

@@ -55,6 +55,8 @@ class PlayerShip {
     private var touchPointerId: UITouch? = nil
     private var lastTouchX: Float = 0
     private var lastTouchY: Float = 0
+    private var grabOffsetX: Float = 0
+    private var grabOffsetY: Float = 0
     private var targetVelocityX: Float = 0
     private var isDragging: Bool = false
     private var isMovingHorizontal: Bool = false
@@ -93,6 +95,7 @@ class PlayerShip {
         node.position = CGPoint(x: CGFloat(x), y: CGFloat(y))
         node.zPosition = 50
         scene.addChild(node)
+        ArcadeOutline.attach(to: node)
     }
 
     private func loadTextures() {
@@ -114,6 +117,7 @@ class PlayerShip {
         let grab = touchGrabRadius()
         if gx*gx + gy*gy <= grab*grab {
             touchPointerId = touch; lastTouchX = tx; lastTouchY = ty; isDragging = true
+            grabOffsetX = gx; grabOffsetY = gy
         }
     }
 
@@ -130,6 +134,7 @@ class PlayerShip {
 
     private func releaseSteer() {
         touchPointerId = nil; isDragging = false
+        grabOffsetX = 0; grabOffsetY = 0
         isMovingHorizontal = false; targetVelocityX = 0
         targetFrameIndex = PlayerShip.IDLE_FRAME
     }
@@ -137,7 +142,15 @@ class PlayerShip {
     // MARK: - Update
 
     func update(dt: Float) {
-        if !isMovingHorizontal { targetFrameIndex = PlayerShip.IDLE_FRAME }
+        if isDragging {
+            followTether(fingerX: lastTouchX, fingerY: lastTouchY,
+                         grabOffsetX: grabOffsetX, grabOffsetY: grabOffsetY, dt: dt)
+        }
+        if !isMovingHorizontal {
+            targetFrameIndex = PlayerShip.IDLE_FRAME
+        } else {
+            targetFrameIndex = targetVelocityX < 0 ? 0 : 6
+        }
         let lerp = min(max(PlayerShip.FRAME_LERP * dt * 60, 0), 1)
         currentFrameIndex += (targetFrameIndex - currentFrameIndex) * lerp
         isMovingHorizontal = false
@@ -156,20 +169,13 @@ class PlayerShip {
             }
         }
 
-        // Follow finger
-        if isDragging {
-            followTether(fingerX: lastTouchX, fingerY: lastTouchY,
-                         grabOffsetX: 0, grabOffsetY: 0, dt: dt)
-        }
-
         clamp()
 
-        // Update sprite
         let frame = max(0, min(Int(currentFrameIndex.rounded()), PlayerShip.FRAME_COUNT - 1))
         if frame < frameTextures.count { node.texture = frameTextures[frame] }
         node.position = CGPoint(x: CGFloat(x), y: CGFloat(y))
+        ArcadeOutline.sync(node)
 
-        // Invulnerable flash
         let showFlash = isInvulnerable && (Int(invulnTimer * 20) & 1) == 0
         node.alpha = (isGameOverFlag || respawnTimer > 0 || showFlash) ? 0 : 1
     }
@@ -254,6 +260,7 @@ class PlayerShip {
         isInvulnerable = false; invulnTimer = 0; respawnTimer = 0
         respawnPowerDropLatched = false; isGameOverFlag = false
         isDragging = false; isMovingHorizontal = false; autoFire = false
+        grabOffsetX = 0; grabOffsetY = 0
         touchPointerId = nil; currentFrameIndex = PlayerShip.IDLE_FRAME
         targetFrameIndex = PlayerShip.IDLE_FRAME; targetVelocityX = 0
         x = screenW * 0.5; y = screenH * 0.22; clamp()
@@ -304,5 +311,9 @@ class PlayerShip {
             fireIntervalBase = PlayerShip.P38_FIRE_INTERVAL
         }
         loadTextures()
+        if node != nil, !frameTextures.isEmpty {
+            node.texture = frameTextures[PlayerShip.IDLE_INDEX]
+            ArcadeOutline.sync(node)
+        }
     }
 }

@@ -148,23 +148,49 @@ class Stage2Director: StageDirector {
         }
         if !tanks && elapsed >= FormationSpawner.S2_TANKS_AT {
             tanks = true
-            enemies.spawnEnemy(startX: FormationSpawner.S2_TANK_LANE_L*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, health: FormationSpawner.S2_TANK_HP, isLandVehicle: true)
-            enemies.spawnEnemy(startX: FormationSpawner.S2_TANK_LANE_R*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, health: FormationSpawner.S2_TANK_HP, isLandVehicle: true)
+            enemies.spawnEnemy(startX: FormationSpawner.S2_TANK_LANE_L*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY*2.2, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.S2_TANK_HP, isLandVehicle: true)
+            enemies.spawnEnemy(startX: FormationSpawner.S2_TANK_LANE_R*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY*2.2, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.S2_TANK_HP, isLandVehicle: true)
         }
         if !leftWall && elapsed >= FormationSpawner.S2_LEFT_WALL_AT {
-            leftWall = true
-            enemies.spawnEnemy(startX: 0.12*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.WEAVE_VY, enemyType: FormationSpawner.TYPE_DRONE)
-            enemies.spawnEnemy(startX: 0.32*w, startY: -0.09*h, velocityX: 0, velocityY: FormationSpawner.WEAVE_VY, enemyType: FormationSpawner.TYPE_DRONE)
+            var g = 0
+            while leftWallCount < 3 && g < 3 {
+                let at = FormationSpawner.S2_LEFT_WALL_AT + Float(leftWallCount) * FormationSpawner.S2_WALL_STAGGER
+                if elapsed < at { break }
+                if leftWallCount == 0 {
+                    enemies.spawnEnemy(startX: -0.06*w, startY: 0.18*h, velocityX: FormationSpawner.CROSS_VX, velocityY: FormationSpawner.CROSS_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_DIAGONAL_SWEEP)
+                } else if leftWallCount == 1 {
+                    enemies.spawnEnemy(startX: -0.06*w, startY: 0.32*h, velocityX: FormationSpawner.CROSS_VX, velocityY: FormationSpawner.CROSS_VY*0.85, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_DIAGONAL_SWEEP)
+                } else {
+                    enemies.spawnEnemy(startX: -0.06*w, startY: 0.46*h, velocityX: FormationSpawner.CROSS_VX, velocityY: FormationSpawner.CROSS_VY*0.70, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_DIAGONAL_SWEEP)
+                }
+                leftWallCount += 1; g += 1
+            }
+            if leftWallCount >= 3 { leftWall = true }
         }
         if !rightWall && elapsed >= FormationSpawner.S2_RIGHT_WALL_AT {
-            rightWall = true
-            enemies.spawnEnemy(startX: 0.68*w, startY: -0.09*h, velocityX: 0, velocityY: FormationSpawner.WEAVE_VY, enemyType: FormationSpawner.TYPE_DRONE)
-            enemies.spawnEnemy(startX: 0.88*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.WEAVE_VY, enemyType: FormationSpawner.TYPE_DRONE)
+            var g = 0
+            while rightWallCount < 3 && g < 3 {
+                let at = FormationSpawner.S2_RIGHT_WALL_AT + Float(rightWallCount) * FormationSpawner.S2_WALL_STAGGER
+                if elapsed < at { break }
+                if rightWallCount == 0 {
+                    enemies.spawnEnemy(startX: 1.06*w, startY: 0.18*h, velocityX: -FormationSpawner.CROSS_VX, velocityY: FormationSpawner.CROSS_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_DIAGONAL_SWEEP)
+                } else if rightWallCount == 1 {
+                    enemies.spawnEnemy(startX: 1.06*w, startY: 0.32*h, velocityX: -FormationSpawner.CROSS_VX, velocityY: FormationSpawner.CROSS_VY*0.85, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_DIAGONAL_SWEEP)
+                } else {
+                    enemies.spawnEnemy(startX: 1.06*w, startY: 0.46*h, velocityX: -FormationSpawner.CROSS_VX, velocityY: FormationSpawner.CROSS_VY*0.70, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_DIAGONAL_SWEEP)
+                }
+                rightWallCount += 1; g += 1
+            }
+            if rightWallCount >= 3 { rightWall = true }
         }
-        if !preBoss && elapsed >= FormationSpawner.S2_PRE_BOSS_AT { preBoss = true; FormationSpawner.spawnVFormation(enemies: enemies, w: w, h: h) }
+        if !preBoss && elapsed >= FormationSpawner.S2_PRE_BOSS_AT {
+            preBoss = true
+            enemies.spawnEnemy(startX: 0.12*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.WEAVE_VY*1.5, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_WEAVE)
+            enemies.spawnEnemy(startX: 0.88*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.WEAVE_VY*1.5, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_WEAVE)
+        }
         if !centerIntercept && elapsed >= FormationSpawner.S2_CENTER_INTERCEPT_AT {
             centerIntercept = true
-            enemies.spawnEnemy(startX: 0.50*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.INTERCEPT_VY, enemyType: FormationSpawner.TYPE_INTERCEPTOR, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.INTERCEPT_HP)
+            enemies.spawnEnemy(startX: 0.12*w, startY: -0.08*h, velocityX: 0, velocityY: FormationSpawner.INTERCEPT_VY, enemyType: FormationSpawner.TYPE_INTERCEPTOR, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.INTERCEPT_HP)
         }
     }
 }
@@ -173,12 +199,17 @@ class Stage2Director: StageDirector {
 class Stage3Director: StageDirector {
     private var scoutGap: Float = FormationSpawner.S3_SCOUT_SPACING
     private var cruiser = false; private var crossSpawned = false
-    private var flankGap: Float = 0; private var flankStarted = false
+    private var flankGap: Float = FormationSpawner.S3_FLANK_SPACING
+    private var flankFromLeft = true
     private var destroyer = false
 
-    func reset() { scoutGap = FormationSpawner.S3_SCOUT_SPACING; cruiser = false; crossSpawned = false; flankGap = 0; flankStarted = false; destroyer = false }
+    func reset() {
+        scoutGap = FormationSpawner.S3_SCOUT_SPACING; cruiser = false; crossSpawned = false
+        flankGap = FormationSpawner.S3_FLANK_SPACING; flankFromLeft = true; destroyer = false
+    }
     func tick(dt: Float, elapsed: Float, enemies: EnemyPoolManager, w: Float, h: Float,
               boss: BossController, allowBoss: Bool, stageData: StageData, cue: DirectorCue) {
+        if cue.bossCueFired { return }
         if elapsed >= FormationSpawner.S3_SCOUT_START && elapsed <= FormationSpawner.S3_SCOUT_END {
             scoutGap += dt; var g = 0
             while scoutGap >= FormationSpawner.S3_SCOUT_SPACING && g < 2 {
@@ -189,23 +220,50 @@ class Stage3Director: StageDirector {
         }
         if !cruiser && elapsed >= FormationSpawner.S3_CRUISER_AT {
             cruiser = true
-            enemies.spawnEnemy(startX: 0.35*w, startY: -0.08*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, health: FormationSpawner.S3_CRUISER_HP, isDestroyer: true)
-            enemies.spawnEnemy(startX: 0.65*w, startY: -0.08*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, health: FormationSpawner.S3_CRUISER_HP, isDestroyer: true)
+            enemies.spawnEnemy(startX: 0.30*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S3_CRUISER_HP)
+            enemies.spawnEnemy(startX: 0.70*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S3_CRUISER_HP)
         }
-        if !crossSpawned && elapsed >= FormationSpawner.S3_CROSS_AT { crossSpawned = true; FormationSpawner.spawnSideCross(enemies: enemies, w: w, h: h, yFrac: FormationSpawner.S3_CROSS_Y, vx: FormationSpawner.CROSS_VX, vy: FormationSpawner.CROSS_VY, type: FormationSpawner.TYPE_DRONE) }
+        if !destroyer && elapsed >= FormationSpawner.S3_DESTROYER_AT {
+            destroyer = true
+            let vy = FormationSpawner.HEAVY_VY * 2.2
+            enemies.spawnEnemy(startX: 0.28*w, startY: -0.06*h, velocityX: 0, velocityY: vy,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S3_DESTROYER_HP, isDestroyer: true)
+            enemies.spawnEnemy(startX: 0.72*w, startY: -0.06*h, velocityX: 0, velocityY: vy,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S3_DESTROYER_HP, isDestroyer: true)
+        }
+        if !crossSpawned && elapsed >= FormationSpawner.S3_CROSS_AT {
+            if enemies.countActive() < FormationSpawner.MAX_ACTIVE {
+                crossSpawned = true
+                FormationSpawner.spawnSideCross(enemies: enemies, w: w, h: h, yFrac: FormationSpawner.S3_CROSS_Y,
+                                                vx: FormationSpawner.CROSS_VX, vy: FormationSpawner.CROSS_VY,
+                                                type: FormationSpawner.TYPE_DRONE)
+            }
+        }
         if elapsed >= FormationSpawner.S3_FLANK_START && elapsed <= FormationSpawner.S3_FLANK_END {
-            if !flankStarted { flankStarted = true; flankGap = FormationSpawner.S3_FLANK_SPACING }
             flankGap += dt; var g = 0
             while flankGap >= FormationSpawner.S3_FLANK_SPACING && g < 2 {
                 if enemies.countActive() >= FormationSpawner.MAX_ACTIVE { break }
                 flankGap -= FormationSpawner.S3_FLANK_SPACING; g += 1
-                enemies.spawnEnemy(startX: -0.06*w, startY: -0.06*h, velocityX:  FormationSpawner.SWEEP_VX, velocityY: FormationSpawner.SWEEP_VY, enemyType: FormationSpawner.TYPE_DRONE)
-                enemies.spawnEnemy(startX:  1.06*w, startY: -0.06*h, velocityX: -FormationSpawner.SWEEP_VX, velocityY: FormationSpawner.SWEEP_VY, enemyType: FormationSpawner.TYPE_DRONE)
+                let laneY = flankFromLeft
+                    ? 0.10*h
+                    : 0.10*h + FormationSpawner.formGapY(enemies: enemies, type: FormationSpawner.TYPE_INTERCEPTOR)
+                if flankFromLeft {
+                    enemies.spawnEnemy(startX: -0.08*w, startY: laneY, velocityX: FormationSpawner.SWEEP_VX*1.35,
+                                       velocityY: FormationSpawner.FAST_DOWN*1.15, enemyType: FormationSpawner.TYPE_INTERCEPTOR,
+                                       health: FormationSpawner.INTERCEPT_HP)
+                } else {
+                    enemies.spawnEnemy(startX: 1.08*w, startY: laneY, velocityX: -FormationSpawner.SWEEP_VX*1.35,
+                                       velocityY: FormationSpawner.FAST_DOWN*1.15, enemyType: FormationSpawner.TYPE_INTERCEPTOR,
+                                       health: FormationSpawner.INTERCEPT_HP)
+                }
+                flankFromLeft = !flankFromLeft
             }
-        }
-        if !destroyer && elapsed >= FormationSpawner.S3_DESTROYER_AT {
-            destroyer = true
-            enemies.spawnEnemy(startX: 0.50*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY*0.85, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.S3_DESTROYER_HP, isDestroyer: true)
         }
     }
 }
@@ -213,53 +271,67 @@ class Stage3Director: StageDirector {
 // MARK: - Stage 4
 class Stage4Director: StageDirector {
     private var flankGap: Float = FormationSpawner.S4_FLANK_SPACING
-    private var weaveGap: Float = 0; private var weaveCount = 0
-    private var kamiSpawned = false; private var wallGap: Float = 0; private var wallCount = 0
-    private var holdVSpawned = false; private var cruiserSpawned = false
+    private var weaveGap: Float = FormationSpawner.S4_WEAVE_SPACING
+    private var weaveCount = 0
+    private var kamiSpawned = false
+    private var wallCount = 0
+    private var holdVSpawned = false
+    private var cruiserSpawned = false
 
-    func reset() { flankGap = FormationSpawner.S4_FLANK_SPACING; weaveGap = 0; weaveCount = 0; kamiSpawned = false; wallGap = 0; wallCount = 0; holdVSpawned = false; cruiserSpawned = false }
+    func reset() {
+        flankGap = FormationSpawner.S4_FLANK_SPACING; weaveGap = FormationSpawner.S4_WEAVE_SPACING
+        weaveCount = 0; kamiSpawned = false; wallCount = 0; holdVSpawned = false; cruiserSpawned = false
+    }
     func tick(dt: Float, elapsed: Float, enemies: EnemyPoolManager, w: Float, h: Float,
               boss: BossController, allowBoss: Bool, stageData: StageData, cue: DirectorCue) {
+        if cue.bossCueFired { return }
         if elapsed >= FormationSpawner.S4_FLANK_START && elapsed <= FormationSpawner.S4_FLANK_END {
             flankGap += dt; var g = 0
             while flankGap >= FormationSpawner.S4_FLANK_SPACING && g < 2 {
                 if enemies.countActive() >= FormationSpawner.MAX_ACTIVE { break }
                 flankGap -= FormationSpawner.S4_FLANK_SPACING; g += 1
-                enemies.spawnEnemy(startX: -0.06*w, startY: -0.05*h, velocityX:  FormationSpawner.S4_FLANK_VX, velocityY: FormationSpawner.SWEEP_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_DIAGONAL_SWEEP)
-                enemies.spawnEnemy(startX:  1.06*w, startY: -0.05*h, velocityX: -FormationSpawner.S4_FLANK_VX, velocityY: FormationSpawner.SWEEP_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_DIAGONAL_SWEEP)
+                let y = h * 0.40
+                enemies.spawnEnemy(startX: -0.08*w, startY: y, velocityX: FormationSpawner.S4_FLANK_VX, velocityY: 0, enemyType: FormationSpawner.TYPE_DRONE)
+                enemies.spawnEnemy(startX: 1.08*w, startY: y, velocityX: -FormationSpawner.S4_FLANK_VX, velocityY: 0, enemyType: FormationSpawner.TYPE_DRONE)
             }
         }
         if elapsed >= FormationSpawner.S4_WEAVE_START && elapsed <= FormationSpawner.S4_WEAVE_END && weaveCount < FormationSpawner.S4_WEAVE_PAIRS {
             weaveGap += dt; var g = 0
-            while weaveCount < FormationSpawner.S4_WEAVE_PAIRS && g < 2 {
-                let at = FormationSpawner.S4_WEAVE_START + Float(weaveCount)*FormationSpawner.S4_WEAVE_SPACING
-                if elapsed < at { break }
-                let lx = (weaveCount & 1) == 0 ? 0.20*w : 0.25*w
-                let rx = (weaveCount & 1) == 0 ? 0.80*w : 0.75*w
-                enemies.spawnEnemy(startX: lx, startY: -0.04*h, velocityX: 0, velocityY: FormationSpawner.S4_WEAVE_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_WEAVE)
-                enemies.spawnEnemy(startX: rx, startY: -0.04*h, velocityX: 0, velocityY: FormationSpawner.S4_WEAVE_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_WEAVE)
-                weaveCount += 1; g += 1
+            while weaveCount < FormationSpawner.S4_WEAVE_PAIRS && weaveGap >= FormationSpawner.S4_WEAVE_SPACING && g < 2 {
+                if enemies.countActive() >= FormationSpawner.MAX_ACTIVE { break }
+                weaveGap -= FormationSpawner.S4_WEAVE_SPACING; g += 1; weaveCount += 1
+                enemies.spawnEnemy(startX: 0.12*w, startY: -0.02*h, velocityX: 0, velocityY: FormationSpawner.S4_WEAVE_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_WEAVE)
+                enemies.spawnEnemy(startX: 0.88*w, startY: -0.02*h, velocityX: 0, velocityY: FormationSpawner.S4_WEAVE_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_WEAVE)
             }
+        }
+        if !cruiserSpawned && elapsed >= FormationSpawner.S4_CRUISER_AT {
+            cruiserSpawned = true
+            enemies.spawnEnemy(startX: 0.50*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.S4_CRUISER_VY,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S4_CRUISER_HP)
         }
         if !kamiSpawned && elapsed >= FormationSpawner.S4_KAMI_AT {
             kamiSpawned = true
-            enemies.spawnEnemy(startX: 0.20*w, startY: 0.25*h, velocityX:  FormationSpawner.KAMI_VX*0.8, velocityY: FormationSpawner.S4_KAMI_VY, enemyType: FormationSpawner.TYPE_KAMIKAZE)
-            enemies.spawnEnemy(startX: 0.80*w, startY: 0.25*h, velocityX: -FormationSpawner.KAMI_VX*0.8, velocityY: FormationSpawner.S4_KAMI_VY, enemyType: FormationSpawner.TYPE_KAMIKAZE)
+            enemies.spawnEnemy(startX: -0.06*w, startY: 0.22*h, velocityX: FormationSpawner.S4_FLANK_VX*0.90,
+                               velocityY: FormationSpawner.S4_KAMI_VY*0.70, enemyType: FormationSpawner.TYPE_KAMIKAZE)
+            enemies.spawnEnemy(startX: 1.06*w, startY: 0.22*h, velocityX: -FormationSpawner.S4_FLANK_VX*0.90,
+                               velocityY: FormationSpawner.S4_KAMI_VY*0.70, enemyType: FormationSpawner.TYPE_KAMIKAZE)
         }
         if elapsed >= FormationSpawner.S4_WALL_START && elapsed <= FormationSpawner.S4_WALL_END && wallCount < FormationSpawner.S4_WALL_COUNT {
-            wallGap += dt; var g = 0
-            while wallCount < FormationSpawner.S4_WALL_COUNT && g < 2 {
-                let at = FormationSpawner.S4_WALL_START + Float(wallCount)*FormationSpawner.S4_WALL_SPACING
-                if elapsed < at { break }
-                let x = Float(wallCount) / Float(FormationSpawner.S4_WALL_COUNT-1)
-                enemies.spawnEnemy(startX: x*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.S4_WALL_VY, enemyType: FormationSpawner.TYPE_KAMIKAZE)
-                wallCount += 1; g += 1
+            let at = FormationSpawner.S4_WALL_START + Float(wallCount) * FormationSpawner.S4_WALL_SPACING
+            if elapsed >= at {
+                let lane: Float
+                if wallCount == 0 { lane = 0.10 }
+                else if wallCount == 1 { lane = 0.22 }
+                else if wallCount == 2 { lane = 0.78 }
+                else { lane = 0.90 }
+                enemies.spawnEnemy(startX: lane*w, startY: -0.04*h, velocityX: 0, velocityY: FormationSpawner.S4_WALL_VY, enemyType: FormationSpawner.TYPE_DRONE)
+                wallCount += 1
             }
         }
-        if !holdVSpawned && elapsed >= FormationSpawner.S4_HOLD_V_AT { holdVSpawned = true; FormationSpawner.spawnVFormation(enemies: enemies, w: w, h: h) }
-        if !cruiserSpawned && elapsed >= FormationSpawner.S4_CRUISER_AT {
-            cruiserSpawned = true
-            enemies.spawnEnemy(startX: 0.50*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.S4_CRUISER_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.S4_CRUISER_HP)
+        if !holdVSpawned && elapsed >= FormationSpawner.S4_HOLD_V_AT {
+            holdVSpawned = true
+            FormationSpawner.spawnVFormation(enemies: enemies, w: w, h: h)
         }
     }
 }
@@ -267,15 +339,18 @@ class Stage4Director: StageDirector {
 // MARK: - Stage 5
 class Stage5Director: StageDirector {
     private var flankGap: Float = FormationSpawner.S5_FLANK_SPACING
+    private var flankFromLeft = true
     private var kamiVSpawned = false; private var heavyLeftSpawned = false
-    private var wagonsSpawned = false; private var drizzleGap: Float = 0; private var drizzleCount = 0
+    private var wagonsSpawned = false; private var drizzleGap: Float = 0
+    private var drizzleSeed: UInt64 = 1
     private var heavyRightSpawned = false; private var powerWaveSpawned = false
     private var kamiWallSpawned = false
 
     func reset() {
-        flankGap = FormationSpawner.S5_FLANK_SPACING; kamiVSpawned = false; heavyLeftSpawned = false
-        wagonsSpawned = false; drizzleGap = 0; drizzleCount = 0; heavyRightSpawned = false
-        powerWaveSpawned = false; kamiWallSpawned = false
+        flankGap = FormationSpawner.S5_FLANK_SPACING; flankFromLeft = true
+        kamiVSpawned = false; heavyLeftSpawned = false
+        wagonsSpawned = false; drizzleGap = 0; drizzleSeed = 1
+        heavyRightSpawned = false; powerWaveSpawned = false; kamiWallSpawned = false
     }
     func tick(dt: Float, elapsed: Float, enemies: EnemyPoolManager, w: Float, h: Float,
               boss: BossController, allowBoss: Bool, stageData: StageData, cue: DirectorCue) {
@@ -283,38 +358,75 @@ class Stage5Director: StageDirector {
         if elapsed <= FormationSpawner.S5_FLANK_END {
             flankGap += dt; var g = 0
             while flankGap >= FormationSpawner.S5_FLANK_SPACING && g < 2 {
-                if enemies.countActive() >= FormationSpawner.MAX_ACTIVE { break }
                 flankGap -= FormationSpawner.S5_FLANK_SPACING; g += 1
-                FormationSpawner.spawnS5FlankCascade(enemies: enemies, w: w, h: h, fromLeft: (g % 2 == 0))
+                FormationSpawner.spawnS5FlankCascade(enemies: enemies, w: w, h: h, fromLeft: flankFromLeft)
+                flankFromLeft = !flankFromLeft
             }
         }
-        if !kamiVSpawned && elapsed >= FormationSpawner.S5_KAMI_V_AT { kamiVSpawned = true; FormationSpawner.spawnS5CenterKamiV(enemies: enemies, w: w, h: h) }
+        if !kamiVSpawned && elapsed >= FormationSpawner.S5_KAMI_V_AT {
+            kamiVSpawned = true
+            FormationSpawner.spawnS5CenterKamiV(enemies: enemies, w: w, h: h)
+        }
         if !heavyLeftSpawned && elapsed >= FormationSpawner.S5_HEAVY_LEFT_AT {
             heavyLeftSpawned = true
-            enemies.spawnEnemy(startX: 0.50*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.S5_HEAVY_HP, isLandVehicle: true)
+            enemies.spawnEnemy(startX: 0.20*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S5_HEAVY_HP)
         }
-        if elapsed >= FormationSpawner.S5_DRIZZLE_START && elapsed <= FormationSpawner.S5_DRIZZLE_END {
-            drizzleGap += dt; var g = 0
-            while g < 2 && drizzleGap >= FormationSpawner.S5_DRIZZLE_SPACING {
-                if enemies.countActive() >= FormationSpawner.MAX_ACTIVE { break }
-                drizzleGap -= FormationSpawner.S5_DRIZZLE_SPACING; g += 1
-                enemies.spawnEnemy(startX: 0.25*w, startY: -0.04*h, velocityX: 0, velocityY: FormationSpawner.S5_DRIZZLE_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_WEAVE)
-                enemies.spawnEnemy(startX: 0.75*w, startY: -0.04*h, velocityX: 0, velocityY: FormationSpawner.S5_DRIZZLE_VY, enemyType: FormationSpawner.TYPE_DRONE, pattern: FormationSpawner.PATTERN_WEAVE)
-            }
+        if !heavyRightSpawned && elapsed >= FormationSpawner.S5_HEAVY_RIGHT_AT {
+            heavyRightSpawned = true
+            enemies.spawnEnemy(startX: 0.80*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S5_HEAVY_HP)
         }
         if !wagonsSpawned && elapsed >= FormationSpawner.S5_WAGONS_AT {
             wagonsSpawned = true
-            enemies.spawnEnemy(startX: 0.25*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.S5_WAGON_HP, isWagon: true)
-            enemies.spawnEnemy(startX: 0.75*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.S5_WAGON_HP, isWagon: true)
+            let vy = FormationSpawner.HEAVY_VY * 2.2
+            enemies.spawnEnemy(startX: 0.22*w, startY: -0.06*h, velocityX: 0, velocityY: vy,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S5_WAGON_HP, isWagon: true)
+            enemies.spawnEnemy(startX: 0.78*w, startY: -0.06*h, velocityX: 0, velocityY: vy,
+                               enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD,
+                               health: FormationSpawner.S5_WAGON_HP, isWagon: true)
         }
-        if !heavyRightSpawned && elapsed >= FormationSpawner.S5_HEAVY_RIGHT_AT { heavyRightSpawned = true; enemies.spawnEnemy(startX: 0.50*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.S5_HEAVY_HP, isLandVehicle: true) }
-        if !powerWaveSpawned && elapsed >= FormationSpawner.S5_POWER_WAVE_AT { powerWaveSpawned = true; FormationSpawner.spawnVFormation(enemies: enemies, w: w, h: h) }
-        if !kamiWallSpawned && elapsed >= FormationSpawner.S5_KAMI_WALL_AT { kamiWallSpawned = true; FormationSpawner.spawnS5CenterKamiV(enemies: enemies, w: w, h: h) }
+        if elapsed >= FormationSpawner.S5_DRIZZLE_START && elapsed <= FormationSpawner.S5_DRIZZLE_END {
+            drizzleGap += dt; var g = 0
+            while drizzleGap >= FormationSpawner.S5_DRIZZLE_SPACING && g < 2 {
+                drizzleGap -= FormationSpawner.S5_DRIZZLE_SPACING; g += 1
+                drizzleSeed = drizzleSeed &* 1664525 &+ 1013904223
+                let u = Float((drizzleSeed >> 8) & 0xFFFFFF) / 16_777_215
+                let xFrac: Float = 0.08 + u * 0.84
+                enemies.spawnEnemy(startX: xFrac*w, startY: -0.04*h, velocityX: 0, velocityY: FormationSpawner.S5_DRIZZLE_VY,
+                                   enemyType: FormationSpawner.TYPE_INTERCEPTOR, pattern: FormationSpawner.PATTERN_WEAVE)
+            }
+        }
+        if !powerWaveSpawned && elapsed >= FormationSpawner.S5_POWER_WAVE_AT {
+            powerWaveSpawned = true
+            enemies.spawnEnemy(startX: 0.25*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.S5_POWER_VY,
+                               enemyType: FormationSpawner.TYPE_DRONE, isRedShipAnchor: true)
+            enemies.spawnEnemy(startX: 0.50*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.S5_POWER_VY,
+                               enemyType: FormationSpawner.TYPE_DRONE, isRedShipAnchor: true)
+            enemies.spawnEnemy(startX: 0.75*w, startY: -0.05*h, velocityX: 0, velocityY: FormationSpawner.S5_POWER_VY,
+                               enemyType: FormationSpawner.TYPE_DRONE, isRedShipAnchor: true)
+        }
+        if !kamiWallSpawned && elapsed >= FormationSpawner.S5_KAMI_WALL_AT {
+            kamiWallSpawned = true
+            var n = 0
+            while n < 6 {
+                let xFrac = (Float(n) + 0.5) / 6
+                enemies.spawnEnemy(startX: xFrac*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.S5_KAMI_VY,
+                                   enemyType: FormationSpawner.TYPE_KAMIKAZE)
+                n += 1
+            }
+        }
         if elapsed >= FormationSpawner.S5_SCROLL_DECAY_AT {
             let u = min(max((elapsed - FormationSpawner.S5_SCROLL_DECAY_AT) / FormationSpawner.S5_SCROLL_DECAY_SPAN, 0), 1)
             stageData.scrollSpeedY = FormationSpawner.S5_SCROLL_START * (1 - u)
         }
-        if allowBoss && elapsed >= stageData.def.bossAtSeconds { cue.fireBoss(stageId: stageData.currentStage, boss: boss); stageData.scrollSpeedY = 0 }
+        if allowBoss && elapsed >= stageData.def.bossAtSeconds {
+            cue.fireBoss(stageId: stageData.currentStage, boss: boss)
+            stageData.scrollSpeedY = 0
+        }
     }
 }
 
@@ -351,7 +463,10 @@ class Stage7Director: StageDirector {
         if !heaviesSpawned && elapsed >= FormationSpawner.S7_HEAVIES_AT { heaviesSpawned = true; enemies.spawnEnemy(startX: 0.28*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.HEAVY_HP); enemies.spawnEnemy(startX: 0.72*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.HEAVY_HP) }
         if !wallSpawned && elapsed >= FormationSpawner.S7_WALL_AT {
             wallSpawned = true
-            for x in [0.12*w, 0.36*w, 0.64*w, 0.88*w] { enemies.spawnEnemy(startX: x, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.S7_FLURRY_VY, enemyType: FormationSpawner.TYPE_DRONE) }
+            enemies.spawnEnemy(startX: 0.12*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.S7_FLURRY_VY, enemyType: FormationSpawner.TYPE_DRONE)
+            enemies.spawnEnemy(startX: 0.36*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.S7_FLURRY_VY, enemyType: FormationSpawner.TYPE_DRONE)
+            enemies.spawnEnemy(startX: 0.64*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.S7_FLURRY_VY, enemyType: FormationSpawner.TYPE_DRONE)
+            enemies.spawnEnemy(startX: 0.88*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.S7_FLURRY_VY, enemyType: FormationSpawner.TYPE_DRONE)
         }
     }
 }
@@ -381,7 +496,10 @@ class Stage8Director: StageDirector {
         if !heaviesSpawned && elapsed >= FormationSpawner.S8_HEAVIES_AT { heaviesSpawned = true; enemies.spawnEnemy(startX: 0.30*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.HEAVY_HP); enemies.spawnEnemy(startX: 0.70*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.HEAVY_VY, enemyType: FormationSpawner.TYPE_HEAVY, pattern: FormationSpawner.PATTERN_V_HOLD, health: FormationSpawner.HEAVY_HP) }
         if !wallSpawned && elapsed >= FormationSpawner.S8_WALL_AT {
             wallSpawned = true
-            for x in [0.14*w, 0.38*w, 0.62*w, 0.86*w] { enemies.spawnEnemy(startX: x, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.S8_REEF_VY*1.15, enemyType: FormationSpawner.TYPE_DRONE) }
+            enemies.spawnEnemy(startX: 0.14*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.S8_REEF_VY*1.15, enemyType: FormationSpawner.TYPE_DRONE)
+            enemies.spawnEnemy(startX: 0.38*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.S8_REEF_VY*1.15, enemyType: FormationSpawner.TYPE_DRONE)
+            enemies.spawnEnemy(startX: 0.62*w, startY: -0.10*h, velocityX: 0, velocityY: FormationSpawner.S8_REEF_VY*1.15, enemyType: FormationSpawner.TYPE_DRONE)
+            enemies.spawnEnemy(startX: 0.86*w, startY: -0.06*h, velocityX: 0, velocityY: FormationSpawner.S8_REEF_VY*1.15, enemyType: FormationSpawner.TYPE_DRONE)
         }
     }
 }

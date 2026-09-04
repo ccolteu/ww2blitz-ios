@@ -86,7 +86,7 @@ class BulletManager {
                 b.x += b.vx * dt; b.y += b.vy * dt
                 // Android top-origin => bullets with vy < 0 go up => in SpriteKit vy > 0 means up
                 // We store velocity in Android coordinate space (y down), convert for display
-                if b.y < -40 || b.x < -40 || b.x > maxX || b.y > sceneH + 40 {
+                if b.y < 0 || b.x < -40 || b.x > maxX {
                     b.isActive = false
                 }
             }

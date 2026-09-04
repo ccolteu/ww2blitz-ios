@@ -14,6 +14,56 @@ enum LayoutPx {
     }
 }
 
+/// Android blitOutlined: 3px black ring + 2px drop shadow (y-down).
+enum ArcadeOutline {
+    static let outline: CGFloat = 3
+    static let shadow: CGFloat = 2
+
+    static func attach(to node: SKSpriteNode) {
+        guard node.childNode(withName: "arcadeShadow") == nil else {
+            sync(node)
+            return
+        }
+        let shadow = SKSpriteNode(texture: node.texture)
+        shadow.name = "arcadeShadow"
+        shadow.zPosition = -2
+        shadow.color = UIColor(white: 0, alpha: 1)
+        shadow.colorBlendFactor = 1
+        shadow.alpha = 0xCC / 255
+        node.addChild(shadow)
+        let o = ArcadeOutline.outline
+        for oy in stride(from: -o, through: o, by: o) {
+            for ox in stride(from: -o, through: o, by: o) {
+                if ox == 0 && oy == 0 { continue }
+                let ring = SKSpriteNode(texture: node.texture)
+                ring.name = "arcadeOutline.\(Int(ox)).\(Int(oy))"
+                ring.zPosition = -1
+                ring.color = .black
+                ring.colorBlendFactor = 1
+                node.addChild(ring)
+            }
+        }
+        sync(node)
+    }
+
+    static func sync(_ node: SKSpriteNode) {
+        let s = ArcadeOutline.shadow
+        for child in node.children {
+            guard let sprite = child as? SKSpriteNode, let name = child.name else { continue }
+            sprite.texture = node.texture
+            sprite.size = node.size
+            if name == "arcadeShadow" {
+                sprite.position = CGPoint(x: s, y: -s)
+            } else if name.hasPrefix("arcadeOutline.") {
+                let parts = name.split(separator: ".")
+                if parts.count == 3, let ox = Double(parts[1]), let oy = Double(parts[2]) {
+                    sprite.position = CGPoint(x: CGFloat(ox), y: -CGFloat(oy))
+                }
+            }
+        }
+    }
+}
+
 /// Load PNG art from copied folder-reference directories (`Images/`, `Stages/…`).
 enum GameArt {
     private static var cache: [String: SKTexture] = [:]
@@ -165,4 +215,5 @@ class StageTheater {
     func swapToFloorAlt() { if let alt = floorAltTex { floorSwapped = true; activeFloorTex = alt } }
     var hasOverlayClouds: Bool { def.hasOverlayClouds }
     var isFacilityTheater: Bool { def.theaterKind == .facility }
+    var isAscentTheater: Bool { def.theaterKind == .ascent }
 }

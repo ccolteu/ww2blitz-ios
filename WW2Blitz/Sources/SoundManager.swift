@@ -3,14 +3,12 @@ import AVFoundation
 class SoundManager {
     static let instance = SoundManager()
 
-    // BGM track identifiers (filename stems without extension)
     static let BGM_STAGE1  = "bgm_stage1"
     static let BGM_STAGE2  = "bgm_stage2"
     static let BGM_TITLE   = "bgm_title"
     static let BGM_BOSS    = "bgm_boss"
     static let BGM_VICTORY = "bgm_victory"
 
-    // SFX indices
     static let SFX_VULCAN          = 0
     static let SFX_LASER           = 1
     static let SFX_SMALL_EXPLOSION = 2
@@ -21,23 +19,36 @@ class SoundManager {
 
     private let sfxNames = ["sfx_vulcan","sfx_laser","sfx_small_explosion",
                             "sfx_heavy_explosion","sfx_alarm","sfx_pickup","sfx_bomb"]
+    private static let MAX_VOICES = 16
 
     private var engine = AVAudioEngine()
-    private var sfxPlayers: [AVAudioPlayerNode] = []
-    private var sfxBuffers:  [AVAudioPCMBuffer?] = []
+    private var sfxVoices: [AVAudioPlayerNode] = []
+    private var sfxVoiceIndex = 0
+    private var sfxBuffers: [AVAudioPCMBuffer?] = []
     private var bgmPlayer   = AVAudioPlayerNode()
     private var alarmPlayer = AVAudioPlayerNode()
     private var mixerFormat: AVAudioFormat?
     private var bgmCache: [String: AVAudioPCMBuffer] = [:]
     private var currentBgm: String = ""
-    private var alarmLooping: Bool = false
+    private var alarmLooping = false
+    private var paused = false
+    private var bgmWasPlaying = false
 
-    var bgmVolume: Float = 0.5 { didSet { bgmPlayer.volume = muted ? 0 : bgmVolume } }
-    var sfxVolume: Float = 0.65
+    var bgmVolume: Float = 0.5 {
+        didSet { applyVolumes() }
+    }
+    var sfxVolume: Float = 0.65 {
+        didSet { applyVolumes() }
+    }
     var muted: Bool = false {
         didSet {
-            bgmPlayer.volume = muted ? 0 : bgmVolume
-            alarmPlayer.volume = muted ? 0 : sfxVolume
+            applyVolumes()
+            if muted {
+                stopAlarm()
+                pauseBGMRemembering()
+            } else if !paused {
+                resumeBGMIfNeeded()
+            }
         }
     }
 
@@ -46,11 +57,17 @@ class SoundManager {
     init() {
         loadPrefs()
         setupEngine()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance()
+        )
     }
 
     private func setupEngine() {
         let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+        try? session.setCategory(.playback, mode: .default, options: [])
         try? session.setActive(true)
 
         let mixer = engine.mainMixerNode
@@ -63,56 +80,82 @@ class SoundManager {
         engine.connect(bgmPlayer, to: mixer, format: format)
         engine.attach(alarmPlayer)
         engine.connect(alarmPlayer, to: mixer, format: format)
-        for _ in sfxNames {
+        for _ in 0..<SoundManager.MAX_VOICES {
             let node = AVAudioPlayerNode()
             engine.attach(node)
             engine.connect(node, to: mixer, format: format)
-            sfxPlayers.append(node)
+            sfxVoices.append(node)
         }
         sfxBuffers = sfxNames.map { loadBuffer(named: $0) }
+        applyVolumes()
         try? engine.start()
     }
 
     func playBGM(_ name: String, loop: Bool = true) {
-        if currentBgm == name { return }
+        if name.isEmpty { stopBGM(); return }
+        if currentBgm == name && (bgmPlayer.isPlaying || paused) { return }
         currentBgm = name
         bgmPlayer.stop()
         guard let buf = cachedBuffer(named: name) else { return }
-        bgmPlayer.volume = muted ? 0 : bgmVolume
-        if loop {
-            bgmPlayer.scheduleBuffer(buf, at: nil, options: .loops)
-        } else {
-            bgmPlayer.scheduleBuffer(buf)
-        }
+        bgmPlayer.volume = muted || paused ? 0 : bgmVolume
+        bgmPlayer.scheduleBuffer(buf, at: nil, options: loop ? .loops : [])
+        bgmWasPlaying = !paused && !muted
+        if paused || muted { return }
         ensureRunning()
         bgmPlayer.play()
     }
+
+    func isBgmPlaying(_ name: String) -> Bool {
+        !name.isEmpty && name == currentBgm && bgmPlayer.isPlaying
+    }
+
+    func currentBgmName() -> String { currentBgm }
 
     func stopBGM() {
         bgmPlayer.stop()
         currentBgm = ""
+        bgmWasPlaying = false
     }
 
-    func pauseBGM() { bgmPlayer.pause() }
-    func resumeBGM() {
+    func pauseAll() {
+        paused = true
+        stopAlarm()
+        pauseBGMRemembering()
+        for node in sfxVoices { if node.isPlaying { node.pause() } }
+    }
+
+    func resumeAll() {
+        paused = false
+        if muted { return }
         ensureRunning()
-        bgmPlayer.play()
+        try? AVAudioSession.sharedInstance().setActive(true)
+        for node in sfxVoices { if !node.isPlaying { node.play() } }
+        resumeBGMIfNeeded()
+        applyVolumes()
     }
 
     func playSFX(_ index: Int) {
-        guard index >= 0 && index < sfxPlayers.count else { return }
+        if paused || muted { return }
+        if index == SoundManager.SFX_ALARM {
+            playAlarm()
+            return
+        }
+        guard index >= 0 && index < sfxBuffers.count else { return }
         guard let buf = sfxBuffers[index] else { return }
-        let node = sfxPlayers[index]
-        node.volume = muted ? 0 : sfxVolume
+        let node = sfxVoices[sfxVoiceIndex]
+        sfxVoiceIndex = (sfxVoiceIndex + 1) % sfxVoices.count
+        node.volume = sfxVolume
         node.scheduleBuffer(buf)
         ensureRunning()
         if !node.isPlaying { node.play() }
     }
 
     func playAlarm() {
+        if paused || muted { return }
+        if alarmLooping && alarmPlayer.isPlaying { return }
         guard let buf = cachedBuffer(named: "sfx_alarm") else { return }
         alarmPlayer.stop()
-        alarmPlayer.volume = muted ? 0 : sfxVolume
+        alarmPlayer.volume = sfxVolume
         alarmPlayer.scheduleBuffer(buf, at: nil, options: .loops)
         ensureRunning()
         alarmPlayer.play()
@@ -122,6 +165,48 @@ class SoundManager {
     func stopAlarm() {
         alarmPlayer.stop()
         alarmLooping = false
+    }
+
+    @objc private func handleInterruption(_ note: Notification) {
+        guard let info = note.userInfo,
+              let typeVal = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeVal) else { return }
+        switch type {
+        case .began:
+            pauseAll()
+        case .ended:
+            let opts = (info[AVAudioSessionInterruptionOptionKey] as? UInt)
+                .map { AVAudioSession.InterruptionOptions(rawValue: $0) } ?? []
+            if opts.contains(.shouldResume) {
+                resumeAll()
+            }
+        @unknown default:
+            break
+        }
+    }
+
+    private func pauseBGMRemembering() {
+        if bgmPlayer.isPlaying {
+            bgmWasPlaying = true
+            bgmPlayer.pause()
+        }
+    }
+
+    private func resumeBGMIfNeeded() {
+        if muted || paused || currentBgm.isEmpty { return }
+        if bgmWasPlaying || !bgmPlayer.isPlaying {
+            applyVolumes()
+            ensureRunning()
+            bgmPlayer.play()
+            bgmWasPlaying = true
+        }
+    }
+
+    private func applyVolumes() {
+        bgmPlayer.volume = muted || paused ? 0 : bgmVolume
+        alarmPlayer.volume = muted || paused ? 0 : sfxVolume
+        let v: Float = muted || paused ? 0 : sfxVolume
+        for node in sfxVoices { node.volume = v }
     }
 
     private func ensureRunning() {
@@ -155,7 +240,6 @@ class SoundManager {
         return convert(source, to: target) ?? source
     }
 
-    /// Convert file PCM (often mono) to the mixer format (stereo on iOS).
     private func convert(_ buffer: AVAudioPCMBuffer, to format: AVAudioFormat) -> AVAudioPCMBuffer? {
         if buffer.format.channelCount == format.channelCount
             && abs(buffer.format.sampleRate - format.sampleRate) < 0.5
@@ -194,7 +278,6 @@ class SoundManager {
         savePrefs()
     }
 
-    // MARK: Persistence
     func savePrefs() {
         let d = UserDefaults.standard
         d.set(bgmVolume, forKey: kPrefs + "_bgm")

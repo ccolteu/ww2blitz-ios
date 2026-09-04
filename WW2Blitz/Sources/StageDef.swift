@@ -50,7 +50,7 @@ struct StageDef {
     var waveScript: Int = 1
     var bossCombat: BossCombatKind = .plane
     var boss: BossWrecks
-    var usesSharedBossEntranceCue: Bool { !introOnly }
+    var usesSharedBossEntranceCue: Bool { usesOpeningPowerV && !introOnly }
 
     var operationNameString: String { String(operationName) }
 
@@ -103,10 +103,9 @@ struct StageCatalog {
             StageDef(
                 id: 2,
                 operationName: Array("IRON TREADS"),
-                scrollSpeedY: 160,
-                bossAtSeconds: 32,
+                scrollSpeedY: 260,
+                bossAtSeconds: 30,
                 stageMusicTrack: SoundManager.BGM_STAGE2,
-                locksElapsedAtBoss: true,
                 usesOpeningPowerV: true,
                 skinTankFile: "skin_tank.png",
                 waveScript: StageWaveKind.IRON_TREADS,
